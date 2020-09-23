@@ -23,11 +23,15 @@ impl Token {
         let mut i = 0;
         while i < l {
             if input.chars().nth(i).unwrap().is_numeric() {
+                let t = i;
+                i += 1;
+                while i < l && input.chars().nth(i).unwrap().is_numeric() {
+                    i += 1;
+                }
                 p_data.push(Token {
-                    s: input.chars().nth(i).unwrap().to_string(),
+                    s: input[t..(i - t)].to_string(),
                     t: TokenKind::Number,
                 });
-                i += 1;
             } else {
                 i += 1;
             }
@@ -38,10 +42,10 @@ impl Token {
 
 #[test]
 fn parser_test() {
-    let l = Token::parse("1");
+    let l = Token::parse("12");
     let e = vec![
         (Token {
-            s: "1".to_string(),
+            s: "12".to_string(),
             t: TokenKind::Number,
         }),
     ];
