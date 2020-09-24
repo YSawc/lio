@@ -53,13 +53,13 @@ pub fn parse(input: &str) -> Vec<Token> {
             }
             b'*' => {
                 p_data.push(Token {
-                    s: "-".to_string(),
+                    s: "*".to_string(),
                     t: TokenKind::Asterisk,
                 });
             }
             b'/' => {
                 p_data.push(Token {
-                    s: "-".to_string(),
+                    s: "/".to_string(),
                     t: TokenKind::Slash,
                 });
             }
@@ -85,6 +85,14 @@ fn parser_test() {
         }),
         (Token {
             s: "1".to_string(),
+            t: TokenKind::Number,
+        }),
+        (Token {
+            s: "*".to_string(),
+            t: TokenKind::Asterisk,
+        }),
+        (Token {
+            s: "2".to_string(),
             t: TokenKind::Number,
         }),
     ];
