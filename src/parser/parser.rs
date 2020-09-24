@@ -16,36 +16,75 @@ pub struct Token {
     pub t: TokenKind,
 }
 
-impl Token {
-    pub fn parse(input: &str) -> Vec<Token> {
-        let mut p_data = Vec::new();
-        let l = input.len();
-        let mut i = 0;
-        while i < l {
-            if input.chars().nth(i).unwrap().is_numeric() {
+pub struct Loc {
+    pub loc_x: u8,
+    pub loc_y: u8,
+    pub t: Token,
+}
+
+pub fn parse(input: &str) -> Vec<Token> {
+    let mut p_data = Vec::new();
+    let l = input.len();
+    let mut i = 0;
+    while i < l {
+        match input.as_bytes()[i] {
+            b'0'..=b'9' => {
                 let t = i;
-                i += 1;
-                while i < l && input.chars().nth(i).unwrap().is_numeric() {
+                while i < input.len() && input.as_bytes()[i].is_ascii_digit() {
                     i += 1;
                 }
+                i -= 1;
                 p_data.push(Token {
-                    s: input[t..(i - t)].to_string(),
+                    s: input[t..i + 1].to_string(),
                     t: TokenKind::Number,
                 });
-            } else {
-                i += 1;
             }
+            b'+' => {
+                p_data.push(Token {
+                    s: "+".to_string(),
+                    t: TokenKind::Plus,
+                });
+            }
+            b'-' => {
+                p_data.push(Token {
+                    s: "-".to_string(),
+                    t: TokenKind::Minus,
+                });
+            }
+            b'*' => {
+                p_data.push(Token {
+                    s: "-".to_string(),
+                    t: TokenKind::Asterisk,
+                });
+            }
+            b'/' => {
+                p_data.push(Token {
+                    s: "-".to_string(),
+                    t: TokenKind::Slash,
+                });
+            }
+            b' ' => (),
+            _ => unimplemented!(),
         }
-        p_data
+        i += 1
     }
+    p_data
 }
 
 #[test]
 fn parser_test() {
-    let l = Token::parse("12");
+    let l = parse("12+1*2");
     let e = vec![
         (Token {
             s: "12".to_string(),
+            t: TokenKind::Number,
+        }),
+        (Token {
+            s: "+".to_string(),
+            t: TokenKind::Plus,
+        }),
+        (Token {
+            s: "1".to_string(),
             t: TokenKind::Number,
         }),
     ];
