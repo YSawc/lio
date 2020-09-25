@@ -3,7 +3,7 @@ use std::fmt::Debug;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum TokenKind {
-    Number(u8),
+    Num(u8),
     Plus,
     Minus,
     Asterisk,
@@ -15,7 +15,7 @@ pub type Token = Annot<TokenKind>;
 
 impl Token {
     fn number(n: u8, loc: Loc) -> Self {
-        Self::new(TokenKind::Number(n), loc)
+        Self::new(TokenKind::Num(n), loc)
     }
 
     fn plus(loc: Loc) -> Self {
@@ -95,7 +95,7 @@ fn tokenize_test() {
     let l = Token::tokenize("12+1*2");
     let e = vec![
         (Annot {
-            value: TokenKind::Number(12),
+            value: TokenKind::Num(12),
             loc: Loc { f: 0, e: 2 },
         }),
         (Annot {
@@ -103,7 +103,7 @@ fn tokenize_test() {
             loc: Loc { f: 2, e: 3 },
         }),
         (Annot {
-            value: TokenKind::Number(1),
+            value: TokenKind::Num(1),
             loc: Loc { f: 3, e: 4 },
         }),
         (Annot {
@@ -111,7 +111,7 @@ fn tokenize_test() {
             loc: Loc { f: 4, e: 5 },
         }),
         (Annot {
-            value: TokenKind::Number(2),
+            value: TokenKind::Num(2),
             loc: Loc { f: 5, e: 6 },
         }),
     ];
