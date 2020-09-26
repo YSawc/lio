@@ -40,6 +40,7 @@ impl Token {
     pub fn tokenize(input: &str) -> Result<Vec<Token>, TokenError> {
         let mut p_data = Vec::new();
         let l = input.len();
+        let mut b = 0;
         let mut i = 0;
         while i < l {
             match input.as_bytes()[i] {
@@ -53,47 +54,48 @@ impl Token {
                     p_data.push(Self::number(
                         n,
                         Loc {
-                            f: t as u8,
-                            e: (i + 1) as u8,
+                            f: t as u8 + b,
+                            e: (i + 1) as u8 + b,
                         },
                     ));
                 }
                 b'+' => {
                     p_data.push(Self::plus(Loc {
-                        f: i as u8,
-                        e: (i + 1) as u8,
+                        f: i as u8 + b,
+                        e: (i + 1) as u8 + b,
                     }));
                 }
                 b'-' => {
                     p_data.push(Self::minus(Loc {
-                        f: i as u8,
-                        e: (i + 1) as u8,
+                        f: i as u8 + b,
+                        e: (i + 1) as u8 + b,
                     }));
                 }
                 b'*' => {
                     p_data.push(Self::asterisk(Loc {
-                        f: i as u8,
-                        e: (i + 1) as u8,
+                        f: i as u8 + b,
+                        e: (i + 1) as u8 + b,
                     }));
                 }
                 b'/' => {
                     p_data.push(Self::slash(Loc {
-                        f: i as u8,
-                        e: (i + 1) as u8,
+                        f: i as u8 + b,
+                        e: (i + 1) as u8 + b,
                     }));
                 }
                 b'\n' => {
+                    b = 0;
                     return Err(TokenError::invalid_token(
                         input.to_string().chars().nth(i).unwrap(),
                         {
                             Loc {
-                                f: i as u8,
-                                e: i as u8 + 1,
+                                f: i as u8 + b,
+                                e: i as u8 + 1 + b,
                             }
                         },
                     ))
                 }
-                b' ' => (),
+                b' ' => b += 1,
                 _ => unimplemented!(),
             }
             i += 1
