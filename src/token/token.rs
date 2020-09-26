@@ -1,4 +1,5 @@
 use super::super::location::location::*;
+use super::error::*;
 use std::fmt::Debug;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -36,7 +37,7 @@ impl Token {
 }
 
 impl Token {
-    pub fn tokenize(input: &str) -> Vec<Token> {
+    pub fn tokenize(input: &str) -> Result<Vec<Token>, TokenError> {
         let mut p_data = Vec::new();
         let l = input.len();
         let mut i = 0;
@@ -81,12 +82,23 @@ impl Token {
                         e: (i + 1) as u8,
                     }));
                 }
+                b'\n' => {
+                    return Err(TokenError::invalid_token(
+                        input.to_string().chars().nth(i).unwrap(),
+                        {
+                            Loc {
+                                f: i as u8,
+                                e: i as u8 + 1,
+                            }
+                        },
+                    ))
+                }
                 b' ' => (),
                 _ => unimplemented!(),
             }
             i += 1
         }
-        p_data
+        Ok(p_data)
     }
 }
 

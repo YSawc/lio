@@ -9,7 +9,7 @@ fn main() {
     let arg1 = &args[1];
 
     println!("INPUT: {}", arg1);
-    let t = Token::tokenize(arg1);
+    let t = Token::tokenize(arg1).unwrap();
     println!("{:?}", t);
     let _nst = NodeSt::parser(t);
     println!("{:?}", _nst);

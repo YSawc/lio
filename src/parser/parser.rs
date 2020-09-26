@@ -34,7 +34,7 @@ impl NodeSt {
             }
 
             let mut t = vt[ps-1].to_owned();
-            println!("{:?}", t);
+            // println!("{:?}", t);
             _c = match t.to_owned().value {
                 TokenKind::Asterisk => Self {
                     c: Annot {

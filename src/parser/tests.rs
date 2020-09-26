@@ -3,11 +3,13 @@ use super::super::location::location::*;
 #[cfg(test)]
 use super::super::node::node::*;
 #[cfg(test)]
+use super::super::token::error::*;
+#[cfg(test)]
 use super::super::token::token::*;
 
 #[test]
 fn parser_test() {
-    let t = Token::tokenize("12+1*2");
+    let t = Token::tokenize("12+1*2").unwrap();
     let l = NodeSt::parser(t);
     let e = NodeSt {
         c: Annot {
@@ -32,4 +34,16 @@ fn parser_test() {
         })),
     };
     assert_eq!(e, l)
+}
+
+#[test]
+fn unimplemented_new_line_test() {
+    let l = match Token::tokenize("1+1\n") {
+        Err(e) => match e.value {
+            TokenErrorKind::InvalidToken('\n') => true,
+            _ => false,
+        },
+        _ => false,
+    };
+    assert!(l);
 }

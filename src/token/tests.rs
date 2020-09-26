@@ -5,7 +5,7 @@ use super::super::token::token::*;
 
 #[test]
 fn tokenize_test() {
-    let t = Token::tokenize("12+1*2").to_owned();
+    let t = Token::tokenize("12+1*2").unwrap().to_owned();
     let e = vec![
         (Annot {
             value: TokenKind::Num(12),
