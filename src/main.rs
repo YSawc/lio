@@ -1,23 +1,25 @@
-use std::env;
-use rr::token::token::*;
-use rr::parser::parser::*;
 use rr::location::location::*;
 use rr::node::node::*;
+use rr::parser::parser::*;
+use rr::token::token::*;
+use std::env;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
     let arg1 = &args[1];
 
+    println!("INPUT: {}", "12+1*2");
     let t = Token::tokenize("12+1*2");
+    // println!("{:?}", t);
     let nst = NodeSt::parser(t);
-    println!("{:?}", nst);
+    // println!("{:?}", nst);
 
-    println!("  .intel_syntax noprefix");
-    println!("  .global _start");
-    println!("_start:");
-    println!("    mov rax, 60");
-    println!("    mov rdi, {}", arg1);
-    println!("    syscall");
+    // println!("  .intel_syntax noprefix");
+    // println!("  .global _start");
+    // println!("_start:");
+    // println!("    mov rax, 60");
+    // println!("    mov rdi, {}", arg1);
+    // println!("    syscall");
 }
 
 #[test]
