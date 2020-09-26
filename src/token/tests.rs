@@ -1,6 +1,8 @@
 #[cfg(test)]
 use super::super::location::location::*;
 #[cfg(test)]
+use super::super::token::error::*;
+#[cfg(test)]
 use super::super::token::token::*;
 
 #[test]
@@ -29,4 +31,16 @@ fn tokenize_test() {
         }),
     ];
     assert_eq!(e, t);
+}
+
+#[test]
+fn unimplemented_new_line_test() {
+    let l = match Token::tokenize("1+1\n") {
+        Err(e) => match e.value {
+            TokenErrorKind::InvalidToken('\n') => true,
+            _ => false,
+        },
+        _ => false,
+    };
+    assert!(l);
 }
