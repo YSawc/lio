@@ -2,23 +2,24 @@ use super::super::location::location::*;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum NodeKind {
-    Num,
+    Num(u8),
     Add,
     Sub,
     Mul,
     Div,
     Nul,
+    Default,
+}
+
+impl Default for NodeKind {
+    fn default() -> Self { NodeKind::Default }
 }
 
 pub type Node = Annot<NodeKind>;
 
-pub enum NodeSt {
-    Nodes {
-        c: Node,
-        rhs: Box<NodeSt>,
-        lhs: Box<NodeSt>,
-    },
-    Val {
-        val: u8,
-    }
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Default)]
+pub struct NodeSt {
+    pub c: Node,
+    pub lhs: Option<Box<NodeSt>>,
+    pub rhs: Option<Box<NodeSt>>,
 }

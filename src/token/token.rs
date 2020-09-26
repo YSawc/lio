@@ -90,6 +90,15 @@ impl Token {
     }
 }
 
+impl Token {
+    pub fn get_val(&mut self) -> u8 {
+        match self.value {
+            TokenKind::Num(n) => n,
+            _ => unimplemented!(),
+        }
+    }
+}
+
 #[test]
 fn tokenize_test() {
     let l = Token::tokenize("12+1*2");
