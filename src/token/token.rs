@@ -93,7 +93,7 @@ impl Token {
                                 e: i as u8 + 1 + b,
                             }
                         },
-                    ))
+                    ));
                 }
                 b' ' => b += 1,
                 _ => unimplemented!(),
