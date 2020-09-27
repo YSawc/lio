@@ -34,7 +34,7 @@ fn tokenize_test() {
 }
 
 #[test]
-fn unimplemented_new_line_test() {
+fn invalid_token_test() {
     let l = match Token::tokenize("1+1\n") {
         Err(e) => match e.value {
             TokenErrorKind::InvalidToken('\n') => true,

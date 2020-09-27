@@ -83,7 +83,8 @@ impl Token {
                         e: (i + 1) as u8 + b,
                     }));
                 }
-                b'\n' => {
+                b' ' => b += 1,
+                _ => {
                     b = 0;
                     return Err(TokenError::invalid_token(
                         input.to_string().chars().nth(i).unwrap(),
@@ -95,8 +96,6 @@ impl Token {
                         },
                     ));
                 }
-                b' ' => b += 1,
-                _ => unimplemented!(),
             }
             i += 1
         }
