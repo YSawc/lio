@@ -1,5 +1,5 @@
-use rr::node::node::*;
 use rr::code_gen::gen_x86::*;
+use rr::node::node::*;
 use rr::token::token::*;
 use std::env;
 
@@ -12,5 +12,5 @@ fn main() {
     println!("{:?}", t);
     let _nst = NodeSt::parser(t);
     println!("{:?}", _nst);
-    let _nst = gen_x86(_nst);
+    let _nst = gen(_nst);
 }

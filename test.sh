@@ -1,15 +1,12 @@
 #!/bin/bash
 
-mkdir -p workspace
-cd workspace
-
 assert() {
   expected="$1"
   input="$2"
 
   cargo run $2
-  cc -o tmp tmp.s
-  ./tmp
+  cc -o ./workspace/tmp ./workspace/tmp.s
+  ./workspace/tmp
   actual="$?"
 
   if [ "$actual" = "$expected" ]; then
@@ -21,3 +18,4 @@ assert() {
 }
 
 assert 42 42
+assert 3 1+2
