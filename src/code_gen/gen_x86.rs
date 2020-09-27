@@ -32,18 +32,22 @@ fn gen_x86(f: &mut fs::File, ns: NodeSt) {
     }
 
     match ns.c.value {
-        NodeKind::Num(n) => unsafe { write!(f, "  mov ${}, %{}\n", n, REGS[CC as usize]).unwrap() },
-        NodeKind::Add => unsafe {
-            write!(
-                f,
-                "  add %{}, %{}\n",
-                REGS[CC as usize - 1],
-                REGS[CC as usize - 2]
-            )
-            .unwrap()
-        },
+        NodeKind::Num(n) => {
+            unsafe { write!(f, "  mov ${}, %{}\n", n, REGS[CC as usize]).unwrap() };
+            unsafe { CC += 1 };
+        }
+        NodeKind::Add => {
+            unsafe {
+                write!(
+                    f,
+                    "  add %{}, %{}\n",
+                    REGS[CC as usize - 1],
+                    REGS[CC as usize - 2]
+                )
+                .unwrap()
+            };
+            unsafe { CC -= 1 };
+        }
         _ => unimplemented!(),
     }
-
-    unsafe { CC += 1 };
 }
