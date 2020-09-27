@@ -7,10 +7,9 @@ assert() {
   expected="$1"
   input="$2"
 
-  cargo run > main.s $input
-  as main.s -o main.o
-  ld -s -o a.out main.o
-  ./a.out
+  cargo run $2
+  cc -o tmp tmp.s
+  ./tmp
   actual="$?"
 
   if [ "$actual" = "$expected" ]; then

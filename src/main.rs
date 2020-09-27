@@ -1,6 +1,5 @@
-// use rr::location::location::*;
 use rr::node::node::*;
-// use rr::parser::parser::*;
+use rr::code_gen::gen_x86::*;
 use rr::token::token::*;
 use std::env;
 
@@ -13,11 +12,5 @@ fn main() {
     println!("{:?}", t);
     let _nst = NodeSt::parser(t);
     println!("{:?}", _nst);
-
-    println!("  .intel_syntax noprefix");
-    println!("  .global _start");
-    println!("_start:");
-    println!("    mov rax, 60");
-    println!("    mov rdi, {}", arg1);
-    println!("    syscall");
+    let _nst = gen_x86(_nst);
 }
