@@ -22,7 +22,7 @@ fn main() {
 
             let t = Token::tokenize(&s).unwrap();
             // println!("{:?}", t);
-            let _nst = NodeSt::parser(t);
+            let _nst = NodeSt::parser(t).unwrap();
             println!("{:?}", _nst);
             let _nst = gen(_nst);
         }
@@ -30,7 +30,7 @@ fn main() {
         println!("INPUT: {}", arg1);
         let t = Token::tokenize(arg1).unwrap();
         println!("{:?}", t);
-        let _nst = NodeSt::parser(t);
+        let _nst = NodeSt::parser(t).unwrap();
         // println!("{:?}", _nst.c);
         println!("{:?}", _nst);
         let _nst = gen(_nst);

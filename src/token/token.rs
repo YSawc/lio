@@ -104,10 +104,10 @@ impl Token {
 }
 
 impl Token {
-    pub fn get_val(&mut self) -> u8 {
+    pub fn get_val(&mut self) -> Result<u8, TokenErrorKind> {
         match self.value {
-            TokenKind::Num(n) => n,
-            _ => unimplemented!(),
+            TokenKind::Num(n) => Ok(n),
+            _ => Err(TokenErrorKind::InvalidNumber)
         }
     }
 }

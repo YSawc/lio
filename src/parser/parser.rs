@@ -1,4 +1,5 @@
 use super::super::location::location::*;
+use super::super::node::error::*;
 use super::super::node::node::*;
 use super::super::token::token::*;
 
@@ -12,19 +13,27 @@ impl NodeSt {
         }
     }
 
-    pub fn new_num(mut t: Token) -> Self {
-        Self {
+    pub fn new_num(mut t: Token) -> Result<Self, NodeError> {
+        let n = match Token::get_val(&mut t) {
+            Ok(n) => n,
+            Err(_) => return Err(NodeError::not_number(t.clone(), t.loc)),
+        };
+
+        Ok(Self {
             c: Annot {
-                value: NodeKind::Num(Token::get_val(&mut t)),
+                value: NodeKind::Num(n),
                 loc: t.loc,
             },
             ..Default::default()
-        }
+        })
     }
 
-    pub fn parser(vt: Vec<Token>) -> Self {
+    pub fn parser(vt: Vec<Token>) -> Result<Self, NodeError> {
         let mut ps = 0;
-        let mut lhs = Self::new_num(vt[ps].to_owned());
+        let mut rhs = match Self::new_num(vt[ps].to_owned()) {
+            Ok(n) => n,
+            Err(e) => return Err(e),
+        };
         let mut _c = Node::default();
         ps += 1;
 
@@ -40,15 +49,19 @@ impl NodeSt {
                     value: NodeKind::Add,
                     loc: t.to_owned().loc,
                 },
-                _ => unimplemented!(),
+                TokenKind::Minus => Annot {
+                    value: NodeKind::Sub,
+                    loc: t.to_owned().loc,
+                },
+                _ => panic!(""),
             };
             ps += 1;
 
-            let n = Self::new_num(vt[ps].to_owned());
+            let n = Self::new_num(vt[ps].to_owned()).unwrap();
             ps += 1;
 
-            lhs = Self::new_nds(_c, Box::new(lhs), Box::new(n));
+            rhs = Self::new_nds(_c, Box::new(rhs), Box::new(n));
         }
-        lhs
+        Ok(rhs)
     }
 }
