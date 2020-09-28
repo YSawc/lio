@@ -15,3 +15,9 @@ impl<T> Annot<T> {
         Self { value, loc }
     }
 }
+
+impl Loc {
+    pub fn new(f: u8, e: u8) -> Self {
+        Self { f, e }
+    }
+}

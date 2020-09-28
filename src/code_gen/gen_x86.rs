@@ -15,7 +15,7 @@ pub fn gen(ns: NodeSt) {
 
     gen_x86(&mut f, ns);
 
-    unsafe { write!(f, "  mov %{} , %rax\n", REGS[CC as usize - 1 ]).unwrap() } ;
+    unsafe { write!(f, "  mov %{} , %rax\n", REGS[CC as usize - 1]).unwrap() };
     write!(f, "  ret\n").unwrap();
 }
 

@@ -66,5 +66,4 @@ impl NodeSt {
         }
         Ok(lhs)
     }
-
 }
