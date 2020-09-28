@@ -15,7 +15,7 @@ pub fn gen(ns: NodeSt) {
 
     gen_x86(&mut f, ns);
 
-    write!(f, "  mov %edi, %eax\n").unwrap();
+    unsafe { write!(f, "  mov %{} , %rax\n", REGS[CC as usize - 1 ]).unwrap() } ;
     write!(f, "  ret\n").unwrap();
 }
 
@@ -48,6 +48,18 @@ fn gen_x86(f: &mut fs::File, ns: NodeSt) {
             };
             unsafe { CC -= 1 };
         }
+        NodeKind::Sub => {
+            unsafe {
+                write!(
+                    f,
+                    "  sub %{}, %{}\n",
+                    REGS[CC as usize - 2],
+                    REGS[CC as usize - 1],
+                )
+                .unwrap()
+            };
+        }
+
         _ => unimplemented!(),
     }
 }
