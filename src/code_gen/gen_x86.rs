@@ -13,51 +13,33 @@ pub fn gen(ns: NodeSt) {
     write!(f, " .global main\n").unwrap();
     write!(f, "main:\n").unwrap();
 
-    gen_x86(&mut f, ns);
+    let r = gen_x86(&mut f, ns);
 
-    unsafe { write!(f, "  mov %{} , %rax\n", REGS[CC as usize - 1]).unwrap() };
+    write!(f, "  mov %{}, %rax\n", r).unwrap();
     write!(f, "  ret\n").unwrap();
 }
 
-fn gen_x86(f: &mut fs::File, ns: NodeSt) {
-    if ns.c.value == NodeKind::Default {
-        return;
-    }
-
-    if ns.rhs != None {
-        gen_x86(f, ns.rhs.unwrap().as_ref().to_owned());
-    }
-    if ns.lhs != None {
-        gen_x86(f, ns.lhs.unwrap().as_ref().to_owned());
-    }
-
+fn gen_x86(f: &mut fs::File, ns: NodeSt) -> String {
     match ns.c.value {
         NodeKind::Num(n) => {
             unsafe { write!(f, "  mov ${}, %{}\n", n, REGS[CC as usize]).unwrap() };
             unsafe { CC += 1 };
+            unsafe { return REGS[CC as usize - 1].to_string() };
         }
+        _ => (),
+    }
+
+    let l = gen_x86(f, ns.lhs.unwrap().as_ref().to_owned());
+    let r = gen_x86(f, ns.rhs.unwrap().as_ref().to_owned());
+
+    match ns.c.value {
         NodeKind::Add => {
-            unsafe {
-                write!(
-                    f,
-                    "  add %{}, %{}\n",
-                    REGS[CC as usize - 1],
-                    REGS[CC as usize - 2]
-                )
-                .unwrap()
-            };
-            unsafe { CC -= 1 };
+            write!(f, "  add %{}, %{}\n", r, l).unwrap();
+            return l;
         }
         NodeKind::Sub => {
-            unsafe {
-                write!(
-                    f,
-                    "  sub %{}, %{}\n",
-                    REGS[CC as usize - 2],
-                    REGS[CC as usize - 1],
-                )
-                .unwrap()
-            };
+            write!(f, "  sub %{}, %{}\n", r, l).unwrap();
+            return l;
         }
 
         _ => unimplemented!(),

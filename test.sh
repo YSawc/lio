@@ -25,6 +25,7 @@ assert 3 1+2
 assert 15 1+2+3+4+5
 assert 2 3-1
 assert 4 6-1-1
+assert 9 6-1+1+3
 
 echo "------------------------------"
 echo "All test passed!"
