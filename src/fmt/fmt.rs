@@ -1,4 +1,5 @@
 use super::super::location::location::*;
+use super::super::parser::error::*;
 use super::super::token::error::*;
 use super::super::token::token::*;
 use std::fmt;
@@ -11,6 +12,15 @@ impl fmt::Display for TokenKind {
             TokenKind::Minus => write!(f, "-"),
             TokenKind::Asterisk => write!(f, "*"),
             TokenKind::Slash => write!(f, "/"),
+        }
+    }
+}
+
+impl fmt::Display for ParseError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            ParseError::NotNumber(tok) => write!(f, "{}: {} is not number", tok.loc, tok.value),
+            ParseError::NotOperator(tok) => write!(f, "{}: {} is not operator", tok.loc, tok.value),
         }
     }
 }

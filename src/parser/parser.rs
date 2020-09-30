@@ -1,7 +1,7 @@
 use super::super::location::location::*;
-use super::super::node::error::*;
 use super::super::node::node::*;
 use super::super::token::token::*;
+use super::error::*;
 
 impl NodeSt {
     pub fn new_nds(c: Node, lhs: Box<NodeSt>, rhs: Box<NodeSt>) -> Self {
@@ -13,10 +13,10 @@ impl NodeSt {
         }
     }
 
-    pub fn new_num(mut t: Token) -> Result<Self, NodeError> {
+    pub fn new_num(mut t: Token) -> Result<Self, ParseError> {
         let n = match Token::get_val(&mut t) {
             Ok(n) => n,
-            Err(_) => return Err(NodeError::not_number(t.clone(), t.loc)),
+            Err(_) => return Err(ParseError::NotNumber(t)),
         };
 
         Ok(Self {
@@ -30,7 +30,7 @@ impl NodeSt {
 }
 
 impl NodeSt {
-    pub fn parser(vt: Vec<Token>) -> Result<Self, NodeError> {
+    pub fn parser(vt: Vec<Token>) -> Result<Self, ParseError> {
         let mut ps = 0;
         let mut lhs = match Self::new_num(vt[ps].to_owned()) {
             Ok(n) => n,

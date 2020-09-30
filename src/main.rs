@@ -21,8 +21,13 @@ fn main() {
             }
 
             let t = Token::tokenize(&s).unwrap();
-            // println!("{:?}", t);
-            let _nst = NodeSt::parser(t).unwrap();
+            let _nst = match NodeSt::parser(t) {
+                Ok(n) => n,
+                Err(e) => {
+                    eprintln!("{}", e);
+                    continue;
+                }
+            };
             println!("{:?}", _nst);
             let _nst = gen(_nst);
         }
