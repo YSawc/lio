@@ -9,7 +9,6 @@ pub enum TokenKind {
     Minus,
     Asterisk,
     Slash,
-    NULL,
 }
 
 pub type Token = Annot<TokenKind>;
@@ -107,7 +106,7 @@ impl Token {
     pub fn get_val(&mut self) -> Result<u8, TokenErrorKind> {
         match self.value {
             TokenKind::Num(n) => Ok(n),
-            _ => Err(TokenErrorKind::InvalidNumber)
+            _ => Err(TokenErrorKind::InvalidNumber(self.to_owned())),
         }
     }
 }
