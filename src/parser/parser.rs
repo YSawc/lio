@@ -32,10 +32,7 @@ impl NodeSt {
 impl NodeSt {
     pub fn parser(vt: Vec<Token>) -> Result<Self, ParseError> {
         let mut ps = 0;
-        let mut lhs = match Self::new_num(vt[ps].to_owned()) {
-            Ok(n) => n,
-            Err(e) => return Err(e),
-        };
+        let mut lhs = Self::new_num(vt[ps].to_owned())?;
         let mut _c = Node::default();
         ps += 1;
 
@@ -63,10 +60,7 @@ impl NodeSt {
                 return Err(ParseError::Eof);
             }
 
-            let n = match Self::new_num(vt[ps].to_owned()) {
-                Ok(n) => n,
-                Err(e) => return Err(e),
-            };
+            let n = Self::new_num(vt[ps].to_owned())?;
             ps += 1;
 
             lhs = Self::new_nds(_c, Box::new(lhs), Box::new(n));

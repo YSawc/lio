@@ -26,7 +26,6 @@ fn parser_test() {
             })),
         }
     };
-
     assert_eq!(e, l)
 }
 
@@ -35,10 +34,7 @@ fn not_exit_when_failed_parser_test() {
     let t = Token::tokenize("+3").unwrap();
     let l = match NodeSt::parser(t) {
         Ok(_) => false,
-        Err(e) => {
-            eprintln!("{}", e);
-            true
-        }
+        Err(_) => true,
     };
     assert!(l)
 }
@@ -48,12 +44,10 @@ fn reached_at_eof_test() {
     let t = Token::tokenize("5+").unwrap();
     let l = match NodeSt::parser(t) {
         Ok(_) => false,
-        Err(e) => {
-            match e {
-                ParseError::Eof => true,
-                _ => false
-            }
-        }
+        Err(e) => match e {
+            ParseError::Eof => true,
+            _ => false,
+        },
     };
     assert!(l)
 }
