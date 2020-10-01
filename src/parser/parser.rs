@@ -31,37 +31,30 @@ impl NodeSt {
 
 impl NodeSt {
     pub fn parser(vt: Vec<Token>) -> Result<Self, ParseError> {
-        let mut ps = 0;
-        let mut lhs = Self::new_num(vt[ps].to_owned())?;
+        let mut it = vt.iter().peekable();
+        let mut lhs = Self::new_num(it.next().unwrap().to_owned())?;
         let mut _c = Node::default();
-        ps += 1;
 
-        loop {
-            if vt.len() <= ps {
-                break;
-            }
+        while it.peek() != None {
+            let t = it.next().unwrap().to_owned();
 
-            let t = vt[ps].to_owned();
             println!("t: {:?}", t);
-            _c = match t.to_owned().value {
+            _c = match t.value {
                 TokenKind::Plus => Annot {
                     value: NodeKind::Add,
-                    loc: t.to_owned().loc,
+                    loc: t.loc,
                 },
                 TokenKind::Minus => Annot {
                     value: NodeKind::Sub,
-                    loc: t.to_owned().loc,
+                    loc: t.loc,
                 },
                 _ => panic!(""),
             };
-            ps += 1;
 
-            if vt.len() <= ps {
+            if it.peek() == None {
                 return Err(ParseError::Eof);
             }
-
-            let n = Self::new_num(vt[ps].to_owned())?;
-            ps += 1;
+            let n = Self::new_num(it.next().unwrap().to_owned())?;
 
             lhs = Self::new_nds(_c, Box::new(lhs), Box::new(n));
         }
