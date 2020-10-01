@@ -27,3 +27,16 @@ fn parser_test() {
 
     assert_eq!(e, l)
 }
+
+#[test]
+fn not_exit_when_failed_parser_test() {
+    let t = Token::tokenize("+3").unwrap();
+    let l = match NodeSt::parser(t) {
+        Ok(_) => false,
+        Err(e) => {
+            eprintln!("{}", e);
+            true
+        }
+    };
+    assert!(l)
+}
