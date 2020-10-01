@@ -59,7 +59,14 @@ impl NodeSt {
             };
             ps += 1;
 
-            let n = Self::new_num(vt[ps].to_owned()).unwrap();
+            if vt.len() <= ps {
+                return Err(ParseError::Eof);
+            }
+
+            let n = match Self::new_num(vt[ps].to_owned()) {
+                Ok(n) => n,
+                Err(e) => return Err(e),
+            };
             ps += 1;
 
             lhs = Self::new_nds(_c, Box::new(lhs), Box::new(n));

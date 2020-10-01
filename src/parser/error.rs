@@ -9,5 +9,5 @@ pub enum ParseError {
     // NotExpression(Token),
     // UnclosedOpenParen(Token),
     // RedundantExpression(Token),
-    // Eof,
+    Eof,
 }
