@@ -20,10 +20,7 @@ impl NodeSt {
         };
 
         Ok(Self {
-            c: Annot {
-                value: NodeKind::Num(n),
-                loc: t.loc,
-            },
+            c: Annot::new(NodeKind::Num(n), t.loc),
             ..Default::default()
         })
     }
@@ -46,14 +43,8 @@ impl NodeSt {
     ) -> Result<NodeSt, ParseError> {
         let t = it.next().unwrap().to_owned();
         let c = match t.value {
-            TokenKind::Plus => Annot {
-                value: NodeKind::Add,
-                loc: t.loc,
-            },
-            TokenKind::Minus => Annot {
-                value: NodeKind::Sub,
-                loc: t.loc,
-            },
+            TokenKind::Plus => Annot::new(NodeKind::Add, t.loc),
+            TokenKind::Minus => Annot::new(NodeKind::Sub, t.loc),
             _ => return Err(ParseError::NotOperator(t.to_owned())),
         };
 

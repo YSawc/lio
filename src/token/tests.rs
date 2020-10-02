@@ -9,26 +9,11 @@ use super::super::token::token::*;
 fn tokenize_test() {
     let t = Token::tokenize("12+1*2").unwrap().to_owned();
     let e = vec![
-        (Annot {
-            value: TokenKind::Num(12),
-            loc: Loc::new(0, 2),
-        }),
-        (Annot {
-            value: TokenKind::Plus,
-            loc: Loc::new(2, 3),
-        }),
-        (Annot {
-            value: TokenKind::Num(1),
-            loc: Loc::new(3, 4),
-        }),
-        (Annot {
-            value: TokenKind::Asterisk,
-            loc: Loc::new(4, 5),
-        }),
-        (Annot {
-            value: TokenKind::Num(2),
-            loc: Loc::new(5, 6),
-        }),
+        (Annot::new(TokenKind::Num(12), Loc::new(0, 2))),
+        (Annot::new(TokenKind::Plus, Loc::new(2, 3))),
+        (Annot::new(TokenKind::Num(1), Loc::new(3, 4))),
+        (Annot::new(TokenKind::Asterisk, Loc::new(4, 5))),
+        (Annot::new(TokenKind::Num(2), Loc::new(5, 6))),
     ];
     assert_eq!(e, t);
 }
