@@ -33,33 +33,39 @@ impl NodeSt {
     pub fn parser(vt: Vec<Token>) -> Result<Self, ParseError> {
         let mut it = vt.iter().peekable();
         let mut lhs = Self::new_num(it.next().unwrap().to_owned())?;
-        let mut _c = Node::default();
 
         while it.peek() != None {
-            let t = it.next().unwrap().to_owned();
-
-            println!("t: {:?}", t);
-            _c = match t.value {
-                TokenKind::Plus => Annot {
-                    value: NodeKind::Add,
-                    loc: t.loc,
-                },
-                TokenKind::Minus => Annot {
-                    value: NodeKind::Sub,
-                    loc: t.loc,
-                },
-                _ => return Err(ParseError::NotOperator(t)),
-            };
-
-            if it.peek() == None {
-                return Err(ParseError::Eof);
-            }
-
-            let n = Self::primary(&mut it).unwrap();
-
-            lhs = Self::new_nds(_c, Box::new(lhs), Box::new(n));
+            lhs = Self::expr(&mut it, &mut lhs)?;
         }
         Ok(lhs)
+    }
+
+    pub fn expr(
+        mut it: &mut std::iter::Peekable<std::slice::Iter<'_, Annot<TokenKind>>>,
+        lhs: &mut NodeSt,
+    ) -> Result<NodeSt, ParseError> {
+        let t = it.next().unwrap().to_owned();
+        let c = match t.value {
+            TokenKind::Plus => Annot {
+                value: NodeKind::Add,
+                loc: t.loc,
+            },
+            TokenKind::Minus => Annot {
+                value: NodeKind::Sub,
+                loc: t.loc,
+            },
+            _ => return Err(ParseError::NotOperator(t.to_owned())),
+        };
+
+        if it.peek() == None {
+            return Err(ParseError::Eof);
+        }
+
+        let n = Self::primary(&mut it).unwrap();
+
+        *lhs = Self::new_nds(c, Box::new(lhs.to_owned()), Box::new(n));
+
+        Ok(lhs.to_owned())
     }
 
     pub fn primary(

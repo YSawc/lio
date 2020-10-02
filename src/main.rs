@@ -34,10 +34,9 @@ fn main() {
     } else {
         println!("INPUT: {}", arg1);
         let t = Token::tokenize(arg1).unwrap();
-        println!("{:?}", t);
+        println!("after tokenized: {:?}", t);
         let _nst = NodeSt::parser(t).unwrap();
-        // println!("{:?}", _nst.c);
-        println!("{:?}", _nst);
+        println!("after parsed: {:?}", _nst);
         let _nst = gen(_nst);
     }
 }
