@@ -5,6 +5,7 @@ use super::super::token::token::*;
 pub enum ParseError {
     NotNumber(Token),
     NotOperator(Token),
+    NotImplementedOperator(Token),
     // UnexpectedToken(Token),
     // NotExpression(Token),
     // UnclosedOpenParen(Token),

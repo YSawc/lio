@@ -21,6 +21,9 @@ impl fmt::Display for ParseError {
         match self {
             ParseError::NotNumber(tok) => write!(f, "{}: {} is not number", tok.loc, tok.value),
             ParseError::NotOperator(tok) => write!(f, "{}: {} is not operator", tok.loc, tok.value),
+            ParseError::NotImplementedOperator(tok) => {
+                write!(f, "{}: {} is not implemented operator", tok.loc, tok.value)
+            }
             ParseError::Eof => write!(f, "Expected token, but not detected."),
         }
     }
