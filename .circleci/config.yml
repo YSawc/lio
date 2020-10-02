@@ -90,6 +90,7 @@ jobs:
           name: build & test
           command: |
             cargo test
+            sh test.sh
       - save_cache_
 
 workflows:
@@ -99,4 +100,4 @@ workflows:
       # - readme
       # - lint
       - test:
-          name: cargo test
+          name: run all test
