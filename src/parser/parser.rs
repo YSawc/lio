@@ -48,16 +48,23 @@ impl NodeSt {
                     value: NodeKind::Sub,
                     loc: t.loc,
                 },
-                _ => panic!(""),
+                _ => return Err(ParseError::NotOperator(t)),
             };
 
             if it.peek() == None {
                 return Err(ParseError::Eof);
             }
-            let n = Self::new_num(it.next().unwrap().to_owned())?;
+
+            let n = Self::primary(&mut it).unwrap();
 
             lhs = Self::new_nds(_c, Box::new(lhs), Box::new(n));
         }
         Ok(lhs)
+    }
+
+    pub fn primary(
+        it: &mut std::iter::Peekable<std::slice::Iter<'_, Annot<TokenKind>>>,
+    ) -> Result<NodeSt, ParseError> {
+        Ok(Self::new_num(it.next().unwrap().to_owned())?)
     }
 }
