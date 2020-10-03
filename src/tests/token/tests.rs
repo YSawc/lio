@@ -1,9 +1,9 @@
 #[cfg(test)]
-use super::super::location::location::*;
+use super::super::super::location::location::*;
 #[cfg(test)]
-use super::super::token::error::*;
+use super::super::super::token::error::*;
 #[cfg(test)]
-use super::super::token::token::*;
+use super::super::super::token::token::*;
 
 #[test]
 fn tokenize_test() {

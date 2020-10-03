@@ -1,11 +1,11 @@
 #[cfg(test)]
-use super::super::location::location::*;
+use super::super::super::location::location::*;
 #[cfg(test)]
-use super::super::node::node::*;
+use super::super::super::node::node::*;
 #[cfg(test)]
-use super::super::token::token::*;
+use super::super::super::token::token::*;
 #[cfg(test)]
-use super::error::*;
+use super::super::super::parser::error::*;
 
 #[test]
 fn parser_test() {
