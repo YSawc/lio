@@ -7,6 +7,7 @@ static mut CC: u8 = 0;
 
 pub fn gen(ns: NodeSt) {
     const DIR: &str = "workspace/tmp.s";
+    fs::File::create(DIR).unwrap();
     fs::remove_file(DIR).unwrap();
 
     let mut f = fs::File::create(DIR).unwrap();
