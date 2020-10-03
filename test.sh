@@ -31,6 +31,9 @@ assert 9 6-1+1+3
 assert 10 5*2
 assert 9 5+2*2
 assert 1 5-2*2
+assert 2 4/2
+assert 8 4/2*4
+assert 8 1+4/2*4-1
 
 echo "------------------------------"
 echo "All test passed!"
