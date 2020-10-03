@@ -29,33 +29,36 @@ impl NodeSt {
 impl NodeSt {
     pub fn parser(vt: Vec<Token>) -> Result<Self, ParseError> {
         let mut it = vt.iter().peekable();
-        let mut lhs = Self::new_num(it.next().unwrap().to_owned())?;
-
-        while it.peek() != None {
-            lhs = Self::expr(&mut it, &mut lhs)?;
-        }
+        let lhs = Self::expr(&mut it)?;
         Ok(lhs)
     }
 
     pub fn expr(
         mut it: &mut std::iter::Peekable<std::slice::Iter<Annot<TokenKind>>>,
-        lhs: &mut NodeSt,
     ) -> Result<NodeSt, ParseError> {
-        *lhs = match it.peek().map(|vt| vt.value.to_owned()) {
-            Some(TokenKind::Plus) => Self::new_nds(
-                Annot::new(NodeKind::Add, it.next().unwrap().loc.to_owned()),
-                lhs.to_owned(),
-                Self::primary(&mut it)?,
-            ),
-            Some(TokenKind::Minus) => Self::new_nds(
-                Annot::new(NodeKind::Sub, it.next().unwrap().loc.to_owned()),
-                lhs.to_owned(),
-                Self::primary(&mut it)?,
-            ),
-            _ => return Err(ParseError::NotOperator(it.next().unwrap().to_owned())),
-        };
+        let mut lhs = Self::primary(it)?;
 
-        Ok(lhs.to_owned())
+        loop {
+            match it.peek().map(|vt| vt.value.to_owned()) {
+                Some(TokenKind::Plus) | Some(TokenKind::Minus) => {
+                    let op = match it.next().unwrap() {
+                        Token {
+                            value: TokenKind::Plus,
+                            loc,
+                        } => Node::plus(loc.to_owned()),
+                        Token {
+                            value: TokenKind::Minus,
+                            loc,
+                        } => Node::minus(loc.to_owned()),
+                        _ => unreachable!(),
+                    };
+                    let rhs = Self::primary(&mut it)?;
+
+                    lhs = Self::new_nds(op, lhs, rhs);
+                }
+                _ => return Ok(lhs),
+            }
+        }
     }
 
     pub fn primary(
