@@ -38,29 +38,28 @@ impl NodeSt {
     }
 
     pub fn expr(
-        mut it: &mut std::iter::Peekable<std::slice::Iter<'_, Annot<TokenKind>>>,
+        mut it: &mut std::iter::Peekable<std::slice::Iter<Annot<TokenKind>>>,
         lhs: &mut NodeSt,
     ) -> Result<NodeSt, ParseError> {
-        let t = it.next().unwrap().to_owned();
-        *lhs = match t.value {
-            TokenKind::Plus => Self::new_nds(
-                Annot::new(NodeKind::Add, t.loc),
+        *lhs = match it.peek().map(|vt| vt.value.to_owned()) {
+            Some(TokenKind::Plus) => Self::new_nds(
+                Annot::new(NodeKind::Add, it.next().unwrap().loc.to_owned()),
                 lhs.to_owned(),
                 Self::primary(&mut it)?,
             ),
-            TokenKind::Minus => Self::new_nds(
-                Annot::new(NodeKind::Sub, t.loc),
+            Some(TokenKind::Minus) => Self::new_nds(
+                Annot::new(NodeKind::Sub, it.next().unwrap().loc.to_owned()),
                 lhs.to_owned(),
                 Self::primary(&mut it)?,
             ),
-            _ => return Err(ParseError::NotOperator(t.to_owned())),
+            _ => return Err(ParseError::NotOperator(it.next().unwrap().to_owned())),
         };
 
         Ok(lhs.to_owned())
     }
 
     pub fn primary(
-        it: &mut std::iter::Peekable<std::slice::Iter<'_, Annot<TokenKind>>>,
+        it: &mut std::iter::Peekable<std::slice::Iter<Annot<TokenKind>>>,
     ) -> Result<NodeSt, ParseError> {
         if it.peek() == None {
             return Err(ParseError::Eof);
