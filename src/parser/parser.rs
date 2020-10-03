@@ -36,7 +36,7 @@ impl NodeSt {
     pub fn expr(
         mut it: &mut std::iter::Peekable<std::slice::Iter<Annot<TokenKind>>>,
     ) -> Result<NodeSt, ParseError> {
-        let mut lhs = Self::primary(it)?;
+        let mut lhs = Self::mul(it)?;
 
         loop {
             match it.peek().map(|vt| vt.value.to_owned()) {
@@ -50,6 +50,34 @@ impl NodeSt {
                             value: TokenKind::Minus,
                             loc,
                         } => Node::minus(loc.to_owned()),
+                        _ => unreachable!(),
+                    };
+                    let rhs = Self::mul(&mut it)?;
+
+                    lhs = Self::new_nds(op, lhs, rhs);
+                }
+                _ => return Ok(lhs),
+            }
+        }
+    }
+
+    pub fn mul(
+        mut it: &mut std::iter::Peekable<std::slice::Iter<Annot<TokenKind>>>,
+    ) -> Result<NodeSt, ParseError> {
+        let mut lhs = Self::primary(it)?;
+
+        loop {
+            match it.peek().map(|vt| vt.value.to_owned()) {
+                Some(TokenKind::Asterisk) | Some(TokenKind::Slash) => {
+                    let op = match it.next().unwrap() {
+                        Token {
+                            value: TokenKind::Asterisk,
+                            loc,
+                        } => Node::mul(loc.to_owned()),
+                        Token {
+                            value: TokenKind::Slash,
+                            loc,
+                        } => Node::div(loc.to_owned()),
                         _ => unreachable!(),
                     };
                     let rhs = Self::primary(&mut it)?;

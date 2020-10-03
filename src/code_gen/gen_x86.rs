@@ -42,7 +42,10 @@ fn gen_x86(f: &mut fs::File, ns: NodeSt) -> String {
             write!(f, "  sub %{}, %{}\n", r, l).unwrap();
             return l;
         }
-
+        NodeKind::Mul => {
+            write!(f, "  imul %{}, %{}\n", r, l).unwrap();
+            return l;
+        }
         _ => unimplemented!(),
     }
 }
