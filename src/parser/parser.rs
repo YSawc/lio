@@ -4,11 +4,11 @@ use super::super::token::token::*;
 use super::error::*;
 
 impl NodeSt {
-    pub fn new_nds(c: Node, lhs: Box<NodeSt>, rhs: Box<NodeSt>) -> Self {
+    pub fn new_nds(c: Node, lhs: NodeSt, rhs: NodeSt) -> Self {
         Self {
             c,
-            lhs: Some(lhs),
-            rhs: Some(rhs),
+            lhs: Some(Box::new(lhs)),
+            rhs: Some(Box::new(rhs)),
             ..Default::default()
         }
     }
@@ -42,19 +42,19 @@ impl NodeSt {
         lhs: &mut NodeSt,
     ) -> Result<NodeSt, ParseError> {
         let t = it.next().unwrap().to_owned();
-        let c = match t.value {
-            TokenKind::Plus => Annot::new(NodeKind::Add, t.loc),
-            TokenKind::Minus => Annot::new(NodeKind::Sub, t.loc),
+        *lhs = match t.value {
+            TokenKind::Plus => Self::new_nds(
+                Annot::new(NodeKind::Add, t.loc),
+                lhs.to_owned(),
+                Self::primary(&mut it)?,
+            ),
+            TokenKind::Minus => Self::new_nds(
+                Annot::new(NodeKind::Sub, t.loc),
+                lhs.to_owned(),
+                Self::primary(&mut it)?,
+            ),
             _ => return Err(ParseError::NotOperator(t.to_owned())),
         };
-
-        if it.peek() == None {
-            return Err(ParseError::Eof);
-        }
-
-        let n = Self::primary(&mut it).unwrap();
-
-        *lhs = Self::new_nds(c, Box::new(lhs.to_owned()), Box::new(n));
 
         Ok(lhs.to_owned())
     }
@@ -62,6 +62,10 @@ impl NodeSt {
     pub fn primary(
         it: &mut std::iter::Peekable<std::slice::Iter<'_, Annot<TokenKind>>>,
     ) -> Result<NodeSt, ParseError> {
+        if it.peek() == None {
+            return Err(ParseError::Eof);
+        }
+
         Ok(Self::new_num(it.next().unwrap().to_owned())?)
     }
 }
