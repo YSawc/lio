@@ -14,23 +14,23 @@ pub enum TokenKind {
 pub type Token = Annot<TokenKind>;
 
 impl Token {
-    fn number(n: u8, loc: Loc) -> Self {
+    pub fn number(n: u8, loc: Loc) -> Self {
         Self::new(TokenKind::Num(n), loc)
     }
 
-    fn plus(loc: Loc) -> Self {
+    pub fn plus(loc: Loc) -> Self {
         Self::new(TokenKind::Plus, loc)
     }
 
-    fn minus(loc: Loc) -> Self {
+    pub fn minus(loc: Loc) -> Self {
         Self::new(TokenKind::Minus, loc)
     }
 
-    fn asterisk(loc: Loc) -> Self {
+    pub fn asterisk(loc: Loc) -> Self {
         Self::new(TokenKind::Asterisk, loc)
     }
 
-    fn slash(loc: Loc) -> Self {
+    pub fn slash(loc: Loc) -> Self {
         Self::new(TokenKind::Slash, loc)
     }
 }
