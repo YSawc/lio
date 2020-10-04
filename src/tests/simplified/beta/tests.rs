@@ -3,33 +3,19 @@ use super::super::super::super::location::location::*;
 #[cfg(test)]
 use super::super::super::super::node::node::*;
 #[cfg(test)]
-use super::super::super::super::parser::error::*;
+use super::super::super::super::simplified::beta::*;
 #[cfg(test)]
 use super::super::super::super::token::token::*;
 
-pub fn beta(mut ns: &mut NodeSt) {
-    match ns.c.value {
-        NodeKind::Add | NodeKind::Sub | NodeKind::Mul | NodeKind::Div | NodeKind::Sur => {
-            if ns.lhs != None && ns.rhs != None {
-                match ns.lhs.as_ref().unwrap().as_ref().c.value {
-                    NodeKind::Num(ln) => match ns.rhs.as_ref().unwrap().as_ref().c.value {
-                        NodeKind::Num(rn) => match ns.c.value {
-                            NodeKind::Add => ns.c.value = NodeKind::Num(ln + rn),
-                            NodeKind::Sub => ns.c.value = NodeKind::Num(ln - rn),
-                            NodeKind::Mul => ns.c.value = NodeKind::Num(ln * rn),
-                            NodeKind::Div => ns.c.value = NodeKind::Num(ln / rn),
-                            NodeKind::Sur => ns.c.value = NodeKind::Num(ln % rn),
-                            _ => (),
-                        },
-                        _ => (),
-                    },
-                    _ => (),
-                }
-                ns.lhs = None;
-                ns.rhs = None;
-            }
-        }
-        NodeKind::Num(_) => (),
-        _ => (),
+#[test]
+fn fixme_simplified_beta_test() {
+    let t = Token::tokenize("5+3").unwrap();
+    let mut n = NodeSt::parser(t).unwrap();
+    beta(&mut n);
+    let l = NodeSt {
+        c: Node::number(8, Loc::new(1, 2)), // FIXME:
+        lhs: None,
+        rhs: None,
     };
+    assert_eq!(l, n);
 }
