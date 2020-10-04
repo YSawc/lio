@@ -9,6 +9,7 @@ pub enum TokenKind {
     Minus,
     Asterisk,
     Slash,
+    Percent,
     LParen,
     RParen,
 }
@@ -19,21 +20,20 @@ impl Token {
     pub fn number(n: u8, loc: Loc) -> Self {
         Self::new(TokenKind::Num(n), loc)
     }
-
     pub fn plus(loc: Loc) -> Self {
         Self::new(TokenKind::Plus, loc)
     }
-
     pub fn minus(loc: Loc) -> Self {
         Self::new(TokenKind::Minus, loc)
     }
-
     pub fn asterisk(loc: Loc) -> Self {
         Self::new(TokenKind::Asterisk, loc)
     }
-
     pub fn slash(loc: Loc) -> Self {
         Self::new(TokenKind::Slash, loc)
+    }
+    pub fn percent(loc: Loc) -> Self {
+        Self::new(TokenKind::Percent, loc)
     }
     pub fn lparen(loc: Loc) -> Self {
         Self::new(TokenKind::LParen, loc)
@@ -89,6 +89,13 @@ impl Token {
                         f: i as u8 + b,
                         e: (i + 1) as u8 + b,
                     }));
+                }
+                b'%' => {
+                    p_data.push(Self::percent(Loc {
+                        f: i as u8 + b,
+                        e: (i + 1) as u8 + b,
+                    }));
+
                 }
                 b'(' => {
                     p_data.push(Self::lparen(Loc {

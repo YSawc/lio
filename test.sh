@@ -37,6 +37,7 @@ assert 8 1+4/2*4-1
 assert 14 '2*(3+4)'
 assert 14 '2+(3*4)'
 assert 0 '2+(2-4)'
+assert 1 '7%2'
 
 echo "------------------------------"
 echo "All test passed!"

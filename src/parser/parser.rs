@@ -68,7 +68,7 @@ impl NodeSt {
 
         loop {
             match it.peek().map(|vt| vt.value.to_owned()) {
-                Some(TokenKind::Asterisk) | Some(TokenKind::Slash) => {
+                Some(TokenKind::Asterisk) | Some(TokenKind::Slash) | Some(TokenKind::Percent) => {
                     let op = match it.next().unwrap() {
                         Token {
                             value: TokenKind::Asterisk,
@@ -78,6 +78,11 @@ impl NodeSt {
                             value: TokenKind::Slash,
                             loc,
                         } => Node::div(loc.to_owned()),
+                        Token {
+                            value: TokenKind::Percent,
+                            loc,
+                        } => Node::surplus(loc.to_owned()),
+
                         _ => unreachable!(),
                     };
                     let rhs = Self::unary(&mut it)?;

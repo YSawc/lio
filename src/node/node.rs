@@ -8,11 +8,14 @@ pub enum NodeKind {
     Mul,
     Div,
     Nul,
+    Sur,
     Default,
 }
 
 impl Default for NodeKind {
-    fn default() -> Self { NodeKind::Default }
+    fn default() -> Self {
+        NodeKind::Default
+    }
 }
 
 pub type Node = Annot<NodeKind>;
@@ -45,4 +48,7 @@ impl Node {
         Self::new(NodeKind::Div, loc)
     }
 
+    pub fn surplus(loc: Loc) -> Self {
+        Self::new(NodeKind::Sur, loc)
+    }
 }

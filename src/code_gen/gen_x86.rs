@@ -53,7 +53,13 @@ fn gen_x86(f: &mut fs::File, ns: NodeSt) -> String {
             write!(f, "  mov %rax, %{}\n", l).unwrap();
             return l;
         }
-
+        NodeKind::Sur => {
+            write!(f, "  mov %{}, %rax\n", l).unwrap();
+            write!(f, "  cqo\n").unwrap();
+            write!(f, "  idiv %{}\n", r).unwrap();
+            write!(f, "  mov %rdx, %{}\n", l).unwrap();
+            return l;
+        }
         _ => unimplemented!(),
     }
 }
