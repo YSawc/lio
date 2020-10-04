@@ -19,11 +19,36 @@ fn exec(ns: NodeSt) -> NodeSt {
                 _ => unreachable!(),
             };
             match ns.c.value {
-                NodeKind::Add => return NodeSt::number(l + r, Loc::new(llf, ((l + r ) / 10 ) as u8)),
-                NodeKind::Sub => return NodeSt::number(l - r, Loc::new(llf, ((l - r ) / 10 ) as u8)),
-                NodeKind::Mul => return NodeSt::number(l * r, Loc::new(llf, ((l * r ) / 10 ) as u8)),
-                NodeKind::Div => return NodeSt::number(l / r, Loc::new(llf, ((l / r ) / 10 ) as u8)),
-                NodeKind::Sur => return NodeSt::number(l % r, Loc::new(llf, ((l % r ) / 10 ) as u8)),
+                NodeKind::Add => {
+                    return NodeSt::number(
+                        l + r,
+                        Loc::new(llf, (llf as i8 + ((l + r) / 10) + 1) as u8),
+                    )
+                }
+                NodeKind::Sub => {
+                    return NodeSt::number(
+                        l - r,
+                        Loc::new(llf, (llf as i8 + ((l - r) / 10) + 1) as u8),
+                    )
+                }
+                NodeKind::Mul => {
+                    return NodeSt::number(
+                        l * r,
+                        Loc::new(llf, (llf as i8 + ((l * r) / 10) + 1) as u8),
+                    )
+                }
+                NodeKind::Div => {
+                    return NodeSt::number(
+                        l / r,
+                        Loc::new(llf, (llf as i8 + ((l / r) / 10) + 1) as u8),
+                    )
+                }
+                NodeKind::Sur => {
+                    return NodeSt::number(
+                        l % r,
+                        Loc::new(llf, (llf as i8 + ((l % r) / 10) + 1) as u8),
+                    )
+                }
                 _ => unreachable!(),
             }
         }
