@@ -9,6 +9,8 @@ pub enum TokenKind {
     Minus,
     Asterisk,
     Slash,
+    LParen,
+    RParen,
 }
 
 pub type Token = Annot<TokenKind>;
@@ -32,6 +34,12 @@ impl Token {
 
     pub fn slash(loc: Loc) -> Self {
         Self::new(TokenKind::Slash, loc)
+    }
+    pub fn lparen(loc: Loc) -> Self {
+        Self::new(TokenKind::LParen, loc)
+    }
+    pub fn rparen(loc: Loc) -> Self {
+        Self::new(TokenKind::RParen, loc)
     }
 }
 
@@ -78,6 +86,18 @@ impl Token {
                 }
                 b'/' => {
                     p_data.push(Self::slash(Loc {
+                        f: i as u8 + b,
+                        e: (i + 1) as u8 + b,
+                    }));
+                }
+                b'(' => {
+                    p_data.push(Self::lparen(Loc {
+                        f: i as u8 + b,
+                        e: (i + 1) as u8 + b,
+                    }));
+                }
+                b')' => {
+                    p_data.push(Self::rparen(Loc {
                         f: i as u8 + b,
                         e: (i + 1) as u8 + b,
                     }));

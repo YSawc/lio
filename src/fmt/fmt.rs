@@ -12,6 +12,8 @@ impl fmt::Display for TokenKind {
             TokenKind::Minus => write!(f, "-"),
             TokenKind::Asterisk => write!(f, "*"),
             TokenKind::Slash => write!(f, "/"),
+            TokenKind::LParen => write!(f, "("),
+            TokenKind::RParen => write!(f, ")"),
         }
     }
 }
@@ -24,6 +26,11 @@ impl fmt::Display for ParseError {
             ParseError::NotImplementedOperator(tok) => {
                 write!(f, "{}: {} is not implemented operator", tok.loc, tok.value)
             }
+            ParseError::NotClosedParen(tok) => write!(
+                f,
+                "{}: Expected close token bud got {} ",
+                tok.loc, tok.value
+            ),
             ParseError::Eof => write!(f, "Expected token, but not detected."),
         }
     }
