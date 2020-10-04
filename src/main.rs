@@ -38,6 +38,7 @@ fn main() {
         println!("after tokenized: {:?}", t);
         let _nst = NodeSt::parser(t).unwrap();
         println!("after parsed: {:?}", _nst);
+        // println!("after beta: {:?}", beta(_nst));
         let _nst = gen(_nst);
     }
 }

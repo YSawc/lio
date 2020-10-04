@@ -52,3 +52,13 @@ impl Node {
         Self::new(NodeKind::Sur, loc)
     }
 }
+
+impl NodeSt {
+    pub fn number(n: u8, loc: Loc) -> Self {
+        NodeSt {
+            c: Node::number(n, loc),
+                lhs: None,
+                rhs: None,
+        }
+    }
+}
