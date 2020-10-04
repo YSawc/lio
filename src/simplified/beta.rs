@@ -8,7 +8,9 @@ pub fn beta(ns: NodeSt) -> NodeSt {
 fn exec(ns: NodeSt) -> NodeSt {
     match ns.c.value {
         NodeKind::Add | NodeKind::Sub | NodeKind::Mul | NodeKind::Div | NodeKind::Sur => {
-            let l = match beta(ns.lhs.as_ref().unwrap().as_ref().to_owned()).c.value {
+            let ln = beta(ns.lhs.as_ref().unwrap().as_ref().to_owned());
+            let llf = ln.c.loc.f;
+            let l = match ln.c.value {
                 NodeKind::Num(n) => n,
                 _ => unreachable!(),
             };
@@ -17,11 +19,11 @@ fn exec(ns: NodeSt) -> NodeSt {
                 _ => unreachable!(),
             };
             match ns.c.value {
-                NodeKind::Add => return NodeSt::number(l + r, Loc::new(0, 0)),
-                NodeKind::Sub => return NodeSt::number(l - r, Loc::new(0, 0)),
-                NodeKind::Mul => return NodeSt::number(l * r, Loc::new(0, 0)),
-                NodeKind::Div => return NodeSt::number(l / r, Loc::new(0, 0)),
-                NodeKind::Sur => return NodeSt::number(l % r, Loc::new(0, 0)),
+                NodeKind::Add => return NodeSt::number(l + r, Loc::new(llf, ((l + r ) / 10 ) as u8)),
+                NodeKind::Sub => return NodeSt::number(l - r, Loc::new(llf, ((l - r ) / 10 ) as u8)),
+                NodeKind::Mul => return NodeSt::number(l * r, Loc::new(llf, ((l * r ) / 10 ) as u8)),
+                NodeKind::Div => return NodeSt::number(l / r, Loc::new(llf, ((l / r ) / 10 ) as u8)),
+                NodeKind::Sur => return NodeSt::number(l % r, Loc::new(llf, ((l % r ) / 10 ) as u8)),
                 _ => unreachable!(),
             }
         }
