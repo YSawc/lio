@@ -1,7 +1,7 @@
-use rr::code_gen::gen_x86::*;
-use rr::node::node::*;
-use rr::token::token::*;
-use rr::simplified::beta::*;
+use lio::code_gen::gen_x86::*;
+use lio::node::node::*;
+use lio::token::token::*;
+use lio::simplified::beta::*;
 use std::env;
 use std::io::Write;
 

@@ -1,5 +1,5 @@
 [package]
-name = "rr"
+name = "lio"
 version = "0.1.0"
 authors = ["YSawc <niceage6690@gmail.com>"]
 edition = "2018"
