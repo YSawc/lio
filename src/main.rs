@@ -1,9 +1,10 @@
 use lio::code_gen::gen_x86::*;
 use lio::node::node::*;
-use lio::token::token::*;
 use lio::simplified::beta::*;
+use lio::token::token::*;
 use std::env;
 use std::io::Write;
+use std::process::Command;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -19,6 +20,28 @@ fn main() {
 
             if s == "q" {
                 break;
+            }
+
+            if s == "." {
+                let _ = Command::new("cc")
+                    .arg("-o")
+                    .arg("workspace/tmp")
+                    .arg("workspace/tmp.s")
+                    .spawn()
+                    .expect("failed to execute process")
+                    .wait();
+
+                let _ = Command::new("cat")
+                    .arg("workspace/tmp.s")
+                    .spawn()
+                    .expect("failed to execute process")
+                    .wait();
+
+                let o = Command::new("workspace/tmp")
+                    .status()
+                    .expect("failed to execute process");
+                println!("output: {:?}", o.code().unwrap());
+                continue;
             }
 
             let t = Token::tokenize(&s).unwrap();
