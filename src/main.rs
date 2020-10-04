@@ -1,7 +1,7 @@
 use rr::code_gen::gen_x86::*;
 use rr::node::node::*;
 use rr::token::token::*;
-// use rr::simplified::beta::*;
+use rr::simplified::beta::*;
 use std::env;
 use std::io::Write;
 
@@ -38,7 +38,8 @@ fn main() {
         println!("after tokenized: {:?}", t);
         let _nst = NodeSt::parser(t).unwrap();
         println!("after parsed: {:?}", _nst);
-        // println!("after beta: {:?}", beta(_nst));
+        let _nst = beta(_nst);
+        println!("after beta: {:?}", _nst);
         let _nst = gen(_nst);
     }
 }

@@ -4,7 +4,7 @@ use std::fmt::Debug;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum TokenKind {
-    Num(u8),
+    Num(i8),
     Plus,
     Minus,
     Asterisk,
@@ -17,7 +17,7 @@ pub enum TokenKind {
 pub type Token = Annot<TokenKind>;
 
 impl Token {
-    pub fn number(n: u8, loc: Loc) -> Self {
+    pub fn number(n: i8, loc: Loc) -> Self {
         Self::new(TokenKind::Num(n), loc)
     }
     pub fn plus(loc: Loc) -> Self {
@@ -57,7 +57,7 @@ impl Token {
                         i += 1;
                     }
                     i -= 1;
-                    let n: u8 = input[t..i + 1].to_string().parse().unwrap();
+                    let n: i8 = input[t..i + 1].to_string().parse().unwrap();
                     p_data.push(Self::number(
                         n,
                         Loc {
@@ -95,7 +95,6 @@ impl Token {
                         f: i as u8 + b,
                         e: (i + 1) as u8 + b,
                     }));
-
                 }
                 b'(' => {
                     p_data.push(Self::lparen(Loc {
@@ -130,7 +129,7 @@ impl Token {
 }
 
 impl Token {
-    pub fn get_val(&mut self) -> Result<u8, TokenErrorKind> {
+    pub fn get_val(&mut self) -> Result<i8, TokenErrorKind> {
         match self.value {
             TokenKind::Num(n) => Ok(n),
             _ => Err(TokenErrorKind::InvalidNumber(self.to_owned())),

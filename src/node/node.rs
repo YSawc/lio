@@ -2,7 +2,7 @@ use super::super::location::location::*;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum NodeKind {
-    Num(u8),
+    Num(i8),
     Add,
     Sub,
     Mul,
@@ -28,7 +28,7 @@ pub struct NodeSt {
 }
 
 impl Node {
-    pub fn number(n: u8, loc: Loc) -> Self {
+    pub fn number(n: i8, loc: Loc) -> Self {
         Self::new(NodeKind::Num(n), loc)
     }
 
@@ -54,11 +54,11 @@ impl Node {
 }
 
 impl NodeSt {
-    pub fn number(n: u8, loc: Loc) -> Self {
+    pub fn number(n: i8, loc: Loc) -> Self {
         NodeSt {
             c: Node::number(n, loc),
-                lhs: None,
-                rhs: None,
+            lhs: None,
+            rhs: None,
         }
     }
 }

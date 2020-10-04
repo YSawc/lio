@@ -19,3 +19,16 @@ fn fixme_simplified_beta_test() {
     };
     assert_eq!(l, n);
 }
+
+#[test]
+fn fixme_simplified_beta_with_minus_test() {
+    let t = Token::tokenize("2*(2-4)+5").unwrap();
+    let n = NodeSt::parser(t).unwrap();
+    let n = beta(n);
+    let l = NodeSt {
+        c: Node::number(1, Loc::new(0, 0)), // FIXME:
+        lhs: None,
+        rhs: None,
+    };
+    assert_eq!(l, n);
+}
