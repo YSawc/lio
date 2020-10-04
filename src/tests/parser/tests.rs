@@ -3,9 +3,9 @@ use super::super::super::location::location::*;
 #[cfg(test)]
 use super::super::super::node::node::*;
 #[cfg(test)]
-use super::super::super::token::token::*;
-#[cfg(test)]
 use super::super::super::parser::error::*;
+#[cfg(test)]
+use super::super::super::token::token::*;
 
 #[test]
 fn parser_test() {
@@ -42,6 +42,19 @@ fn not_exit_when_failed_parser_test() {
 #[test]
 fn reached_at_eof_test() {
     let t = Token::tokenize("5+").unwrap();
+    let l = match NodeSt::parser(t) {
+        Ok(_) => false,
+        Err(e) => match e {
+            ParseError::Eof => true,
+            _ => false,
+        },
+    };
+    assert!(l)
+}
+
+#[test]
+fn unclosed_eof_test() {
+    let t = Token::tokenize("5+(3+2*2").unwrap();
     let l = match NodeSt::parser(t) {
         Ok(_) => false,
         Err(e) => match e {

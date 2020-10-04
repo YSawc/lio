@@ -101,6 +101,9 @@ impl NodeSt {
                     } => Self::expr(&mut it)?,
                     _ => unreachable!(),
                 };
+                if it.peek() == None {
+                    return Err(ParseError::Eof);
+                }
                 match it.next().unwrap() {
                     Token {
                         value: TokenKind::RParen,
