@@ -97,56 +97,15 @@ impl Token {
                     }
                     i -= 1;
                     let n: i8 = input[t..i + 1].to_string().parse().unwrap();
-                    p_data.push(Self::number(
-                        n,
-                        Loc {
-                            f: t as u8 + b,
-                            e: (i + 1) as u8 + b,
-                        },
-                    ));
+                    p_data.push(Self::number(n, Loc::new(t as u8 + b, (i + 1) as u8 + b)));
                 }
-                b'+' => {
-                    p_data.push(Self::plus(Loc {
-                        f: i as u8 + b,
-                        e: (i + 1) as u8 + b,
-                    }));
-                }
-                b'-' => {
-                    p_data.push(Self::minus(Loc {
-                        f: i as u8 + b,
-                        e: (i + 1) as u8 + b,
-                    }));
-                }
-                b'*' => {
-                    p_data.push(Self::asterisk(Loc {
-                        f: i as u8 + b,
-                        e: (i + 1) as u8 + b,
-                    }));
-                }
-                b'/' => {
-                    p_data.push(Self::slash(Loc {
-                        f: i as u8 + b,
-                        e: (i + 1) as u8 + b,
-                    }));
-                }
-                b'%' => {
-                    p_data.push(Self::percent(Loc {
-                        f: i as u8 + b,
-                        e: (i + 1) as u8 + b,
-                    }));
-                }
-                b'(' => {
-                    p_data.push(Self::lparen(Loc {
-                        f: i as u8 + b,
-                        e: (i + 1) as u8 + b,
-                    }));
-                }
-                b')' => {
-                    p_data.push(Self::rparen(Loc {
-                        f: i as u8 + b,
-                        e: (i + 1) as u8 + b,
-                    }));
-                }
+                b'+' => p_data.push(Self::plus(Loc::new(i as u8 + b, (i + 1) as u8 + b))),
+                b'-' => p_data.push(Self::minus(Loc::new(i as u8 + b, (i + 1) as u8 + b))),
+                b'*' => p_data.push(Self::asterisk(Loc::new(i as u8 + b, (i + 1) as u8 + b))),
+                b'/' => p_data.push(Self::slash(Loc::new(i as u8 + b, (i + 1) as u8 + b))),
+                b'%' => p_data.push(Self::percent(Loc::new(i as u8 + b, (i + 1) as u8 + b))),
+                b'(' => p_data.push(Self::lparen(Loc::new(i as u8 + b, (i + 1) as u8 + b))),
+                b')' => p_data.push(Self::rparen(Loc::new(i as u8 + b, (i + 1) as u8 + b))),
                 b' ' => b += 1,
                 _ => {
                     let mut _m = false;
@@ -169,12 +128,7 @@ impl Token {
                     b = 0;
                     return Err(TokenError::invalid_token(
                         input.to_string().chars().nth(i).unwrap(),
-                        {
-                            Loc {
-                                f: i as u8 + b,
-                                e: i as u8 + 1 + b,
-                            }
-                        },
+                        Loc::new(i as u8 + b, i as u8 + 1 + b),
                     ));
                 }
             }
