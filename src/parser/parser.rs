@@ -29,8 +29,53 @@ impl NodeSt {
 impl NodeSt {
     pub fn parser(vt: Vec<Token>) -> Result<Self, ParseError> {
         let mut it = vt.iter().peekable();
-        let lhs = Self::expr(&mut it)?;
+        let lhs = Self::cmp(&mut it)?;
         Ok(lhs)
+    }
+
+    pub fn cmp(
+        mut it: &mut std::iter::Peekable<std::slice::Iter<Annot<TokenKind>>>,
+    ) -> Result<NodeSt, ParseError> {
+        let mut lhs = Self::expr(it)?;
+
+        loop {
+            match it.peek().map(|vt| vt.value.to_owned()) {
+                Some(TokenKind::E) | Some(TokenKind::NE) | Some(TokenKind::GT)
+                | Some(TokenKind::GE) => {
+                    let op = match it.next().unwrap() {
+                        Token {
+                            value: TokenKind::E,
+                            loc,
+                        } => Node::eq(loc.to_owned()),
+                        Token {
+                            value: TokenKind::NE,
+                            loc,
+                        } => Node::neq(loc.to_owned()),
+                        _ => unreachable!(),
+                    };
+                    let rhs = Self::mul(&mut it)?;
+
+                    lhs = Self::new_nds(op, lhs, rhs);
+                }
+                Some(TokenKind::RT) | Some(TokenKind::RE) => {
+                    let op = match it.next().unwrap() {
+                        Token {
+                            value: TokenKind::RT,
+                            loc,
+                        } => Node::eq(loc.to_owned()),
+                        Token {
+                            value: TokenKind::RE,
+                            loc,
+                        } => Node::neq(loc.to_owned()),
+                        _ => unreachable!(),
+                    };
+                    let rr = Self::mul(&mut it)?;
+
+                    lhs = Self::new_nds(op, rr, lhs);
+                }
+                _ => return Ok(lhs),
+            }
+        }
     }
 
     pub fn expr(

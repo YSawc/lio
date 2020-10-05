@@ -1,6 +1,6 @@
 # lio
 
-[![CircleCI](https://circleci.com/gh/YSawc/rr.svg?style=shield)](https://circleci.com/gh/YSawc/rr)
+[![CircleCI](https://circleci.com/gh/YSawc/lio.svg?style=shield)](https://circleci.com/gh/YSawc/lio)
 [![](http://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
 A toy compiler implemented by rust.

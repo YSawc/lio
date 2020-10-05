@@ -1,5 +1,6 @@
 use super::super::location::location::*;
 use super::error::*;
+use std::collections::HashMap;
 use std::fmt::Debug;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -12,6 +13,12 @@ pub enum TokenKind {
     Percent,
     LParen,
     RParen,
+    E,
+    NE,
+    RT,
+    RE,
+    GT,
+    GE,
 }
 
 pub type Token = Annot<TokenKind>;
@@ -41,6 +48,24 @@ impl Token {
     pub fn rparen(loc: Loc) -> Self {
         Self::new(TokenKind::RParen, loc)
     }
+    pub fn eq(loc: Loc) -> Self {
+        Self::new(TokenKind::E, loc)
+    }
+    pub fn neq(loc: Loc) -> Self {
+        Self::new(TokenKind::NE, loc)
+    }
+    pub fn rt(loc: Loc) -> Self {
+        Self::new(TokenKind::RT, loc)
+    }
+    pub fn re(loc: Loc) -> Self {
+        Self::new(TokenKind::RE, loc)
+    }
+    pub fn gt(loc: Loc) -> Self {
+        Self::new(TokenKind::GT, loc)
+    }
+    pub fn ge(loc: Loc) -> Self {
+        Self::new(TokenKind::GE, loc)
+    }
 }
 
 impl Token {
@@ -49,6 +74,20 @@ impl Token {
         let l = input.len();
         let mut b = 0;
         let mut i = 0;
+
+        fn keyword_map() -> HashMap<String, TokenKind> {
+            let mut map = HashMap::new();
+            map.insert("==".into(), TokenKind::E);
+            map.insert("!=".into(), TokenKind::NE);
+            map.insert("<".into(), TokenKind::RT);
+            map.insert("<=".into(), TokenKind::RE);
+            map.insert(">".into(), TokenKind::GT);
+            map.insert(">=".into(), TokenKind::GE);
+            map
+        }
+
+        let ks = keyword_map();
+
         while i < l {
             match input.as_bytes()[i] {
                 b'0'..=b'9' => {
@@ -110,6 +149,23 @@ impl Token {
                 }
                 b' ' => b += 1,
                 _ => {
+                    let mut _m = false;
+                    for k in ks.to_owned() {
+                        if input[i..].contains(&k.0) {
+                            p_data.push(Self::new(
+                                k.1,
+                                Loc::new(i as u8, (i as u8 + k.0.len() as u8) + b),
+                            ));
+                            i += k.0.len();
+                            _m = true;
+                            break;
+                        }
+                    }
+                    if _m == true {
+                        _m = false;
+                        break;
+                    }
+
                     b = 0;
                     return Err(TokenError::invalid_token(
                         input.to_string().chars().nth(i).unwrap(),

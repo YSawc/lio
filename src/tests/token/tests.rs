@@ -4,6 +4,8 @@ use super::super::super::location::location::*;
 use super::super::super::token::error::*;
 #[cfg(test)]
 use super::super::super::token::token::*;
+// #[cfg(test)]
+// use std::collections::HashMap;
 
 #[test]
 fn tokenize_test() {
@@ -28,4 +30,12 @@ fn invalid_token_test() {
         _ => false,
     };
     assert!(l);
+}
+
+#[test]
+fn pass_comparison_tokenize_test() {
+    let i = "<<===>>=";
+    let _t = Token::tokenize(i).unwrap().to_owned();
+
+    assert!(true);
 }
