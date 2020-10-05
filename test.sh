@@ -5,10 +5,11 @@ mkdir ./workspace
 assert() {
   expected="$1"
   input="$2"
+  simplified="$3"
 
  echo "------------------------------"
  echo "[[rust output]]"
-  cargo run $2
+  cargo run $2 $3
   cc -o ./workspace/tmp ./workspace/tmp.s
   ./workspace/tmp
   actual="$?"
@@ -38,6 +39,7 @@ assert 14 '2*(3+4)'
 assert 14 '2+(3*4)'
 assert 0 '2+(2-4)'
 assert 1 '7%2'
+assert 2 '2*(3-1)-2*1' simplified
 
 echo "------------------------------"
 echo "All test passed!"

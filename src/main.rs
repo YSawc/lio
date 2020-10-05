@@ -59,10 +59,18 @@ fn main() {
         println!("INPUT: {}", arg1);
         let t = Token::tokenize(arg1).unwrap();
         println!("after tokenized: {:?}", t);
-        let _nst = NodeSt::parser(t).unwrap();
+        let mut _nst = NodeSt::parser(t).unwrap();
         println!("after parsed: {:?}", _nst);
-        let _nst = beta(_nst);
-        println!("after beta: {:?}", _nst);
+
+        if args.len() > 2 {
+            if args[2] == "simplified" {
+                _nst = beta(_nst);
+                println!("after beta: {:?}", _nst);
+            }
+        }
+        // let _nst = beta(_nst);
+        // println!("after beta: {:?}", _nst);
+
         let _nst = gen(_nst);
     }
 }
