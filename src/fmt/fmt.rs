@@ -17,9 +17,9 @@ impl fmt::Display for TokenKind {
             TokenKind::RParen => write!(f, ")"),
             TokenKind::E => write!(f, "="),
             TokenKind::NE => write!(f, "!="),
-            TokenKind::RT => write!(f, "<"),
-            TokenKind::RE => write!(f, "<="),
-            TokenKind::GT => write!(f, ">"),
+            TokenKind::L => write!(f, "<"),
+            TokenKind::LE => write!(f, "<="),
+            TokenKind::G => write!(f, ">"),
             TokenKind::GE => write!(f, ">="),
         }
     }

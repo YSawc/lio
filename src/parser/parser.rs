@@ -40,8 +40,8 @@ impl NodeSt {
 
         loop {
             match it.peek().map(|vt| vt.value.to_owned()) {
-                Some(TokenKind::E) | Some(TokenKind::NE) | Some(TokenKind::GT)
-                | Some(TokenKind::GE) => {
+                Some(TokenKind::E) | Some(TokenKind::NE) | Some(TokenKind::L)
+                | Some(TokenKind::LE) | Some(TokenKind::G) | Some(TokenKind::GE) => {
                     let op = match it.next().unwrap() {
                         Token {
                             value: TokenKind::E,
@@ -51,27 +51,28 @@ impl NodeSt {
                             value: TokenKind::NE,
                             loc,
                         } => Node::neq(loc.to_owned()),
+                        Token {
+                            value: TokenKind::L,
+                            loc,
+                        } => Node::l(loc.to_owned()),
+                        Token {
+                            value: TokenKind::LE,
+                            loc,
+                        } => Node::le(loc.to_owned()),
+                        Token {
+                            value: TokenKind::G,
+                            loc,
+                        } => Node::g(loc.to_owned()),
+                        Token {
+                            value: TokenKind::GE,
+                            loc,
+                        } => Node::ge(loc.to_owned()),
+
                         _ => unreachable!(),
                     };
                     let rhs = Self::mul(&mut it)?;
 
                     lhs = Self::new_nds(op, lhs, rhs);
-                }
-                Some(TokenKind::RT) | Some(TokenKind::RE) => {
-                    let op = match it.next().unwrap() {
-                        Token {
-                            value: TokenKind::RT,
-                            loc,
-                        } => Node::eq(loc.to_owned()),
-                        Token {
-                            value: TokenKind::RE,
-                            loc,
-                        } => Node::neq(loc.to_owned()),
-                        _ => unreachable!(),
-                    };
-                    let rr = Self::mul(&mut it)?;
-
-                    lhs = Self::new_nds(op, rr, lhs);
                 }
                 _ => return Ok(lhs),
             }

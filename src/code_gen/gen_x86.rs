@@ -60,6 +60,43 @@ fn gen_x86(f: &mut fs::File, ns: NodeSt) -> String {
             write!(f, "  mov %rdx, %{}\n", l).unwrap();
             return l;
         }
+        NodeKind::E => {
+            write!(f, "  cmp %{}, %{}\n", r, l).unwrap();
+            write!(f, "  sete %al\n").unwrap();
+            write!(f, "  movzb %al, %{}\n", l).unwrap();
+            return l;
+        }
+        NodeKind::NE => {
+            write!(f, "  cmp %{}, %{}\n", r, l).unwrap();
+            write!(f, "  setne %al\n").unwrap();
+            write!(f, "  movzb %al, %{}\n", l).unwrap();
+            return l;
+        }
+        NodeKind::L => {
+            write!(f, "  cmp %{}, %{}\n", r, l).unwrap();
+            write!(f, "  setl %al\n").unwrap();
+            write!(f, "  movzb %al, %{}\n", l).unwrap();
+            return l;
+        }
+        NodeKind::LE => {
+            write!(f, "  cmp %{}, %{}\n", r, l).unwrap();
+            write!(f, "  setle %al\n").unwrap();
+            write!(f, "  movzb %al, %{}\n", l).unwrap();
+            return l;
+        }
+        NodeKind::G => {
+            write!(f, "  cmp %{}, %{}\n", r, l).unwrap();
+            write!(f, "  setg %al\n").unwrap();
+            write!(f, "  movzb %al, %{}\n", l).unwrap();
+            return l;
+        }
+        NodeKind::GE => {
+            write!(f, "  cmp %{}, %{}\n", r, l).unwrap();
+            write!(f, "  setge %al\n").unwrap();
+            write!(f, "  movzb %al, %{}\n", l).unwrap();
+            return l;
+        }
+
         _ => unimplemented!(),
     }
 }

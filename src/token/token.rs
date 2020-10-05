@@ -15,9 +15,9 @@ pub enum TokenKind {
     RParen,
     E,
     NE,
-    RT,
-    RE,
-    GT,
+    L,
+    LE,
+    G,
     GE,
 }
 
@@ -54,14 +54,14 @@ impl Token {
     pub fn neq(loc: Loc) -> Self {
         Self::new(TokenKind::NE, loc)
     }
-    pub fn rt(loc: Loc) -> Self {
-        Self::new(TokenKind::RT, loc)
+    pub fn l(loc: Loc) -> Self {
+        Self::new(TokenKind::L, loc)
     }
-    pub fn re(loc: Loc) -> Self {
-        Self::new(TokenKind::RE, loc)
+    pub fn le(loc: Loc) -> Self {
+        Self::new(TokenKind::LE, loc)
     }
-    pub fn gt(loc: Loc) -> Self {
-        Self::new(TokenKind::GT, loc)
+    pub fn g(loc: Loc) -> Self {
+        Self::new(TokenKind::G, loc)
     }
     pub fn ge(loc: Loc) -> Self {
         Self::new(TokenKind::GE, loc)
@@ -75,18 +75,31 @@ impl Token {
         let mut b = 0;
         let mut i = 0;
 
-        fn keyword_map() -> FxHashMap<String, TokenKind> {
+        fn multiple_symbol_map_map() -> FxHashMap<String, TokenKind> {
             let mut map = FxHashMap::default();
             map.insert("==".into(), TokenKind::E);
             map.insert("!=".into(), TokenKind::NE);
-            map.insert("<".into(), TokenKind::RT);
-            map.insert("<=".into(), TokenKind::RE);
-            map.insert(">".into(), TokenKind::GT);
+            map.insert("<=".into(), TokenKind::LE);
             map.insert(">=".into(), TokenKind::GE);
             map
         }
 
-        let ks = keyword_map();
+        fn single_symbol_map() -> FxHashMap<char, TokenKind> {
+            let mut map = FxHashMap::default();
+            map.insert('+'.into(), TokenKind::Plus);
+            map.insert('-'.into(), TokenKind::Minus);
+            map.insert('/'.into(), TokenKind::Slash);
+            map.insert('*'.into(), TokenKind::Asterisk);
+            map.insert('%'.into(), TokenKind::Percent);
+            map.insert('('.into(), TokenKind::LParen);
+            map.insert(')'.into(), TokenKind::RParen);
+            map.insert('<'.into(), TokenKind::L);
+            map.insert('>'.into(), TokenKind::G);
+            map
+        }
+
+        let ms = multiple_symbol_map_map();
+        let ss = single_symbol_map();
 
         while i < l {
             match input.as_bytes()[i] {
@@ -99,30 +112,38 @@ impl Token {
                     let n: i8 = input[t..i + 1].to_string().parse().unwrap();
                     p_data.push(Self::number(n, Loc::new(t as u8 + b, (i + 1) as u8 + b)));
                 }
-                b'+' => p_data.push(Self::plus(Loc::new(i as u8 + b, (i + 1) as u8 + b))),
-                b'-' => p_data.push(Self::minus(Loc::new(i as u8 + b, (i + 1) as u8 + b))),
-                b'*' => p_data.push(Self::asterisk(Loc::new(i as u8 + b, (i + 1) as u8 + b))),
-                b'/' => p_data.push(Self::slash(Loc::new(i as u8 + b, (i + 1) as u8 + b))),
-                b'%' => p_data.push(Self::percent(Loc::new(i as u8 + b, (i + 1) as u8 + b))),
-                b'(' => p_data.push(Self::lparen(Loc::new(i as u8 + b, (i + 1) as u8 + b))),
-                b')' => p_data.push(Self::rparen(Loc::new(i as u8 + b, (i + 1) as u8 + b))),
                 b' ' => b += 1,
                 _ => {
                     let mut _m = false;
-                    for k in ks.to_owned() {
-                        if input[i..].contains(&k.0) {
+                    for k in ms.to_owned() {
+                        if input[i..].starts_with(&k.0) {
                             p_data.push(Self::new(
                                 k.1,
-                                Loc::new(i as u8, (i as u8 + k.0.len() as u8) + b),
+                                Loc::new(i as u8 + b, (i as u8 + k.0.len() as u8) + b),
                             ));
                             i += k.0.len();
                             _m = true;
                             break;
                         }
                     }
+
                     if _m == true {
                         _m = false;
-                        break;
+                        continue;
+                    }
+
+                    for k in ss.to_owned() {
+                        if input.chars().nth(i).unwrap() == k.0 {
+                            p_data.push(Self::new(k.1, Loc::new(i as u8 + b, (i as u8 + 1) + b)));
+                            i += 1;
+                            _m = true;
+                            break;
+                        }
+                    }
+
+                    if _m == true {
+                        _m = false;
+                        continue;
                     }
 
                     b = 0;

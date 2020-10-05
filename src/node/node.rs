@@ -11,10 +11,10 @@ pub enum NodeKind {
     Sur,
     E,
     NE,
-    RE,
-    RT,
+    L,
+    LE,
+    G,
     GE,
-    GT,
     Default,
 }
 
@@ -64,14 +64,14 @@ impl Node {
     pub fn neq(loc: Loc) -> Self {
         Self::new(NodeKind::NE, loc)
     }
-    pub fn rt(loc: Loc) -> Self {
-        Self::new(NodeKind::RT, loc)
+    pub fn l(loc: Loc) -> Self {
+        Self::new(NodeKind::L, loc)
     }
-    pub fn re(loc: Loc) -> Self {
-        Self::new(NodeKind::RE, loc)
+    pub fn le(loc: Loc) -> Self {
+        Self::new(NodeKind::LE, loc)
     }
-    pub fn gt(loc: Loc) -> Self {
-        Self::new(NodeKind::GT, loc)
+    pub fn g(loc: Loc) -> Self {
+        Self::new(NodeKind::G, loc)
     }
     pub fn ge(loc: Loc) -> Self {
         Self::new(NodeKind::GE, loc)
