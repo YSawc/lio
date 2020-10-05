@@ -4,8 +4,6 @@ use super::super::super::location::location::*;
 use super::super::super::token::error::*;
 #[cfg(test)]
 use super::super::super::token::token::*;
-// #[cfg(test)]
-// use std::collections::HashMap;
 
 #[test]
 fn tokenize_test() {

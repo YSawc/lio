@@ -1,6 +1,6 @@
 use super::super::location::location::*;
 use super::error::*;
-use std::collections::HashMap;
+use rustc_hash::FxHashMap;
 use std::fmt::Debug;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -75,8 +75,8 @@ impl Token {
         let mut b = 0;
         let mut i = 0;
 
-        fn keyword_map() -> HashMap<String, TokenKind> {
-            let mut map = HashMap::new();
+        fn keyword_map() -> FxHashMap<String, TokenKind> {
+            let mut map = FxHashMap::default();
             map.insert("==".into(), TokenKind::E);
             map.insert("!=".into(), TokenKind::NE);
             map.insert("<".into(), TokenKind::RT);
