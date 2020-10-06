@@ -1,6 +1,6 @@
 #!/bin/bash
 
-mkdir ./workspace
+mkdir -p ./workspace
 
 assert() {
   expected="$1"
@@ -9,9 +9,7 @@ assert() {
 
  echo "------------------------------"
  echo "[[rust output]]"
-  cargo run $2 $3
-  cc -o ./workspace/tmp ./workspace/tmp.s
-  ./workspace/tmp
+  cargo run $2 $3 && cc -o ./workspace/tmp ./workspace/tmp.s && ./workspace/tmp
   actual="$?"
 
  echo "[[ shell output ]]"
