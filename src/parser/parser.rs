@@ -70,7 +70,7 @@ impl NodeSt {
 
                         _ => unreachable!(),
                     };
-                    let rhs = Self::mul(&mut it)?;
+                    let rhs = Self::expr(&mut it)?;
 
                     lhs = Self::new_nds(op, lhs, rhs);
                 }
