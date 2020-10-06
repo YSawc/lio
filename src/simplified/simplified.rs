@@ -1,20 +1,20 @@
 use super::super::location::location::*;
 use super::super::node::node::*;
 
-pub fn beta(ns: NodeSt) -> NodeSt {
+pub fn simplified(ns: NodeSt) -> NodeSt {
     exec(ns)
 }
 
 fn exec(ns: NodeSt) -> NodeSt {
     match ns.c.value {
         NodeKind::Add | NodeKind::Sub | NodeKind::Mul | NodeKind::Div | NodeKind::Sur => {
-            let ln = beta(ns.lhs.as_ref().unwrap().as_ref().to_owned());
+            let ln = simplified(ns.lhs.as_ref().unwrap().as_ref().to_owned());
             let llf = ln.c.loc.f;
             let l = match ln.c.value {
                 NodeKind::Num(n) => n,
                 _ => unreachable!(),
             };
-            let r = match beta(ns.rhs.as_ref().unwrap().as_ref().to_owned()).c.value {
+            let r = match simplified(ns.rhs.as_ref().unwrap().as_ref().to_owned()).c.value {
                 NodeKind::Num(n) => n,
                 _ => unreachable!(),
             };

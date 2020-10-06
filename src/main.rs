@@ -3,7 +3,7 @@ use lio::error::error::*;
 // use lio::fmt::fmt::*;
 use lio::node::node::*;
 // use lio::parser::error::*;
-use lio::simplified::beta::*;
+use lio::simplified::simplified::*;
 // use lio::token::error::*;
 use lio::token::token::*;
 use std::env;
@@ -84,7 +84,7 @@ fn main() {
 
         if args.len() > 2 {
             if args[2] == "simplified" {
-                _nst = beta(_nst);
+                _nst = simplified(_nst);
                 println!("after beta: {:?}", _nst);
             }
         }
