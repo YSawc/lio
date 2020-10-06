@@ -2,7 +2,14 @@ use super::super::location::location::*;
 use super::super::parser::error::*;
 use super::super::token::error::*;
 use super::super::token::token::*;
+use super::super::error::error::*;
 use std::fmt;
+
+impl fmt::Display for Error {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "parse error")
+    }
+}
 
 impl fmt::Display for TokenKind {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

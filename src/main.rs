@@ -1,6 +1,10 @@
 use lio::code_gen::gen_x86::*;
+use lio::error::error::*;
+// use lio::fmt::fmt::*;
 use lio::node::node::*;
+// use lio::parser::error::*;
 use lio::simplified::beta::*;
+// use lio::token::error::*;
 use lio::token::token::*;
 use std::env;
 use std::io::Write;
@@ -48,7 +52,8 @@ fn main() {
             let _nst = match NodeSt::parser(t) {
                 Ok(n) => n,
                 Err(e) => {
-                    eprintln!("{}", e);
+                    // e.show_diagnostic(arg1); // FIXME
+                    show_trace(e);
                     continue;
                 }
             };
@@ -57,9 +62,24 @@ fn main() {
         }
     } else {
         println!("INPUT: {}", arg1);
-        let t = Token::tokenize(arg1).unwrap();
+        let t = match Token::tokenize(arg1) {
+            Ok(n) => n,
+            Err(e) => {
+                // e.show_diagnostic(arg1); // FIXME
+                show_trace(e);
+                std::process::exit(1);
+            }
+        };
         println!("after tokenized: {:?}", t);
-        let mut _nst = NodeSt::parser(t).unwrap();
+        let mut _nst = match NodeSt::parser(t) {
+            Ok(n) => n,
+            Err(e) => {
+                // e.show_diagnostic(arg1); // FIXME
+                show_trace(e);
+                std::process::exit(1);
+            }
+        };
+
         println!("after parsed: {:?}", _nst);
 
         if args.len() > 2 {

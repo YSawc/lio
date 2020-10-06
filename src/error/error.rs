@@ -1,10 +1,10 @@
+use super::super::location::location::*;
 use super::super::parser::error::*;
 use super::super::token::error::*;
 use std::error::Error as StdError;
-use std::fmt;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-enum Error {
+pub enum Error {
     Token(TokenError),
     Parse(ParseError),
 }
@@ -21,22 +21,57 @@ impl From<ParseError> for Error {
     }
 }
 
-impl fmt::Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "parse error")
-    }
-}
-
 impl StdError for TokenError {}
 
 impl StdError for ParseError {}
 
 impl StdError for Error {
     fn source(&self) -> Option<&(dyn StdError + 'static)> {
-        use self::Error::*;
         match self {
-            Token(tok) => Some(tok),
-            Parse(parse) => Some(parse),
+            Self::Token(tok) => Some(tok),
+            Self::Parse(parse) => Some(parse),
         }
+    }
+}
+
+pub fn print_annot(input: &str, loc: Loc) {
+    eprintln!("{}", input);
+    eprintln!(
+        "{}{}",
+        " ".repeat(loc.f as usize),
+        "^".repeat((loc.e - loc.e) as usize)
+    );
+}
+
+impl Error {
+    pub fn show_diagnostic(&self, input: &str) {
+        use self::Error::*;
+
+        let (e, loc): (&dyn StdError, Loc) = match self {
+            Token(e) => (e, e.loc.clone()),
+            Parse(e) => {
+                let loc = match e {
+                    ParseError::NotNumber(loc, ..)
+                    | ParseError::NotOperator(loc, ..)
+                    | ParseError::NotImplementedOperator(loc, ..)
+                    | ParseError::NotClosedParen(loc, ..) => loc.loc.clone(),
+                    ParseError::Eof => Loc::new(input.len() as u8, input.len() as u8 + 1),
+                };
+                (e, loc)
+            }
+        };
+
+        eprintln!("{}", e);
+        print_annot(input, loc)
+    }
+}
+
+pub fn show_trace<E: StdError>(e: E) {
+    eprintln!("{}", e);
+    let mut source = e.source();
+
+    while let Some(e) = source {
+        eprintln!("caused by {}", e);
+        source = e.source()
     }
 }

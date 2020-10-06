@@ -1,4 +1,3 @@
-// use super::parser::*;
 use super::super::token::token::*;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]

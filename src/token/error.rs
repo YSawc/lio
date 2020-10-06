@@ -18,14 +18,3 @@ impl TokenError {
         Self::new(TokenErrorKind::InvalidNumber(tok), loc)
     }
 }
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-enum Error {
-    Token(TokenError),
-}
-
-impl From<TokenError> for Error {
-    fn from(e: TokenError) -> Self {
-        Error::Token(e)
-    }
-}
