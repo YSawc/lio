@@ -47,6 +47,7 @@ assert 1 '1>=0;'
 assert 1 '1*2>=3-(2*1);'
 assert 3 '(1*2>=3-(2*1))+2;'
 assert 3 '(1*2>=3-(2*1))+2;' simplified
+assert 4 '4'
 
 echo "------------------------------"
 echo "All test passed!"

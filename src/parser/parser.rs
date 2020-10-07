@@ -39,7 +39,7 @@ impl NodeSt {
         let lhs = Self::cmp(it)?;
 
         if it.peek() == None {
-            return Err(ParseError::Eof);
+            return Ok(lhs);
         }
 
         match it.next().unwrap() {
