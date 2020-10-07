@@ -29,8 +29,26 @@ impl NodeSt {
 impl NodeSt {
     pub fn parser(vt: Vec<Token>) -> Result<Self, ParseError> {
         let mut it = vt.iter().peekable();
-        let lhs = Self::cmp(&mut it)?;
+        let lhs = Self::stmt(&mut it)?;
         Ok(lhs)
+    }
+
+    pub fn stmt(
+        it: &mut std::iter::Peekable<std::slice::Iter<Annot<TokenKind>>>,
+    ) -> Result<NodeSt, ParseError> {
+        let lhs = Self::cmp(it)?;
+
+        if it.peek() == None {
+            return Err(ParseError::Eof);
+        }
+
+        match it.next().unwrap() {
+            Token {
+                value: TokenKind::Colon,
+                loc: _,
+            } => return Ok(lhs),
+            _ => return Err(ParseError::NotClosedStmt(it.next().unwrap().to_owned())),
+        }
     }
 
     pub fn cmp(

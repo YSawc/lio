@@ -9,7 +9,7 @@ use super::super::super::token::token::*;
 
 #[test]
 fn parser_test() {
-    let t = Token::tokenize("12+3").unwrap();
+    let t = Token::tokenize("12+3;").unwrap();
     let l = NodeSt::parser(t).unwrap();
     let e = {
         NodeSt {

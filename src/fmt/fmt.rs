@@ -1,8 +1,8 @@
+use super::super::error::error::*;
 use super::super::location::location::*;
 use super::super::parser::error::*;
 use super::super::token::error::*;
 use super::super::token::token::*;
-use super::super::error::error::*;
 use std::fmt;
 
 impl fmt::Display for Error {
@@ -28,6 +28,7 @@ impl fmt::Display for TokenKind {
             TokenKind::LE => write!(f, "<="),
             TokenKind::G => write!(f, ">"),
             TokenKind::GE => write!(f, ">="),
+            TokenKind::Colon => write!(f, ";"),
         }
     }
 }
@@ -42,7 +43,12 @@ impl fmt::Display for ParseError {
             }
             ParseError::NotClosedParen(tok) => write!(
                 f,
-                "{}: Expected close token bud got {} ",
+                "{}: Expected close token but got {} ",
+                tok.loc, tok.value
+            ),
+            ParseError::NotClosedStmt(tok) => write!(
+                f,
+                "{}: Expected close statement but got {}.",
                 tok.loc, tok.value
             ),
             ParseError::Eof => write!(f, "Expected token, but not detected."),

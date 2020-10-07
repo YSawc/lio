@@ -19,6 +19,7 @@ pub enum TokenKind {
     LE,
     G,
     GE,
+    Colon,
 }
 
 pub type Token = Annot<TokenKind>;
@@ -66,6 +67,9 @@ impl Token {
     pub fn ge(loc: Loc) -> Self {
         Self::new(TokenKind::GE, loc)
     }
+    pub fn colon(loc: Loc) -> Self {
+        Self::new(TokenKind::Colon, loc)
+    }
 }
 
 impl Token {
@@ -95,6 +99,7 @@ impl Token {
             map.insert(')'.into(), TokenKind::RParen);
             map.insert('<'.into(), TokenKind::L);
             map.insert('>'.into(), TokenKind::G);
+            map.insert(';'.into(), TokenKind::Colon);
             map
         }
 
