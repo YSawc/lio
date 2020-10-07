@@ -149,7 +149,7 @@ impl NodeSt {
                     Token {
                         value: TokenKind::LParen,
                         loc: _,
-                    } => Self::expr(&mut it)?,
+                    } => Self::cmp(&mut it)?,
                     _ => unreachable!(),
                 };
                 if it.peek() == None {

@@ -45,8 +45,8 @@ assert 0 '1<=0'
 assert 1 '1>0'
 assert 1 '1>=0'
 assert 1 '1*2>=3-(2*1)'
-assert 1 '1*2>=3-(2*1)' simplified
-# assert 1 '(1*2>=3-(2*1))+2' # FIXME
+assert 3 '(1*2>=3-(2*1))+2'
+assert 3 '(1*2>=3-(2*1))+2' simplified
 
 echo "------------------------------"
 echo "All test passed!"

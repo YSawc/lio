@@ -17,8 +17,7 @@ fn exec(ns: NodeSt) -> NodeSt {
         | NodeKind::L
         | NodeKind::LE
         | NodeKind::G
-        | NodeKind::GE
-         => {
+        | NodeKind::GE => {
             let ln = simplified(ns.lhs.as_ref().unwrap().as_ref().to_owned());
             let llf = ln.c.loc.f;
             let l = match ln.c.value {
