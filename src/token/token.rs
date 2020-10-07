@@ -102,56 +102,55 @@ impl Token {
         let ss = single_symbol_map();
 
         while i < l {
-            match input.as_bytes()[i] {
-                b'0'..=b'9' => {
-                    let t = i;
-                    while i < input.len() && input.as_bytes()[i].is_ascii_digit() {
+            if input.as_bytes()[i].is_ascii_digit() {
+                let t = i;
+                while i < input.len() && input.as_bytes()[i].is_ascii_digit() {
+                    i += 1;
+                }
+                i -= 1;
+                let n: i8 = input[t..i + 1].to_string().parse().unwrap();
+                p_data.push(Self::number(n, Loc::new(t as u8 + b, (i + 1) as u8 + b)));
+            } else if input.as_bytes()[i] == b' ' {
+                b += 1;
+            } else {
+                let mut _m = false;
+                for k in ms.to_owned() {
+                    if input[i..].starts_with(&k.0) {
+                        p_data.push(Self::new(
+                            k.1,
+                            Loc::new(i as u8 + b, (i as u8 + k.0.len() as u8) + b),
+                        ));
+                        i += k.0.len();
+                        _m = true;
+                        break;
+                    }
+                }
+
+                if _m == true {
+                    _m = false;
+                    continue;
+                }
+
+                for k in ss.to_owned() {
+                    if input.chars().nth(i).unwrap() == k.0 {
+                        p_data.push(Self::new(k.1, Loc::new(i as u8 + b, (i as u8 + 1) + b)));
                         i += 1;
+                        _m = true;
+                        break;
                     }
-                    i -= 1;
-                    let n: i8 = input[t..i + 1].to_string().parse().unwrap();
-                    p_data.push(Self::number(n, Loc::new(t as u8 + b, (i + 1) as u8 + b)));
                 }
-                b' ' => b += 1,
-                _ => {
-                    let mut _m = false;
-                    for k in ms.to_owned() {
-                        if input[i..].starts_with(&k.0) {
-                            p_data.push(Self::new(
-                                k.1,
-                                Loc::new(i as u8 + b, (i as u8 + k.0.len() as u8) + b),
-                            ));
-                            i += k.0.len();
-                            _m = true;
-                            break;
-                        }
-                    }
 
-                    if _m == true {
-                        _m = false;
-                        continue;
-                    }
-
-                    for k in ss.to_owned() {
-                        if input.chars().nth(i).unwrap() == k.0 {
-                            p_data.push(Self::new(k.1, Loc::new(i as u8 + b, (i as u8 + 1) + b)));
-                            i += 1;
-                            _m = true;
-                            break;
-                        }
-                    }
-
-                    if _m == true {
-                        _m = false;
-                        continue;
-                    }
-
-                    b = 0;
-                    return Err(TokenError::invalid_token(
-                        input.to_string().chars().nth(i).unwrap(),
-                        Loc::new(i as u8 + b, i as u8 + 1 + b),
-                    ));
+                if _m == true {
+                    _m = false;
+                    continue;
                 }
+
+                b = 0;
+
+                return Err(TokenError::invalid_token(
+                    input.to_string().chars().nth(i).unwrap(),
+                    Loc::new(i as u8 + b, i as u8 + 1 + b),
+                ));
             }
             i += 1
         }
