@@ -16,6 +16,7 @@ pub fn gen(ns: NodeSt) {
 
     let r = gen_x86(&mut f, ns);
 
+    write!(f, ".L.return:\n").unwrap();
     write!(f, "  mov %{}, %rax\n", r).unwrap();
     write!(f, "  ret\n").unwrap();
 }
@@ -26,6 +27,11 @@ fn gen_x86(f: &mut fs::File, ns: NodeSt) -> String {
             unsafe { write!(f, "  mov ${}, %{}\n", n, REGS[CC as usize]).unwrap() };
             unsafe { CC += 1 };
             unsafe { return REGS[CC as usize - 1].to_string() };
+        }
+        NodeKind::Return => {
+            let l = gen_x86(f, ns.lhs.unwrap().as_ref().to_owned());
+            write!(f, "  jmp .L.return\n").unwrap();
+            return l;
         }
         _ => (),
     }
@@ -96,7 +102,6 @@ fn gen_x86(f: &mut fs::File, ns: NodeSt) -> String {
             write!(f, "  movzb %al, %{}\n", l).unwrap();
             return l;
         }
-
         _ => unimplemented!(),
     }
 }

@@ -29,6 +29,7 @@ impl fmt::Display for TokenKind {
             TokenKind::G => write!(f, ">"),
             TokenKind::GE => write!(f, ">="),
             TokenKind::SemiColon => write!(f, ";"),
+            TokenKind::Return => write!(f, "return"),
         }
     }
 }

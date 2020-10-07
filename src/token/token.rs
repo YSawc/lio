@@ -20,6 +20,7 @@ pub enum TokenKind {
     G,
     GE,
     SemiColon,
+    Return,
 }
 
 pub type Token = Annot<TokenKind>;
@@ -70,6 +71,9 @@ impl Token {
     pub fn semicolon(loc: Loc) -> Self {
         Self::new(TokenKind::SemiColon, loc)
     }
+    pub fn ret(loc: Loc) -> Self {
+        Self::new(TokenKind::Return, loc)
+    }
 }
 
 impl Token {
@@ -85,6 +89,7 @@ impl Token {
             map.insert("!=".into(), TokenKind::NE);
             map.insert("<=".into(), TokenKind::LE);
             map.insert(">=".into(), TokenKind::GE);
+            map.insert("return".into(), TokenKind::Return);
             map
         }
 

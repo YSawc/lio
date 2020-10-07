@@ -4,6 +4,14 @@ use super::super::token::token::*;
 use super::error::*;
 
 impl NodeSt {
+    pub fn new_unary(c: Node, lhs: NodeSt) -> Self {
+        Self {
+            c,
+            lhs: Some(Box::new(lhs)),
+            ..Default::default()
+        }
+    }
+
     pub fn new_nds(c: Node, lhs: NodeSt, rhs: NodeSt) -> Self {
         Self {
             c,
@@ -36,18 +44,34 @@ impl NodeSt {
     pub fn stmt(
         it: &mut std::iter::Peekable<std::slice::Iter<Annot<TokenKind>>>,
     ) -> Result<NodeSt, ParseError> {
-        let lhs = Self::cmp(it)?;
-
-        if it.peek() == None {
-            return Ok(lhs);
-        }
-
-        match it.next().unwrap() {
+        match it.peek().unwrap() {
             Token {
-                value: TokenKind::SemiColon,
-                loc: _,
-            } => return Ok(lhs),
-            _ => return Err(ParseError::NotClosedStmt(it.next().unwrap().to_owned())),
+                value: TokenKind::Return,
+                loc,
+            } => {
+                it.next().unwrap();
+                let op = Node::ret(loc.to_owned());
+                let mut lhs = Self::cmp(it)?;
+                lhs = Self::new_unary(op, lhs);
+                return Ok(lhs);
+            }
+            _ => {
+                let lhs = Self::cmp(it)?;
+
+                if it.peek() == None {
+                    return Ok(lhs);
+                }
+
+                match it.next().unwrap() {
+                    Token {
+                        value: TokenKind::SemiColon,
+                        ..
+                    } => {
+                        return Ok(lhs);
+                    }
+                    _ => return Err(ParseError::NotClosedStmt(it.next().unwrap().to_owned())),
+                }
+            }
         }
     }
 

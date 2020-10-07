@@ -15,6 +15,7 @@ pub enum NodeKind {
     LE,
     G,
     GE,
+    Return,
     Default,
 }
 
@@ -75,6 +76,9 @@ impl Node {
     }
     pub fn ge(loc: Loc) -> Self {
         Self::new(NodeKind::GE, loc)
+    }
+    pub fn ret(loc: Loc) -> Self {
+        Self::new(NodeKind::Return, loc)
     }
 }
 
