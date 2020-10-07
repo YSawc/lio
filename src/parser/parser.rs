@@ -44,7 +44,7 @@ impl NodeSt {
 
         match it.next().unwrap() {
             Token {
-                value: TokenKind::Colon,
+                value: TokenKind::SemiColon,
                 loc: _,
             } => return Ok(lhs),
             _ => return Err(ParseError::NotClosedStmt(it.next().unwrap().to_owned())),

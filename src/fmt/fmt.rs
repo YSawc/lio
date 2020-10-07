@@ -28,7 +28,7 @@ impl fmt::Display for TokenKind {
             TokenKind::LE => write!(f, "<="),
             TokenKind::G => write!(f, ">"),
             TokenKind::GE => write!(f, ">="),
-            TokenKind::Colon => write!(f, ";"),
+            TokenKind::SemiColon => write!(f, ";"),
         }
     }
 }
