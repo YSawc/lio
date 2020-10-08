@@ -49,7 +49,8 @@ fn main() {
             }
 
             let t = Token::tokenize(&s).unwrap();
-            let _nst = match NodeSt::parser(t) {
+            let ti = t.iter().peekable();
+            let _nst = match NodeSt::parser(ti) {
                 Ok(n) => n,
                 Err(e) => {
                     // e.show_diagnostic(arg1); // FIXME
@@ -71,7 +72,8 @@ fn main() {
             }
         };
         println!("after tokenized: {:?}", t);
-        let mut _nst = match NodeSt::parser(t) {
+        let ti = t.iter().peekable();
+        let mut _nst = match NodeSt::parser(ti) {
             Ok(n) => n,
             Err(e) => {
                 // e.show_diagnostic(arg1); // FIXME
