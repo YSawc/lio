@@ -1,10 +1,10 @@
 use lio::code_gen::gen_x86::*;
 use lio::error::error::*;
 // use lio::fmt::fmt::*;
-use lio::node::node::*;
 // use lio::parser::error::*;
 use lio::simplified::simplified::*;
 // use lio::token::error::*;
+use lio::node_arr::node_arr::*;
 use lio::token::token::*;
 use std::env;
 use std::io::Write;
@@ -49,17 +49,16 @@ fn main() {
             }
 
             let t = Token::tokenize(&s).unwrap();
-            let ti = t.iter().peekable();
-            let _nst = match NodeSt::parser(ti) {
-                Ok(n) => n,
+            let _na = match NodeArr::w_parser(t.to_owned()) {
+                Ok(na) => na,
                 Err(e) => {
                     // e.show_diagnostic(arg1); // FIXME
                     show_trace(e);
                     continue;
                 }
             };
-            println!("{:?}", _nst);
-            let _nst = gen(_nst);
+            println!("{:?}", _na);
+            let _nst = gen(_na);
         }
     } else {
         println!("INPUT: {}", arg1);
@@ -72,9 +71,9 @@ fn main() {
             }
         };
         println!("after tokenized: {:?}", t);
-        let ti = t.iter().peekable();
-        let mut _nst = match NodeSt::parser(ti) {
-            Ok(n) => n,
+
+        let mut _na = match NodeArr::w_parser(t.to_owned()) {
+            Ok(na) => na,
             Err(e) => {
                 // e.show_diagnostic(arg1); // FIXME
                 show_trace(e);
@@ -82,17 +81,15 @@ fn main() {
             }
         };
 
-        println!("after parsed: {:?}", _nst);
+        println!("after parsed: {:?}", _na);
 
         if args.len() > 2 {
             if args[2] == "simplified" {
-                _nst = simplified(_nst);
-                println!("after beta: {:?}", _nst);
+                _na = simplified(_na);
+                println!("after beta: {:?}", _na);
             }
         }
-        // let _nst = beta(_nst);
-        // println!("after beta: {:?}", _nst);
 
-        let _nst = gen(_nst);
+        let _nst = gen(_na);
     }
 }

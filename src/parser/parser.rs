@@ -36,7 +36,7 @@ impl NodeSt {
 
 impl NodeSt {
     pub fn parser(
-        mut it: std::iter::Peekable<std::slice::Iter<Annot<TokenKind>>>,
+        mut it: &mut std::iter::Peekable<std::slice::Iter<Annot<TokenKind>>>,
     ) -> Result<Self, ParseError> {
         let lhs = Self::stmt(&mut it)?;
         Ok(lhs)

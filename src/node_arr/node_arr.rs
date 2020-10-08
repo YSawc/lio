@@ -11,8 +11,8 @@ pub struct NodeArr {
 impl NodeArr {
     pub fn new(v: Vec<NodeSt>) -> Self {
         Self {
-            node_st_vec: vec![],
-            ret_node_st: v.last().unwrap().to_owned(),
+            node_st_vec: v.to_owned(),
+            ret_node_st: v.to_owned().last().unwrap().to_owned(),
         }
     }
 
@@ -20,9 +20,12 @@ impl NodeArr {
         let mut vti = vt.iter().peekable();
         let mut n = vec![];
 
-        while vti.peek() == None {
-            n.push(match NodeSt::parser(vti.to_owned()) {
-                Ok(n) => n,
+        while vti.peek() != None {
+            n.push(match NodeSt::parser(&mut vti) {
+                Ok(n) => {
+                    vti.next();
+                    n
+                }
                 Err(e) => return Err(e),
             });
         }

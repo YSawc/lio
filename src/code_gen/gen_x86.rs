@@ -1,11 +1,12 @@
 use super::super::node::node::*;
+use super::super::node_arr::node_arr::*;
 use std::fs;
 use std::io::Write;
 
 const REGS: [&str; 8] = ["rdi", "rsi", "r10", "r11", "r12", "r13", "r14", "r15"];
 static mut CC: u8 = 0;
 
-pub fn gen(ns: NodeSt) {
+pub fn gen(na: NodeArr) {
     const DIR: &str = "workspace/tmp.s";
     fs::File::create(DIR).unwrap();
     fs::remove_file(DIR).unwrap();
@@ -14,7 +15,11 @@ pub fn gen(ns: NodeSt) {
     write!(f, " .global main\n").unwrap();
     write!(f, "main:\n").unwrap();
 
-    let r = gen_x86(&mut f, ns);
+    let mut r = String::new();
+    let mut nai = na.node_st_vec.iter().peekable();
+    while nai.peek() != None {
+        r = gen_x86(&mut f, nai.next().unwrap().to_owned());
+    }
 
     write!(f, ".L.return:\n").unwrap();
     write!(f, "  mov %{}, %rax\n", r).unwrap();

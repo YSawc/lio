@@ -1,7 +1,19 @@
 use super::super::location::location::*;
 use super::super::node::node::*;
+use super::super::node_arr::node_arr::*;
 
-pub fn simplified(ns: NodeSt) -> NodeSt {
+pub fn simplified(mut na: NodeArr) -> NodeArr {
+    let mut nai = na.node_st_vec.iter().peekable();
+    let mut nv = vec![];
+    while nai.peek() != None {
+        nv.push(prepare(nai.next().unwrap().to_owned()));
+    }
+    na.node_st_vec = nv.to_owned();
+    na.ret_node_st = nv.last().unwrap().to_owned();
+    na
+}
+
+pub fn prepare(ns: NodeSt) -> NodeSt {
     exec(ns)
 }
 
@@ -18,13 +30,13 @@ fn exec(ns: NodeSt) -> NodeSt {
         | NodeKind::LE
         | NodeKind::G
         | NodeKind::GE => {
-            let ln = simplified(ns.lhs.as_ref().unwrap().as_ref().to_owned());
+            let ln = prepare(ns.lhs.as_ref().unwrap().as_ref().to_owned());
             let llf = ln.c.loc.f;
             let l = match ln.c.value {
                 NodeKind::Num(n) => n,
                 _ => unreachable!(),
             };
-            let r = match simplified(ns.rhs.as_ref().unwrap().as_ref().to_owned())
+            let r = match prepare(ns.rhs.as_ref().unwrap().as_ref().to_owned())
                 .c
                 .value
             {
