@@ -24,6 +24,11 @@ impl NodeArr {
             n.push(match NodeSt::parser(&mut vti) {
                 Ok(n) => {
                     // println!("n: {:?}", n);
+                    if n.c.value == NodeKind::Return && vti.peek() != None {
+                        return Err(ParseError::OperatorAfterRetrun(
+                            vti.next().unwrap().to_owned(),
+                        ));
+                    }
                     n
                 }
                 Err(e) => return Err(e),

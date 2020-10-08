@@ -7,6 +7,7 @@ pub enum ParseError {
     NotImplementedOperator(Token),
     NotClosedParen(Token),
     NotClosedStmt(Token),
+    OperatorAfterRetrun(Token),
     // UnexpectedToken(Token),
     // NotExpression(Token),
     // UnclosedOpenParen(Token),

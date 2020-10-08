@@ -55,7 +55,8 @@ impl Error {
                     | ParseError::NotOperator(loc, ..)
                     | ParseError::NotImplementedOperator(loc, ..)
                     | ParseError::NotClosedParen(loc, ..)
-                    | ParseError::NotClosedStmt(loc, ..) => loc.loc.clone(),
+                    | ParseError::NotClosedStmt(loc, ..)
+                    | ParseError::OperatorAfterRetrun(loc, ..) => loc.loc.clone(),
                     ParseError::Eof => Loc::new(input.len() as u8, input.len() as u8 + 1),
                 };
                 (e, loc)

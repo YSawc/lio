@@ -64,7 +64,6 @@ impl NodeSt {
                         value: TokenKind::SemiColon,
                         ..
                     } => {
-                        println!("it.peek() {:?}", it.peek());
                         return Ok(lhs);
                     }
                     _ => return Err(ParseError::NotClosedStmt(it.next().unwrap().to_owned())),

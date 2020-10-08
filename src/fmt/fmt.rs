@@ -52,6 +52,11 @@ impl fmt::Display for ParseError {
                 "{}: Expected close statement but final token got {}.",
                 tok.loc, tok.value
             ),
+            ParseError::OperatorAfterRetrun(tok) => write!(
+                f,
+                "{}: {} Operator affter return not expected.",
+                tok.loc, tok.value
+            ),
             ParseError::Eof => write!(f, "Expected token, but not detected."),
         }
     }

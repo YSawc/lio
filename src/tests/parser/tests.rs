@@ -67,6 +67,19 @@ fn return_with_unclosed_test() {
 }
 
 #[test]
+fn operater_after_return_test() {
+    let t = Token::tokenize("return 3; 4").unwrap();
+    let l = match NodeArr::w_parser(t) {
+        Ok(_) => false,
+        Err(e) => match e {
+            ParseError::OperatorAfterRetrun(_) => true,
+            _ => false,
+        },
+    };
+    assert!(l)
+}
+
+#[test]
 fn not_exit_when_failed_parser_test() {
     let t = Token::tokenize("+3").unwrap();
     let l = match NodeArr::w_parser(t) {
