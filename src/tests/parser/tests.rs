@@ -54,6 +54,19 @@ fn evaluation_final_value_test() {
 }
 
 #[test]
+fn return_with_unclosed_test() {
+    let t = Token::tokenize("return 3").unwrap();
+    let l = match NodeArr::w_parser(t) {
+        Ok(_) => false,
+        Err(e) => match e {
+            ParseError::NotClosedStmt(_) => true,
+            _ => false,
+        },
+    };
+    assert!(l)
+}
+
+#[test]
 fn not_exit_when_failed_parser_test() {
     let t = Token::tokenize("+3").unwrap();
     let l = match NodeArr::w_parser(t) {

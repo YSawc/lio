@@ -48,7 +48,8 @@ assert 1 '1*2>=3-(2*1);'
 assert 3 '(1*2>=3-(2*1))+2;'
 assert 3 '(1*2>=3-(2*1))+2;' simplified
 assert 4 '4'
-assert 4 'return 4'
+assert 3 '2; 3'
+assert 4 'return 4;'
 
 echo "------------------------------"
 echo "All test passed!"

@@ -23,7 +23,7 @@ impl NodeArr {
         while vti.peek() != None {
             n.push(match NodeSt::parser(&mut vti) {
                 Ok(n) => {
-                    vti.next();
+                    // println!("n: {:?}", n);
                     n
                 }
                 Err(e) => return Err(e),

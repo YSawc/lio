@@ -50,11 +50,25 @@ impl NodeSt {
                 value: TokenKind::Return,
                 loc,
             } => {
+                let mut et = it.clone();
                 it.next().unwrap();
                 let op = Node::ret(loc.to_owned());
                 let mut lhs = Self::cmp(it)?;
                 lhs = Self::new_unary(op, lhs);
-                return Ok(lhs);
+                if it.peek() == None {
+                    et.next();
+                    return Err(ParseError::NotClosedStmt(et.next().unwrap().to_owned()));
+                }
+                match it.next().unwrap() {
+                    Token {
+                        value: TokenKind::SemiColon,
+                        ..
+                    } => {
+                        println!("it.peek() {:?}", it.peek());
+                        return Ok(lhs);
+                    }
+                    _ => return Err(ParseError::NotClosedStmt(it.next().unwrap().to_owned())),
+                }
             }
             _ => {
                 let lhs = Self::cmp(it)?;
@@ -68,6 +82,7 @@ impl NodeSt {
                         value: TokenKind::SemiColon,
                         ..
                     } => {
+                        println!("it.peek() {:?}", it.peek());
                         return Ok(lhs);
                     }
                     _ => return Err(ParseError::NotClosedStmt(it.next().unwrap().to_owned())),

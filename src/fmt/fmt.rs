@@ -49,7 +49,7 @@ impl fmt::Display for ParseError {
             ),
             ParseError::NotClosedStmt(tok) => write!(
                 f,
-                "{}: Expected close statement but got {}.",
+                "{}: Expected close statement but final token got {}.",
                 tok.loc, tok.value
             ),
             ParseError::Eof => write!(f, "Expected token, but not detected."),
