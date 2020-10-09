@@ -21,6 +21,9 @@ pub enum TokenKind {
     GE,
     SemiColon,
     Return,
+    Int,
+    Ident(String),
+    Assign,
 }
 
 pub type Token = Annot<TokenKind>;
@@ -74,6 +77,15 @@ impl Token {
     pub fn ret(loc: Loc) -> Self {
         Self::new(TokenKind::Return, loc)
     }
+    pub fn int(loc: Loc) -> Self {
+        Self::new(TokenKind::Int, loc)
+    }
+    pub fn ident(s: String, loc: Loc) -> Self {
+        Self::new(TokenKind::Ident(s), loc)
+    }
+    pub fn assign(loc: Loc) -> Self {
+        Self::new(TokenKind::Assign, loc)
+    }
 }
 
 impl Token {
@@ -90,6 +102,7 @@ impl Token {
             map.insert("<=".into(), TokenKind::LE);
             map.insert(">=".into(), TokenKind::GE);
             map.insert("return".into(), TokenKind::Return);
+            map.insert("int".into(), TokenKind::Int);
             map
         }
 
@@ -105,6 +118,7 @@ impl Token {
             map.insert('<'.into(), TokenKind::L);
             map.insert('>'.into(), TokenKind::G);
             map.insert(';'.into(), TokenKind::SemiColon);
+            map.insert('='.into(), TokenKind::Assign);
             map
         }
 
@@ -157,6 +171,17 @@ impl Token {
 
                 b = 0;
 
+                if input.as_bytes()[i].is_ascii_alphabetic() {
+                    let t = i;
+                    let mut s = String::new();
+                    while input.as_bytes()[i].is_ascii_alphabetic() {
+                        s.push(input.chars().nth(i).unwrap());
+                        i += 1;
+                    }
+                    println!("s: {}", s);
+                    p_data.push(Self::ident(s, Loc::new(t as u8 + b, (i as u8 + 1) + b)));
+                    continue;
+                }
                 return Err(TokenError::invalid_token(
                     input.to_string().chars().nth(i).unwrap(),
                     Loc::new(i as u8 + b, i as u8 + 1 + b),

@@ -8,6 +8,8 @@ pub enum ParseError {
     NotClosedParen(Token),
     NotClosedStmt(Token),
     OperatorAfterRetrun(Token),
+    NotIdent(Token),
+    NotAssign(Token),
     // UnexpectedToken(Token),
     // NotExpression(Token),
     // UnclosedOpenParen(Token),

@@ -22,15 +22,18 @@ impl NodeSt {
     }
 
     pub fn new_num(mut t: Token) -> Result<Self, ParseError> {
-        let n = match Token::get_val(&mut t) {
-            Ok(n) => n,
-            Err(_) => return Err(ParseError::NotNumber(t)),
-        };
-
+        let n = Token::get_val(&mut t).or(Err(ParseError::NotNumber(t.to_owned())))?;
         Ok(Self {
             c: Annot::new(NodeKind::Num(n), t.loc),
             ..Default::default()
         })
+    }
+
+    pub fn new_ident(s: String, t: Token) -> Self {
+        Self {
+            c: Annot::new(NodeKind::Ident(s), t.loc),
+            ..Default::default()
+        }
     }
 }
 
@@ -67,6 +70,55 @@ impl NodeSt {
                         return Ok(lhs);
                     }
                     _ => return Err(ParseError::NotClosedStmt(it.next().unwrap().to_owned())),
+                }
+            }
+            Token {
+                value: TokenKind::Int,
+                loc,
+            } => {
+                it.next().unwrap();
+                let i = Node::int(loc.to_owned());
+                match it.peek().unwrap() {
+                    Token {
+                        value: TokenKind::Ident(s),
+                        ..
+                    } => {
+                        let l = Self::new_ident(s.to_owned(), it.next().unwrap().to_owned());
+                        let l = Self::new_unary(i, l);
+                        match it.peek().unwrap() {
+                            Token {
+                                value: TokenKind::Assign,
+                                loc,
+                            } => {
+                                let mut et = it.clone();
+                                it.next().unwrap();
+                                let op = Node::assign(loc.to_owned());
+                                let r = Self::cmp(it)?;
+                                let lhs = Self::new_nds(op, l, r);
+                                if it.peek() == None {
+                                    et.next();
+                                    return Err(ParseError::NotClosedStmt(
+                                        et.next().unwrap().to_owned(),
+                                    ));
+                                }
+                                match it.next().unwrap() {
+                                    Token {
+                                        value: TokenKind::SemiColon,
+                                        ..
+                                    } => {
+                                        return Ok(lhs);
+                                    }
+                                    _ => {
+                                        return Err(ParseError::NotClosedStmt(
+                                            it.next().unwrap().to_owned(),
+                                        ))
+                                    }
+                                }
+                            }
+                            _ => return Err(ParseError::NotAssign(it.next().unwrap().to_owned())),
+                        }
+                    }
+                    _ => return Err(ParseError::NotIdent(it.next().unwrap().to_owned())),
                 }
             }
             _ => {
@@ -205,7 +257,7 @@ impl NodeSt {
                 let rhs = match it.next().unwrap() {
                     Token {
                         value: TokenKind::LParen,
-                        loc: _,
+                        ..
                     } => Self::cmp(&mut it)?,
                     _ => unreachable!(),
                 };
@@ -215,12 +267,12 @@ impl NodeSt {
                 match it.next().unwrap() {
                     Token {
                         value: TokenKind::RParen,
-                        loc: _,
-                    } => return Ok(rhs),
-                    _ => return Err(ParseError::NotClosedParen(it.next().unwrap().to_owned())),
+                        ..
+                    } => Ok(rhs),
+                    _ => Err(ParseError::NotClosedParen(it.next().unwrap().to_owned())),
                 }
             }
-            _ => return Self::primary(it),
+            _ => Self::primary(it),
         }
     }
 

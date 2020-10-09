@@ -22,7 +22,7 @@ impl fmt::Display for TokenKind {
             TokenKind::Percent => write!(f, "%"),
             TokenKind::LParen => write!(f, "("),
             TokenKind::RParen => write!(f, ")"),
-            TokenKind::E => write!(f, "="),
+            TokenKind::E => write!(f, "=="),
             TokenKind::NE => write!(f, "!="),
             TokenKind::L => write!(f, "<"),
             TokenKind::LE => write!(f, "<="),
@@ -30,6 +30,9 @@ impl fmt::Display for TokenKind {
             TokenKind::GE => write!(f, ">="),
             TokenKind::SemiColon => write!(f, ";"),
             TokenKind::Return => write!(f, "return"),
+            TokenKind::Int => write!(f, "int"),
+            TokenKind::Ident(s) => s.fmt(f),
+            TokenKind::Assign => write!(f, "="),
         }
     }
 }
@@ -57,6 +60,12 @@ impl fmt::Display for ParseError {
                 "{}: {} Operator affter return not expected.",
                 tok.loc, tok.value
             ),
+            ParseError::NotIdent(tok) => {
+                write!(f, "{}: Expected ident but got {}.", tok.loc, tok.value)
+            }
+            ParseError::NotAssign(tok) => {
+                write!(f, "{}: Expected assign but got {}.", tok.loc, tok.value)
+            }
             ParseError::Eof => write!(f, "Expected token, but not detected."),
         }
     }

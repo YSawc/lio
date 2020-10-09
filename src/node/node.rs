@@ -16,6 +16,9 @@ pub enum NodeKind {
     G,
     GE,
     Return,
+    Int,
+    Ident(String),
+    Assign,
     Default,
 }
 
@@ -79,6 +82,15 @@ impl Node {
     }
     pub fn ret(loc: Loc) -> Self {
         Self::new(NodeKind::Return, loc)
+    }
+    pub fn int(loc: Loc) -> Self {
+        Self::new(NodeKind::Int, loc)
+    }
+    pub fn ident(s: String, loc: Loc) -> Self {
+        Self::new(NodeKind::Ident(s), loc)
+    }
+    pub fn assign(loc: Loc) -> Self {
+        Self::new(NodeKind::Assign, loc)
     }
 }
 
