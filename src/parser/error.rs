@@ -10,6 +10,7 @@ pub enum ParseError {
     OperatorAfterRetrun(Token),
     NotIdent(Token),
     NotAssign(Token),
+    NotDefinitionVar(Token),
     // UnexpectedToken(Token),
     // NotExpression(Token),
     // UnclosedOpenParen(Token),

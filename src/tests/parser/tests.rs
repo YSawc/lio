@@ -55,37 +55,13 @@ fn evaluation_final_value_test() {
 
 #[test]
 fn parser_assign_test() {
-    let t = Token::tokenize("int a = 3;").unwrap();
+    let t = Token::tokenize("int a = 3; 1").unwrap();
     let l = NodeArr::w_parser(t).unwrap().ret_node_st;
     let e = {
         NodeSt {
-            c: Annot {
-                value: NodeKind::Assign,
-                loc: Loc { f: 7, e: 8 },
-            },
-            lhs: Some(Box::new(NodeSt {
-                c: Annot {
-                    value: NodeKind::Int,
-                    loc: Loc { f: 0, e: 3 },
-                },
-                lhs: Some(Box::new(NodeSt {
-                    c: Annot {
-                        value: NodeKind::Ident("a".to_string()),
-                        loc: Loc { f: 4, e: 6 },
-                    },
-                    lhs: None,
-                    rhs: None,
-                })),
-                rhs: None,
-            })),
-            rhs: Some(Box::new(NodeSt {
-                c: Annot {
-                    value: NodeKind::Num(3),
-                    loc: Loc { f: 10, e: 11 },
-                },
-                lhs: None,
-                rhs: None,
-            })),
+            c: Node::number(1, Loc::new(14, 15)),
+            lhs: None,
+            rhs: None,
         }
     };
     assert_eq!(e, l)

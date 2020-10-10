@@ -66,6 +66,11 @@ impl fmt::Display for ParseError {
             ParseError::NotAssign(tok) => {
                 write!(f, "{}: Expected assign but got {}.", tok.loc, tok.value)
             }
+            ParseError::NotDefinitionVar(tok) => write!(
+                f,
+                "{}: Expected definition var but not detected. Failed ident is {}",
+                tok.loc, tok.value
+            ),
             ParseError::Eof => write!(f, "Expected token, but not detected."),
         }
     }

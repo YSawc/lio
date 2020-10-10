@@ -1,11 +1,24 @@
 use super::super::node::node::*;
 use super::super::parser::error::*;
 use super::super::token::token::*;
+use super::super::var::var::*;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct NodeArr {
     pub node_st_vec: Vec<NodeSt>,
     pub ret_node_st: NodeSt,
+    pub l: Vec<Var>,
+}
+
+impl NodeArr {
+    pub fn find_l(s: String, vv: Vec<Var>) -> Option<Var> {
+        for v in vv {
+            if v.s == s {
+                return Some(v);
+            }
+        }
+        None
+    }
 }
 
 impl NodeArr {
@@ -13,29 +26,52 @@ impl NodeArr {
         Self {
             node_st_vec: v.to_owned(),
             ret_node_st: v.to_owned().last().unwrap().to_owned(),
+            l: vec![],
         }
     }
 
     pub fn w_parser(vt: Vec<Token>) -> Result<Self, ParseError> {
         let mut vti = vt.iter().peekable();
-        let mut n = vec![];
+        let mut nv = vec![];
+        let mut l: Vec<Var> = vec![];
 
         while vti.peek() != None {
-            n.push(match NodeSt::parser(&mut vti) {
-                Ok(n) => {
-                    // println!("n: {:?}", n);
-                    if n.c.value == NodeKind::Return && vti.peek() != None {
-                        return Err(ParseError::OperatorAfterRetrun(
-                            vti.next().unwrap().to_owned(),
-                        ));
+            nv.push(match NodeSt::parser(&mut vti) {
+                Ok(n) => match n.c.value {
+                    NodeKind::Return => {
+                        if vti.peek() != None {
+                            return Err(ParseError::OperatorAfterRetrun(
+                                vti.next().unwrap().to_owned(),
+                            ));
+                        }
+                        n
                     }
-                    n
-                }
+                    NodeKind::Assign => {
+                        let s = match n.to_owned().lhs.unwrap().lhs.unwrap().c.value {
+                            NodeKind::Ident(s) => s,
+                            _ => unreachable!(),
+                        };
+                        let n = n.lhs.as_ref().unwrap().as_ref().to_owned();
+                        let v = Var::new(s, n);
+                        l.push(v);
+                        continue;
+                    }
+                    NodeKind::Ident(s) => match Self::find_l(s, l.to_owned()) {
+                        Some(v) => v.n,
+                        None => {
+                            return Err(ParseError::NotDefinitionVar(
+                                vti.next().unwrap().to_owned(),
+                            ))
+                        }
+                    },
+                    _ => n,
+                },
                 Err(e) => return Err(e),
             });
         }
 
-        let a = Self::new(n);
+        let mut a = Self::new(nv);
+        a.l = l;
         Ok(a)
     }
 }

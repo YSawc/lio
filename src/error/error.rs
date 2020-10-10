@@ -58,7 +58,8 @@ impl Error {
                     | ParseError::NotClosedStmt(loc, ..)
                     | ParseError::OperatorAfterRetrun(loc, ..)
                     | ParseError::NotIdent(loc, ..)
-                    | ParseError::NotAssign(loc, ..) => loc.loc.clone(),
+                    | ParseError::NotAssign(loc, ..)
+                    | ParseError::NotDefinitionVar(loc, ..) => loc.loc.clone(),
                     ParseError::Eof => Loc::new(input.len() as u8, input.len() as u8 + 1),
                 };
                 (e, loc)

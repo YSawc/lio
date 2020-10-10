@@ -8,3 +8,4 @@ pub mod parser;
 pub mod simplified;
 pub mod tests;
 pub mod token;
+pub mod var;

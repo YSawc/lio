@@ -50,6 +50,8 @@ assert 3 '(1*2>=3-(2*1))+2;' simplified
 assert 4 '4'
 assert 3 '2; 3'
 assert 4 'return 4;'
+assert 1 'int a = 3; 1;'
+assert 2 'int a = 3; return 2;'
 
 echo "------------------------------"
 echo "All test passed!"
