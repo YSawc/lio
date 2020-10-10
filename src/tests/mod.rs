@@ -1,3 +1,4 @@
 pub mod parser;
-pub mod token;
 pub mod simplified;
+pub mod token;
+pub mod var;

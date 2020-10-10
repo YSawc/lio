@@ -17,7 +17,7 @@ pub fn prepare(ns: NodeSt) -> NodeSt {
     exec(ns)
 }
 
-fn exec(ns: NodeSt) -> NodeSt {
+pub fn exec(ns: NodeSt) -> NodeSt {
     match ns.c.value {
         NodeKind::Add
         | NodeKind::Sub

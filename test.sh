@@ -53,6 +53,9 @@ assert 4 'return 4;'
 assert 1 'int a = 3; 1;'
 assert 4 'int a = 3; int b = 4; b;'
 assert 36 'int a = 3; int b = 4; b*a*3;'
+assert 60 'int a = 3; int b = 4; b*a*5;' simplified
+assert 54 'int a = 3; int b = a*2; b*a*3;'
+assert 54 'int a = 3; int b = a*2; b*a*3;' simplified
 
 echo "------------------------------"
 echo "All test passed!"

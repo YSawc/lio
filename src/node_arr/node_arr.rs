@@ -2,6 +2,7 @@ use super::super::node::node::*;
 use super::super::parser::error::*;
 use super::super::token::token::*;
 use super::super::var::var::*;
+use super::super::simplified::*;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct NodeArr {
@@ -51,7 +52,8 @@ impl NodeArr {
                             NodeKind::Ident(s) => s,
                             _ => unreachable!(),
                         };
-                        let n = n.rhs.as_ref().unwrap().as_ref().to_owned();
+                        let mut n = vex(&mut n.to_owned().rhs.unwrap().to_owned(), l.to_owned());
+                        n = simplified::exec(n);
                         let v = Var::new(s, n);
                         l.push(v);
                         continue;
