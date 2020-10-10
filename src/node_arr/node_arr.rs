@@ -51,7 +51,7 @@ impl NodeArr {
                             NodeKind::Ident(s) => s,
                             _ => unreachable!(),
                         };
-                        let n = n.lhs.as_ref().unwrap().as_ref().to_owned();
+                        let n = n.rhs.as_ref().unwrap().as_ref().to_owned();
                         let v = Var::new(s, n);
                         l.push(v);
                         continue;
@@ -64,7 +64,11 @@ impl NodeArr {
                             ))
                         }
                     },
-                    _ => n,
+                    _ => {
+                        let n = vex(&mut n.to_owned(), l.to_owned());
+                        // println!("_n : {:?}", _n);
+                        n
+                    }
                 },
                 Err(e) => return Err(e),
             });

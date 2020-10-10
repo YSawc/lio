@@ -178,7 +178,7 @@ impl Token {
                         s.push(input.chars().nth(i).unwrap());
                         i += 1;
                     }
-                    println!("s: {}", s);
+                    // println!("s: {}", s);
                     p_data.push(Self::ident(s, Loc::new(t as u8 + b, (i as u8 + 1) + b)));
                     continue;
                 }

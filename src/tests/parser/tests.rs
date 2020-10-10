@@ -68,6 +68,27 @@ fn parser_assign_test() {
 }
 
 #[test]
+fn variable_expansion_test() {
+    let t = Token::tokenize("int a = 3; int b = 5; b*a;").unwrap();
+    let l = NodeArr::w_parser(t).unwrap().ret_node_st;
+    let e = NodeSt {
+        c: Node::mul(Loc::new(23, 24)),
+        lhs: Some(Box::new(NodeSt {
+            c: Node::number(5, Loc::new(21, 22)),
+            lhs: None,
+            rhs: None,
+        })),
+        rhs: Some(Box::new(NodeSt {
+            c: Node::number(3, Loc::new(10, 11)),
+            lhs: None,
+            rhs: None,
+        })),
+    };
+
+    assert_eq!(e, l)
+}
+
+#[test]
 fn return_with_unclosed_test() {
     let t = Token::tokenize("return 3").unwrap();
     let l = match NodeArr::w_parser(t) {

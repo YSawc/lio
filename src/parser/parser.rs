@@ -283,6 +283,15 @@ impl NodeSt {
             return Err(ParseError::Eof);
         }
 
-        Ok(Self::new_num(it.next().unwrap().to_owned())?)
+        match it.peek().unwrap() {
+            Token {
+                value: TokenKind::Ident(s),
+                ..
+            } => Ok(Self::new_ident(
+                s.to_string(),
+                it.next().unwrap().to_owned(),
+            )),
+            _ => Ok(Self::new_num(it.next().unwrap().to_owned())?),
+        }
     }
 }
