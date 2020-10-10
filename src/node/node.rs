@@ -38,7 +38,7 @@ pub struct NodeSt {
 }
 
 impl Node {
-    pub fn number(n: i8, loc: Loc) -> Self {
+    pub fn num(n: i8, loc: Loc) -> Self {
         Self::new(NodeKind::Num(n), loc)
     }
 
@@ -95,9 +95,9 @@ impl Node {
 }
 
 impl NodeSt {
-    pub fn number(n: i8, loc: Loc) -> Self {
+    pub fn num(n: i8, loc: Loc) -> Self {
         NodeSt {
-            c: Node::number(n, loc),
+            c: Node::num(n, loc),
             lhs: None,
             rhs: None,
         }

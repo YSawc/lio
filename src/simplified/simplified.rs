@@ -45,67 +45,67 @@ pub fn exec(ns: NodeSt) -> NodeSt {
             };
             match ns.c.value {
                 NodeKind::Add => {
-                    return NodeSt::number(
+                    return NodeSt::num(
                         l + r,
                         Loc::new(llf, (llf as i8 + ((l + r) / 10) + 1) as u8),
                     )
                 }
                 NodeKind::Sub => {
-                    return NodeSt::number(
+                    return NodeSt::num(
                         l - r,
                         Loc::new(llf, (llf as i8 + ((l - r) / 10) + 1) as u8),
                     )
                 }
                 NodeKind::Mul => {
-                    return NodeSt::number(
+                    return NodeSt::num(
                         l * r,
                         Loc::new(llf, (llf as i8 + ((l * r) / 10) + 1) as u8),
                     )
                 }
                 NodeKind::Div => {
-                    return NodeSt::number(
+                    return NodeSt::num(
                         l / r,
                         Loc::new(llf, (llf as i8 + ((l / r) / 10) + 1) as u8),
                     )
                 }
                 NodeKind::Sur => {
-                    return NodeSt::number(
+                    return NodeSt::num(
                         l % r,
                         Loc::new(llf, (llf as i8 + ((l % r) / 10) + 1) as u8),
                     )
                 }
                 NodeKind::E => {
-                    return NodeSt::number(
+                    return NodeSt::num(
                         (l == r) as i8,
                         Loc::new(llf, (llf as i8 + ((l % r) / 10) + 1) as u8),
                     )
                 }
                 NodeKind::NE => {
-                    return NodeSt::number(
+                    return NodeSt::num(
                         (l != r) as i8,
                         Loc::new(llf, (llf as i8 + ((l % r) / 10) + 1) as u8),
                     )
                 }
                 NodeKind::L => {
-                    return NodeSt::number(
+                    return NodeSt::num(
                         (l < r) as i8,
                         Loc::new(llf, (llf as i8 + ((l % r) / 10) + 1) as u8),
                     )
                 }
                 NodeKind::LE => {
-                    return NodeSt::number(
+                    return NodeSt::num(
                         (l <= r) as i8,
                         Loc::new(llf, (llf as i8 + ((l % r) / 10) + 1) as u8),
                     )
                 }
                 NodeKind::G => {
-                    return NodeSt::number(
+                    return NodeSt::num(
                         (l > r) as i8,
                         Loc::new(llf, (llf as i8 + ((l % r) / 10) + 1) as u8),
                     )
                 }
                 NodeKind::GE => {
-                    return NodeSt::number(
+                    return NodeSt::num(
                         (l >= r) as i8,
                         Loc::new(llf, (llf as i8 + ((l % r) / 10) + 1) as u8),
                     )

@@ -18,27 +18,15 @@ fn simplified_variable_under_initialize_test() {
     let mut e: Vec<Var> = Vec::new();
     e.push(Var {
         s: "a".to_string(),
-        n: NodeSt {
-            c: Node::number(2, Loc::new(10, 11)),
-            lhs: None,
-            rhs: None,
-        },
+        n: NodeSt::num(2, Loc::new(10, 11)),
     });
     e.push(Var {
         s: "b".to_string(),
-        n: NodeSt {
-            c: Node::number(16, Loc::new(21, 23)),
-            lhs: None,
-            rhs: None,
-        },
+        n: NodeSt::num(16, Loc::new(21, 23)),
     });
     e.push(Var {
         s: "c".to_string(),
-        n: NodeSt {
-            c: Node::number(34, Loc::new(34, 38)),
-            lhs: None,
-            rhs: None,
-        },
+        n: NodeSt::num(34, Loc::new(34, 38)),
     });
     assert_eq!(e, l);
 }

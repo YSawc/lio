@@ -1,8 +1,8 @@
 use super::super::node::node::*;
 use super::super::parser::error::*;
+use super::super::simplified::*;
 use super::super::token::token::*;
 use super::super::var::var::*;
-use super::super::simplified::*;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct NodeArr {

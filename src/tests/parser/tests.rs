@@ -16,16 +16,8 @@ fn parser_test() {
     let e = {
         NodeSt {
             c: Node::plus(Loc::new(2, 3)),
-            lhs: Some(Box::new(NodeSt {
-                c: Node::number(12, Loc::new(0, 2)),
-                lhs: None,
-                rhs: None,
-            })),
-            rhs: Some(Box::new(NodeSt {
-                c: Node::number(3, Loc::new(3, 4)),
-                lhs: None,
-                rhs: None,
-            })),
+            lhs: Some(Box::new(NodeSt::num(12, Loc::new(0, 2)))),
+            rhs: Some(Box::new(NodeSt::num(3, Loc::new(3, 4)))),
         }
     };
     assert_eq!(e, l)
@@ -38,16 +30,8 @@ fn evaluation_final_value_test() {
     let e = {
         NodeSt {
             c: Node::plus(Loc::new(2, 3)),
-            lhs: Some(Box::new(NodeSt {
-                c: Node::number(12, Loc::new(0, 2)),
-                lhs: None,
-                rhs: None,
-            })),
-            rhs: Some(Box::new(NodeSt {
-                c: Node::number(3, Loc::new(3, 4)),
-                lhs: None,
-                rhs: None,
-            })),
+            lhs: Some(Box::new(NodeSt::num(12, Loc::new(0, 2)))),
+            rhs: Some(Box::new(NodeSt::num(3, Loc::new(3, 4)))),
         }
     };
     assert_eq!(e, l)
@@ -57,13 +41,7 @@ fn evaluation_final_value_test() {
 fn parser_assign_test() {
     let t = Token::tokenize("int a = 3; 1").unwrap();
     let l = NodeArr::w_parser(t).unwrap().ret_node_st;
-    let e = {
-        NodeSt {
-            c: Node::number(1, Loc::new(14, 15)),
-            lhs: None,
-            rhs: None,
-        }
-    };
+    let e = { NodeSt::num(1, Loc::new(14, 15)) };
     assert_eq!(e, l)
 }
 
@@ -73,16 +51,8 @@ fn variable_expansion_test() {
     let l = NodeArr::w_parser(t).unwrap().ret_node_st;
     let e = NodeSt {
         c: Node::mul(Loc::new(23, 24)),
-        lhs: Some(Box::new(NodeSt {
-            c: Node::number(5, Loc::new(21, 22)),
-            lhs: None,
-            rhs: None,
-        })),
-        rhs: Some(Box::new(NodeSt {
-            c: Node::number(3, Loc::new(10, 11)),
-            lhs: None,
-            rhs: None,
-        })),
+        lhs: Some(Box::new(NodeSt::num(5, Loc::new(21, 22)))),
+        rhs: Some(Box::new(NodeSt::num(3, Loc::new(10, 11)))),
     };
 
     assert_eq!(e, l)
