@@ -14,6 +14,7 @@ pub fn map(vt: Vec<Token>) -> Result<Vec<Token>, MapError> {
             TokenKind::Map => {
                 let loc = vti.peek().unwrap().loc.to_owned();
                 vti.next();
+                // TODO: implement struct checker in first
                 if vti.peek() == None {
                     return Err(MapError::invalid_struct(
                         me.next().unwrap().to_owned(),
@@ -32,6 +33,12 @@ pub fn map(vt: Vec<Token>) -> Result<Vec<Token>, MapError> {
                         ));
                     }
                 }
+                if vti.peek() == None {
+                    return Err(MapError::invalid_struct(
+                        me.next().unwrap().to_owned(),
+                        ma.loc.to_owned(),
+                    ));
+                }
                 me = vti.to_owned();
                 match vti.next().unwrap().value {
                     TokenKind::Num(n) => {
@@ -44,33 +51,29 @@ pub fn map(vt: Vec<Token>) -> Result<Vec<Token>, MapError> {
                         ));
                     }
                 }
-                me = vti.to_owned();
                 let mut n = 0;
                 // println!("(_f, _e) : ({}, {})", _f, _e);
+                if vti.peek() == None {
+                    return Err(MapError::invalid_struct(
+                        me.next().unwrap().to_owned(),
+                        ma.loc.to_owned(),
+                    ));
+                }
                 match vti.peek().unwrap().value {
                     TokenKind::Plus | TokenKind::Minus | TokenKind::Asterisk | TokenKind::Slash => {
                         match vti.next().unwrap().value {
                             TokenKind::Plus => {
-                                for i in _f..=_e {
-                                    n += i
-                                }
+                                n = (_f..=_e).sum::<i8>();
                             }
                             TokenKind::Minus => {
-                                for i in _f..=_e {
-                                    n -= i
-                                }
+                                n = (_f..=_e).fold(n, |acc, x| acc - x);
                             }
                             TokenKind::Asterisk => {
-                                n = 1;
-                                for i in _f..=_e {
-                                    n *= i
-                                }
+                                n = (_f..=_e).product::<i8>();
                             }
                             TokenKind::Slash => {
                                 n = 1;
-                                for i in _f..=_e {
-                                    n /= i
-                                }
+                                n = (_f..=_e).fold(n, |acc, x| acc / x);
                             }
                             _ => unreachable!(),
                         }
