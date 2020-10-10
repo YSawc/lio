@@ -1,5 +1,6 @@
 use super::super::error::error::*;
 use super::super::location::location::*;
+use super::super::map::error::*;
 use super::super::parser::error::*;
 use super::super::token::error::*;
 use super::super::token::token::*;
@@ -33,6 +34,7 @@ impl fmt::Display for TokenKind {
             TokenKind::Int => write!(f, "int"),
             TokenKind::Ident(s) => s.fmt(f),
             TokenKind::Assign => write!(f, "="),
+            TokenKind::Map => write!(f, "map"),
         }
     }
 }
@@ -88,6 +90,24 @@ impl fmt::Display for TokenError {
         match &self.value {
             TokenErrorKind::InvalidToken(t) => write!(f, "{}: invalid token '{:?}'", loc, t),
             TokenErrorKind::InvalidNumber(t) => write!(f, "{}: invalid number '{:?}'", loc, t),
+        }
+    }
+}
+
+impl fmt::Display for MapError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let loc = &self.loc;
+        match &self.value {
+            MapErrorKind::InvalidMap(t) => write!(
+                f,
+                "{}: invalid map found. Invalid token is : '{:?}'",
+                loc, t
+            ),
+            MapErrorKind::InvalidStruct(t) => write!(
+                f,
+                "{}: invalid map structue found. Final token found here : '{:?}'",
+                loc, t
+            ),
         }
     }
 }

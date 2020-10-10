@@ -2,6 +2,7 @@ pub mod code_gen;
 pub mod error;
 pub mod fmt;
 pub mod location;
+pub mod map;
 pub mod node;
 pub mod node_arr;
 pub mod parser;

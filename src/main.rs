@@ -4,6 +4,7 @@ use lio::error::error::*;
 // use lio::parser::error::*;
 use lio::simplified::simplified::*;
 // use lio::token::error::*;
+use lio::map::map::*;
 use lio::node_arr::node_arr::*;
 use lio::token::token::*;
 use std::env;
@@ -49,6 +50,14 @@ fn main() {
             }
 
             let t = Token::tokenize(&s).unwrap();
+            let t = match map(t) {
+                Ok(t) => t,
+                Err(e) => {
+                    // e.show_diagnostic(arg1); // FIXME
+                    show_trace(e);
+                    continue;
+                }
+            };
             let _na = match NodeArr::w_parser(t.to_owned()) {
                 Ok(na) => na,
                 Err(e) => {
@@ -71,6 +80,16 @@ fn main() {
             }
         };
         println!("after tokenized: {:?}", t);
+
+        let t = match map(t) {
+            Ok(t) => t,
+            Err(e) => {
+                // e.show_diagnostic(arg1); // FIXME
+                show_trace(e);
+                std::process::exit(1);
+            }
+        };
+        // println!("after maped: {:?}", t);
 
         let mut _na = match NodeArr::w_parser(t.to_owned()) {
             Ok(na) => na,

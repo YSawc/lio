@@ -1,4 +1,5 @@
 use super::super::location::location::*;
+use super::super::map::error::*;
 use super::super::parser::error::*;
 use super::super::token::error::*;
 use std::error::Error as StdError;
@@ -7,6 +8,7 @@ use std::error::Error as StdError;
 pub enum Error {
     Token(TokenError),
     Parse(ParseError),
+    Map(MapError),
 }
 
 impl From<TokenError> for Error {
@@ -25,11 +27,14 @@ impl StdError for TokenError {}
 
 impl StdError for ParseError {}
 
+impl StdError for MapError {}
+
 impl StdError for Error {
     fn source(&self) -> Option<&(dyn StdError + 'static)> {
         match self {
             Self::Token(tok) => Some(tok),
             Self::Parse(parse) => Some(parse),
+            Self::Map(map) => Some(map),
         }
     }
 }
@@ -64,6 +69,7 @@ impl Error {
                 };
                 (e, loc)
             }
+            Map(e) => (e, e.loc.clone()),
         };
 
         eprintln!("{}", e);
