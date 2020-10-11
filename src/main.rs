@@ -1,4 +1,4 @@
-use lio::code_gen::gen_x86::*;
+use lio::code_gen::gen_x86_64::*;
 use lio::error::error::*;
 // use lio::fmt::fmt::*;
 // use lio::parser::error::*;
