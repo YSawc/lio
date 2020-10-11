@@ -58,6 +58,9 @@ assert 54 'int a = 3; int b = a*2; b*a*3;'
 assert 54 'int a = 3; int b = a*2; b*a*3;' simplified
 assert 15 'int r = 1; int l = 5; l + map 2 4 + + r;' simplified
 assert 120 'map 1 5 *;'
+assert 10 'if (2 == 3) 5; else 10;'
+assert 31 'if (2 == 3) 5+3; else 10+21;' simplified
+assert 8 'if (2 < 3) 5+3; else 10;'
 
 echo "------------------------------"
 echo "All test passed!"

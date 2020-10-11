@@ -18,6 +18,7 @@ fn parser_test() {
             c: Node::plus(Loc::new(2, 3)),
             lhs: Some(Box::new(NodeSt::num(12, Loc::new(0, 2)))),
             rhs: Some(Box::new(NodeSt::num(3, Loc::new(3, 4)))),
+            ..Default::default()
         }
     };
     assert_eq!(e, l)
@@ -32,6 +33,7 @@ fn evaluation_final_value_test() {
             c: Node::plus(Loc::new(2, 3)),
             lhs: Some(Box::new(NodeSt::num(12, Loc::new(0, 2)))),
             rhs: Some(Box::new(NodeSt::num(3, Loc::new(3, 4)))),
+            ..Default::default()
         }
     };
     assert_eq!(e, l)
@@ -53,6 +55,7 @@ fn variable_expansion_test() {
         c: Node::mul(Loc::new(23, 24)),
         lhs: Some(Box::new(NodeSt::num(5, Loc::new(21, 22)))),
         rhs: Some(Box::new(NodeSt::num(3, Loc::new(10, 11)))),
+        ..Default::default()
     };
 
     assert_eq!(e, l)

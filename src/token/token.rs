@@ -25,6 +25,8 @@ pub enum TokenKind {
     Ident(String),
     Assign,
     Map,
+    If,
+    Else,
 }
 
 pub type Token = Annot<TokenKind>;
@@ -90,6 +92,12 @@ impl Token {
     pub fn map(loc: Loc) -> Self {
         Self::new(TokenKind::Map, loc)
     }
+    pub fn mif(loc: Loc) -> Self {
+        Self::new(TokenKind::If, loc)
+    }
+    pub fn melse(loc: Loc) -> Self {
+        Self::new(TokenKind::Else, loc)
+    }
 }
 
 impl Token {
@@ -108,6 +116,8 @@ impl Token {
             map.insert("return".into(), TokenKind::Return);
             map.insert("int".into(), TokenKind::Int);
             map.insert("map".into(), TokenKind::Map);
+            map.insert("if".into(), TokenKind::If);
+            map.insert("else".into(), TokenKind::Else);
             map
         }
 

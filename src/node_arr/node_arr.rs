@@ -66,9 +66,22 @@ impl NodeArr {
                             ))
                         }
                     },
+                    NodeKind::If => {
+                        let mut c = vex(&mut n.to_owned().cond.unwrap().to_owned(), l.to_owned());
+                        c = simplified::exec(c);
+                        match c.c.value {
+                            NodeKind::Num(num) => {
+                                if num == 0 {
+                                    *n.to_owned().melse_stmt.unwrap().to_owned()
+                                } else {
+                                    *n.to_owned().stmt.unwrap().to_owned()
+                                }
+                            }
+                            _ => unreachable!(),
+                        }
+                    }
                     _ => {
                         let n = vex(&mut n.to_owned(), l.to_owned());
-                        // println!("_n : {:?}", _n);
                         n
                     }
                 },

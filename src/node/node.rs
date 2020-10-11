@@ -19,6 +19,8 @@ pub enum NodeKind {
     Int,
     Ident(String),
     Assign,
+    If,
+    Else,
     Default,
 }
 
@@ -35,6 +37,9 @@ pub struct NodeSt {
     pub c: Node,
     pub lhs: Option<Box<NodeSt>>,
     pub rhs: Option<Box<NodeSt>>,
+    pub cond: Option<Box<NodeSt>>,
+    pub stmt: Option<Box<NodeSt>>,
+    pub melse_stmt: Option<Box<NodeSt>>,
 }
 
 impl Node {
@@ -92,14 +97,19 @@ impl Node {
     pub fn assign(loc: Loc) -> Self {
         Self::new(NodeKind::Assign, loc)
     }
+    pub fn mif(loc: Loc) -> Self {
+        Self::new(NodeKind::If, loc)
+    }
+    pub fn melse(loc: Loc) -> Self {
+        Self::new(NodeKind::Else, loc)
+    }
 }
 
 impl NodeSt {
     pub fn num(n: i8, loc: Loc) -> Self {
         NodeSt {
             c: Node::num(n, loc),
-            lhs: None,
-            rhs: None,
+            ..Default::default()
         }
     }
 }

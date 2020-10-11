@@ -35,6 +35,8 @@ impl fmt::Display for TokenKind {
             TokenKind::Ident(s) => s.fmt(f),
             TokenKind::Assign => write!(f, "="),
             TokenKind::Map => write!(f, "map"),
+            TokenKind::If => write!(f, "if"),
+            TokenKind::Else => write!(f, "else"),
         }
     }
 }
@@ -105,7 +107,7 @@ impl fmt::Display for MapError {
             ),
             MapErrorKind::InvalidStruct(t) => write!(
                 f,
-                "{}: invalid map structue found. Final token found here : '{:?}'",
+                "{}: invalid structue found. Final token found here : '{:?}'",
                 loc, t
             ),
         }

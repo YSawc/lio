@@ -12,6 +12,15 @@ impl NodeSt {
         }
     }
 
+    pub fn new_if(c: Node, cond: NodeSt, stmt: NodeSt) -> Self {
+        Self {
+            c,
+            cond: Some(Box::new(cond)),
+            stmt: Some(Box::new(stmt)),
+            ..Default::default()
+        }
+    }
+
     pub fn new_nds(c: Node, lhs: NodeSt, rhs: NodeSt) -> Self {
         Self {
             c,
@@ -121,6 +130,52 @@ impl NodeSt {
                     _ => return Err(ParseError::NotIdent(it.next().unwrap().to_owned())),
                 }
             }
+            Token {
+                value: TokenKind::If,
+                loc,
+            } => {
+                let mut et = it.to_owned();
+                it.next().unwrap();
+                let op = Node::mif(loc.to_owned());
+                match it.peek().unwrap() {
+                    Token {
+                        value: TokenKind::LParen,
+                        ..
+                    } => {
+                        et = it.to_owned();
+                        it.next().unwrap();
+                        let cond = Self::cmp(it)?;
+                        match it.peek().unwrap() {
+                            Token {
+                                value: TokenKind::RParen,
+                                ..
+                            } => {
+                                it.next().unwrap();
+                                let stmt = Self::stmt(it)?;
+                                let mut lhs = Self::new_if(op, cond, stmt);
+                                match it.peek().unwrap() {
+                                    Token {
+                                        value: TokenKind::Else,
+                                        ..
+                                    } => {
+                                        it.next().unwrap();
+                                        let stmt = Self::stmt(it)?;
+                                        lhs.melse_stmt = Some(Box::new(stmt));
+                                        return Ok(lhs);
+                                    }
+                                    _ => return Ok(lhs),
+                                }
+                            }
+                            _ => {
+                                return Err(ParseError::NotClosedStmt(
+                                    et.next().unwrap().to_owned(),
+                                ))
+                            }
+                        }
+                    }
+                    _ => return Err(ParseError::NotClosedStmt(et.next().unwrap().to_owned())),
+                }
+            }
             _ => {
                 let lhs = Self::cmp(it)?;
 
@@ -133,7 +188,6 @@ impl NodeSt {
                         value: TokenKind::SemiColon,
                         ..
                     } => {
-                        println!("it.peek() {:?}", it.peek());
                         return Ok(lhs);
                     }
                     _ => return Err(ParseError::NotClosedStmt(it.next().unwrap().to_owned())),
