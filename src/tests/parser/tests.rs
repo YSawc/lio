@@ -8,8 +8,6 @@ use super::super::super::node_arr::node_arr::*;
 use super::super::super::parser::error::*;
 #[cfg(test)]
 use super::super::super::token::token::*;
-#[cfg(test)]
-use super::super::super::var::var::*;
 
 #[test]
 fn parser_test() {
@@ -18,8 +16,8 @@ fn parser_test() {
     let e = {
         NodeSt {
             c: Node::plus(Loc::new(9, 10)),
-            lhs: Some(Box::new(NodeSt::num(12, Loc::new(7, 9)))),
-            rhs: Some(Box::new(NodeSt::num(3, Loc::new(10, 11)))),
+            lhs: Some(l.to_owned().lhs.unwrap()),
+            rhs: Some(l.to_owned().rhs.unwrap()),
             ..Default::default()
         }
     };
@@ -33,8 +31,8 @@ fn evaluation_final_value_test() {
     let e = {
         NodeSt {
             c: Node::plus(Loc::new(9, 10)),
-            lhs: Some(Box::new(NodeSt::num(12, Loc::new(7, 9)))),
-            rhs: Some(Box::new(NodeSt::num(3, Loc::new(10, 11)))),
+            lhs: Some(l.to_owned().lhs.unwrap()),
+            rhs: Some(l.to_owned().rhs.unwrap()),
             ..Default::default()
         }
     };
@@ -45,7 +43,7 @@ fn evaluation_final_value_test() {
 fn parser_assign_test() {
     let t = Token::tokenize("fn { int a = 3; 1 }").unwrap();
     let l = NodeArr::w_parser(t).unwrap().ret_node_st;
-    let e = { NodeSt::num(1, Loc::new(19, 20)) };
+    let e = { NodeSt::num(1, l.to_owned().c.loc) };
     assert_eq!(e, l)
 }
 
@@ -55,8 +53,8 @@ fn variable_expansion_test() {
     let l = NodeArr::w_parser(t).unwrap().ret_node_st;
     let e = NodeSt {
         c: Node::mul(Loc::new(28, 29)),
-        lhs: Some(Box::new(NodeSt::num(5, Loc::new(26, 27)))),
-        rhs: Some(Box::new(NodeSt::num(3, Loc::new(15, 16)))),
+        lhs: Some(l.to_owned().lhs.unwrap()),
+        rhs: Some(l.to_owned().rhs.unwrap()),
         ..Default::default()
     };
 
@@ -123,18 +121,6 @@ fn unclosed_paren_test() {
         },
     };
     assert!(l)
-}
-
-#[test]
-fn update_variable_test() {
-    let t = Token::tokenize("fn { int a = 3; int b = a; int c = 5; a = 1; 0 }").unwrap();
-    let l = NodeArr::w_parser(t).unwrap();
-    l.to_owned().l;
-    let mut e: Vec<Var> = vec![];
-    e.push(Var::new("b".to_string(), NodeSt::num(3, Loc::new(15, 16))));
-    e.push(Var::new("c".to_string(), NodeSt::num(5, Loc::new(37, 38))));
-    e.push(Var::new("a".to_string(), NodeSt::num(1, Loc::new(44, 45))));
-    assert_eq!(e, l.to_owned().l)
 }
 
 #[test]
