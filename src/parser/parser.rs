@@ -78,7 +78,7 @@ impl NodeSt {
                     } => {
                         return Ok(lhs);
                     }
-                    _ => return Err(ParseError::NotClosedStmt(it.next().unwrap().to_owned())),
+                    _ => return Err(ParseError::NotClosedStmt(et.next().unwrap().to_owned())),
                 }
             }
             Token {
@@ -178,14 +178,16 @@ impl NodeSt {
             }
             _ => {
                 let lhs = Self::cmp(it)?;
-
-                if it.peek() == None {
-                    return Ok(lhs);
-                }
-
-                match it.next().unwrap() {
+                match it.peek().unwrap() {
                     Token {
                         value: TokenKind::SemiColon,
+                        ..
+                    } => {
+                        it.next();
+                        return Ok(lhs);
+                    }
+                    Token {
+                        value: TokenKind::RBrace,
                         ..
                     } => {
                         return Ok(lhs);
@@ -315,6 +317,7 @@ impl NodeSt {
                     } => Self::cmp(&mut it)?,
                     _ => unreachable!(),
                 };
+                let et = it.to_owned();
                 if it.peek() == None {
                     return Err(ParseError::Eof);
                 }
@@ -323,7 +326,7 @@ impl NodeSt {
                         value: TokenKind::RParen,
                         ..
                     } => Ok(rhs),
-                    _ => Err(ParseError::NotClosedParen(it.next().unwrap().to_owned())),
+                    _ => Err(ParseError::NotClosedParen(et.to_owned().next().unwrap().to_owned())),
                 }
             }
             _ => Self::primary(it),
@@ -356,7 +359,7 @@ impl NodeSt {
                         let op = Node::assign(loc.to_owned());
                         let rhs = Self::expr(it)?;
                         let lhs = Self::new_nds(op, lhs, rhs);
-                        println!("it.peek(): {:?}", it.peek());
+                        // println!("it.peek(): {:?}", it.peek());
                         return Ok(lhs);
                     }
                     _ => {

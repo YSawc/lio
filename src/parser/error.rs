@@ -11,6 +11,8 @@ pub enum ParseError {
     NotIdent(Token),
     NotAssign(Token),
     NotDefinitionVar(Token),
+    NotLBrace(Token),
+    NotRBrace(Token),
     // UnexpectedToken(Token),
     // NotExpression(Token),
     // UnclosedOpenParen(Token),

@@ -37,6 +37,9 @@ impl fmt::Display for TokenKind {
             TokenKind::Map => write!(f, "map"),
             TokenKind::If => write!(f, "if"),
             TokenKind::Else => write!(f, "else"),
+            TokenKind::Fn => write!(f, "fn"),
+            TokenKind::LBrace => write!(f, "{{"),
+            TokenKind::RBrace => write!(f, "}}"),
         }
     }
 }
@@ -75,6 +78,12 @@ impl fmt::Display for ParseError {
                 "{}: Expected definition var but not detected. Failed ident is {}",
                 tok.loc, tok.value
             ),
+            ParseError::NotLBrace(tok) => {
+                write!(f, "{}: Expected LBrace but god {}", tok.loc, tok.value)
+            }
+            ParseError::NotRBrace(tok) => {
+                write!(f, "{}: Expected RBrace but god {}", tok.loc, tok.value)
+            }
             ParseError::Eof => write!(f, "Expected token, but not detected."),
         }
     }

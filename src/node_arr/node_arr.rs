@@ -36,15 +36,32 @@ impl NodeArr {
         let mut nv = vec![];
         let mut l: Vec<Var> = vec![];
 
-        while vti.peek() != None {
+        let mut et = vti.to_owned();
+        while vti.peek().unwrap().value != TokenKind::Fn {
+            et = vti.to_owned();
+            vti.next();
+        }
+        et.to_owned().next();
+        vti.next();
+
+        if vti.peek() == None {
+            return Err(ParseError::NotLBrace(
+                et.to_owned().next().unwrap().to_owned(),
+            ));
+        }
+        vti.next();
+
+        let mut b = false;
+        while vti.peek() != None && b == false {
             nv.push(match NodeSt::parser(&mut vti) {
                 Ok(n) => match n.c.value {
                     NodeKind::Return => {
-                        if vti.peek() != None {
+                        if vti.peek().unwrap().to_owned().to_owned().value != TokenKind::RBrace {
                             return Err(ParseError::OperatorAfterRetrun(
                                 vti.next().unwrap().to_owned(),
                             ));
                         }
+                        b = true;
                         n
                     }
                     NodeKind::Assign => {
@@ -68,7 +85,6 @@ impl NodeArr {
                                 let ff = f.to_owned();
                                 l.retain(|s| s.s != _s.to_owned());
                                 l.push(ff);
-                                // println!("f: {:?}", f);
                             }
                             _ => {
                                 let mut n =
@@ -81,7 +97,13 @@ impl NodeArr {
                         continue;
                     }
                     NodeKind::Ident(s) => match Self::find_l(s, l.to_owned()) {
-                        Some(v) => v.n,
+                        Some(v) => {
+                            if vti.peek().unwrap().to_owned().to_owned().value == TokenKind::RBrace
+                            {
+                                b = true;
+                            }
+                            v.n
+                        }
                         None => {
                             return Err(ParseError::NotDefinitionVar(
                                 vti.next().unwrap().to_owned(),
@@ -89,6 +111,9 @@ impl NodeArr {
                         }
                     },
                     NodeKind::If => {
+                        if vti.peek().unwrap().to_owned().to_owned().value == TokenKind::RBrace {
+                            b = true;
+                        }
                         let mut c = vex(&mut n.to_owned().cond.unwrap().to_owned(), l.to_owned());
                         c = simplified::exec(c);
                         match c.c.value {
@@ -107,6 +132,10 @@ impl NodeArr {
                         }
                     }
                     _ => {
+                        if vti.peek().unwrap().to_owned().to_owned().value == TokenKind::RBrace {
+                            b = true;
+                        }
+
                         let n = vex(&mut n.to_owned(), l.to_owned());
                         n
                     }

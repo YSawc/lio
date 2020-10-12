@@ -21,6 +21,9 @@ pub enum NodeKind {
     Assign,
     If,
     Else,
+    Fn,
+    LBrace,
+    RBrace,
     Default,
 }
 
@@ -102,6 +105,9 @@ impl Node {
     }
     pub fn melse(loc: Loc) -> Self {
         Self::new(NodeKind::Else, loc)
+    }
+    pub fn mfn(loc: Loc) -> Self {
+        Self::new(NodeKind::Fn, loc)
     }
 }
 

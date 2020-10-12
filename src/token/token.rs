@@ -27,6 +27,9 @@ pub enum TokenKind {
     Map,
     If,
     Else,
+    Fn,
+    LBrace,
+    RBrace,
 }
 
 pub type Token = Annot<TokenKind>;
@@ -98,6 +101,15 @@ impl Token {
     pub fn melse(loc: Loc) -> Self {
         Self::new(TokenKind::Else, loc)
     }
+    pub fn mfn(loc: Loc) -> Self {
+        Self::new(TokenKind::Fn, loc)
+    }
+    pub fn lbrace(loc: Loc) -> Self {
+        Self::new(TokenKind::LBrace, loc)
+    }
+    pub fn rbrace(loc: Loc) -> Self {
+        Self::new(TokenKind::RBrace, loc)
+    }
 }
 
 impl Token {
@@ -118,6 +130,7 @@ impl Token {
             map.insert("map".into(), TokenKind::Map);
             map.insert("if".into(), TokenKind::If);
             map.insert("else".into(), TokenKind::Else);
+            map.insert("fn".into(), TokenKind::Fn);
             map
         }
 
@@ -134,6 +147,8 @@ impl Token {
             map.insert('>'.into(), TokenKind::G);
             map.insert(';'.into(), TokenKind::SemiColon);
             map.insert('='.into(), TokenKind::Assign);
+            map.insert('{'.into(), TokenKind::LBrace);
+            map.insert('}'.into(), TokenKind::RBrace);
             map
         }
 
