@@ -14,6 +14,12 @@ use std::process::Command;
 fn main() {
     let args: Vec<String> = env::args().collect();
     let arg1 = &args[1];
+    let mut fsimplified = false;
+    if args.len() > 2 {
+        if args[2] == "simplified" {
+            fsimplified = true;
+        }
+    }
 
     if arg1 == "repl" {
         loop {
@@ -58,7 +64,7 @@ fn main() {
                     continue;
                 }
             };
-            let _na = match NodeArr::w_parser(t.to_owned()) {
+            let mut _na = match NodeArr::w_parser(t.to_owned()) {
                 Ok(na) => na,
                 Err(e) => {
                     // e.show_diagnostic(arg1); // FIXME
@@ -67,6 +73,12 @@ fn main() {
                 }
             };
             println!("{:?}", _na);
+
+            if fsimplified {
+                _na = simplified(_na);
+                println!("after beta: {:?}", _na);
+            }
+
             let _nst = gen(_na);
         }
     } else {
@@ -102,11 +114,9 @@ fn main() {
 
         println!("after parsed: {:?}", _na);
 
-        if args.len() > 2 {
-            if args[2] == "simplified" {
-                _na = simplified(_na);
-                println!("after beta: {:?}", _na);
-            }
+        if fsimplified {
+            _na = simplified(_na);
+            println!("after beta: {:?}", _na);
         }
 
         let _nst = gen(_na);
