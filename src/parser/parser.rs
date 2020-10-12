@@ -341,11 +341,34 @@ impl NodeSt {
             Token {
                 value: TokenKind::Ident(s),
                 ..
-            } => Ok(Self::new_ident(
-                s.to_string(),
-                it.next().unwrap().to_owned(),
-            )),
-            _ => Ok(Self::new_num(it.next().unwrap().to_owned())?),
+            } => {
+                let t = it.to_owned();
+                let lhs = Self::new_ident(s.to_owned(), it.next().unwrap().to_owned());
+                if it.len() < 2 {
+                    *it = t.to_owned();
+                }
+                match it.peek().unwrap() {
+                    Token {
+                        value: TokenKind::Assign,
+                        loc,
+                    } => {
+                        it.next().unwrap();
+                        let op = Node::assign(loc.to_owned());
+                        let rhs = Self::expr(it)?;
+                        let lhs = Self::new_nds(op, lhs, rhs);
+                        println!("it.peek(): {:?}", it.peek());
+                        return Ok(lhs);
+                    }
+                    _ => {
+                        *it = t;
+                        return Ok(Self::new_ident(
+                            s.to_string(),
+                            it.next().unwrap().to_owned(),
+                        ));
+                    }
+                }
+            }
+            _ => return Ok(Self::new_num(it.next().unwrap().to_owned())?),
         }
     }
 }

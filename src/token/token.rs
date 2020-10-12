@@ -189,7 +189,7 @@ impl Token {
                 if input.as_bytes()[i].is_ascii_alphabetic() {
                     let t = i;
                     let mut s = String::new();
-                    while input.as_bytes()[i].is_ascii_alphabetic() {
+                    while i < l && input.as_bytes()[i].is_ascii_alphabetic() {
                         s.push(input.chars().nth(i).unwrap());
                         i += 1;
                     }

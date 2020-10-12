@@ -48,14 +48,36 @@ impl NodeArr {
                         n
                     }
                     NodeKind::Assign => {
-                        let s = match n.to_owned().lhs.unwrap().lhs.unwrap().c.value {
-                            NodeKind::Ident(s) => s,
-                            _ => unreachable!(),
-                        };
-                        let mut n = vex(&mut n.to_owned().rhs.unwrap().to_owned(), l.to_owned());
-                        n = simplified::exec(n);
-                        let v = Var::new(s, n);
-                        l.push(v);
+                        let mut _s = String::new();
+                        match n.to_owned().lhs.unwrap().c.value {
+                            NodeKind::Ident(si) => _s = si,
+                            _ => {
+                                match n.to_owned().lhs.unwrap().lhs.unwrap().c.value {
+                                    NodeKind::Ident(si) => _s = si,
+                                    _ => unreachable!(),
+                                };
+                            }
+                        }
+
+                        match Self::find_l(_s.to_owned(), l.to_owned()) {
+                            Some(mut f) => {
+                                let mut n =
+                                    vex(&mut n.to_owned().rhs.unwrap().to_owned(), l.to_owned());
+                                n = simplified::exec(n);
+                                f.n = n;
+                                let ff = f.to_owned();
+                                l.retain(|s| s.s != _s.to_owned());
+                                l.push(ff);
+                                // println!("f: {:?}", f);
+                            }
+                            _ => {
+                                let mut n =
+                                    vex(&mut n.to_owned().rhs.unwrap().to_owned(), l.to_owned());
+                                n = simplified::exec(n);
+                                let v = Var::new(_s, n);
+                                l.push(v);
+                            }
+                        }
                         continue;
                     }
                     NodeKind::Ident(s) => match Self::find_l(s, l.to_owned()) {
@@ -72,7 +94,11 @@ impl NodeArr {
                         match c.c.value {
                             NodeKind::Num(num) => {
                                 if num == 0 {
-                                    *n.to_owned().melse_stmt.unwrap().to_owned()
+                                    if n.to_owned().melse_stmt != None {
+                                        *n.to_owned().melse_stmt.unwrap().to_owned()
+                                    } else {
+                                        continue;
+                                    }
                                 } else {
                                     *n.to_owned().stmt.unwrap().to_owned()
                                 }
