@@ -13,6 +13,7 @@ pub enum ParseError {
     NotDefinitionVar(Token),
     NotLBrace(Token),
     NotRBrace(Token),
+    OperatorOutOfFnction(Token),
     // UnexpectedToken(Token),
     // NotExpression(Token),
     // UnclosedOpenParen(Token),

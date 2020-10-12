@@ -84,6 +84,11 @@ impl fmt::Display for ParseError {
             ParseError::NotRBrace(tok) => {
                 write!(f, "{}: Expected RBrace but god {}", tok.loc, tok.value)
             }
+            ParseError::OperatorOutOfFnction(tok) => write!(
+                f,
+                "{}: Expected operator inner function but god {}",
+                tok.loc, tok.value
+            ),
             ParseError::Eof => write!(f, "Expected token, but not detected."),
         }
     }

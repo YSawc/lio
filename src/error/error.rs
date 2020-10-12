@@ -66,7 +66,8 @@ impl Error {
                     | ParseError::NotAssign(loc, ..)
                     | ParseError::NotDefinitionVar(loc, ..)
                     | ParseError::NotLBrace(loc, ..)
-                    | ParseError::NotRBrace(loc, ..) => loc.loc.clone(),
+                    | ParseError::NotRBrace(loc, ..)
+                    | ParseError::OperatorOutOfFnction(loc, ..) => loc.loc.clone(),
                     ParseError::Eof => Loc::new(input.len() as u8, input.len() as u8 + 1),
                 };
                 (e, loc)

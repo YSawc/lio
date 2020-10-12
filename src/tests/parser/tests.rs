@@ -136,3 +136,16 @@ fn update_variable_test() {
     e.push(Var::new("a".to_string(), NodeSt::num(1, Loc::new(44, 45))));
     assert_eq!(e, l.to_owned().l)
 }
+
+#[test]
+fn operator_out_of_function_test() {
+    let t = Token::tokenize("0; fn { 12+3; }").unwrap();
+    let l = match NodeArr::w_parser(t) {
+        Ok(_) => false,
+        Err(e) => match e {
+            ParseError::OperatorOutOfFnction(_) => true,
+            _ => false,
+        },
+    };
+    assert!(l)
+}
