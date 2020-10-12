@@ -62,6 +62,7 @@ assert 10 'if (2 == 3) 5; else 10;'
 assert 31 'if (2 == 3) 5+3; else 10+21;' simplified
 assert 8 'if (2 < 3) 5+3; else 10;'
 assert 2 'int a = 3; a = 2; a'
+assert 5 'int a = 5; int b = a; a = 2; b'
 
 echo "------------------------------"
 echo "All test passed!"

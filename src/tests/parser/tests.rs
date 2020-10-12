@@ -8,6 +8,8 @@ use super::super::super::node_arr::node_arr::*;
 use super::super::super::parser::error::*;
 #[cfg(test)]
 use super::super::super::token::token::*;
+#[cfg(test)]
+use super::super::super::var::var::*;
 
 #[test]
 fn parser_test() {
@@ -121,4 +123,16 @@ fn unclosed_eof_test() {
         },
     };
     assert!(l)
+}
+
+#[test]
+fn update_variable_test() {
+    let t = Token::tokenize("int a = 3; int b = a; int c = 5; a = 1; 0").unwrap();
+    let l = NodeArr::w_parser(t).unwrap();
+    l.to_owned().l;
+    let mut e: Vec<Var> = vec![];
+    e.push(Var::new("b".to_string(), NodeSt::num(3, Loc::new(10, 11))));
+    e.push(Var::new("c".to_string(), NodeSt::num(5, Loc::new(32, 33))));
+    e.push(Var::new("a".to_string(), NodeSt::num(1, Loc::new(39, 40))));
+    assert_eq!(e, l.to_owned().l)
 }
