@@ -88,6 +88,10 @@ impl NodeArr {
 
                         match Self::find_l(_s.to_owned(), l.to_owned()) {
                             Some(mut f) => {
+                                match uv.contains(&f.to_owned().s.to_owned()) {
+                                    true => (),
+                                    false => return Err(ParseError::UnusedVariable(f.n.c.loc)),
+                                }
                                 let mut n = vex(
                                     &mut n.to_owned().rhs.unwrap().to_owned(),
                                     l.to_owned(),

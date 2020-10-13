@@ -54,8 +54,31 @@ fn update_variable_test() {
 }
 
 #[test]
-fn unused_variable_test() {
+fn unused_variable_check_for_used_variable_test() {
+    let t = Token::tokenize("fn { int a = 3; a; int a = 0; int b = 5; a*b }").unwrap();
+    let l = match NodeArr::w_parser(t) {
+        Ok(_) => true,
+        Err(_) => false,
+    };
+    assert!(l)
+}
+
+#[test]
+fn unused_variable_check_when_parsed_whole_function_test() {
     let t = Token::tokenize("fn { int a = 3; int b = a; int c = 5; b }").unwrap();
+    let l = match NodeArr::w_parser(t) {
+        Ok(_) => false,
+        Err(e) => match e {
+            ParseError::UnusedVariable(_) => true,
+            _ => false,
+        },
+    };
+    assert!(l)
+}
+
+#[test]
+fn unused_variable_check_just_before_overwrite_variable_test() {
+    let t = Token::tokenize("fn { int a = 3; int a = 0; a }").unwrap();
     let l = match NodeArr::w_parser(t) {
         Ok(_) => false,
         Err(e) => match e {
