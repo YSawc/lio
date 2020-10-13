@@ -20,11 +20,12 @@ impl Var {
     }
 }
 
-pub fn vex(ns: &mut NodeSt, vv: Vec<Var>) -> NodeSt {
+pub fn vex(ns: &mut NodeSt, vv: Vec<Var>, uv: &mut Vec<String>) -> NodeSt {
     if ns.lhs != None {
         let l = Some(Box::new(vex(
             &mut ns.lhs.as_ref().unwrap().to_owned().as_ref().to_owned(),
             vv.to_owned(),
+            uv,
         )));
         if ns.lhs != l {
             ns.lhs = l;
@@ -35,6 +36,7 @@ pub fn vex(ns: &mut NodeSt, vv: Vec<Var>) -> NodeSt {
         let r = Some(Box::new(vex(
             &mut ns.rhs.as_ref().unwrap().to_owned().as_ref().to_owned(),
             vv.to_owned(),
+            uv,
         )));
         if ns.rhs != r {
             ns.rhs = r;
@@ -44,19 +46,20 @@ pub fn vex(ns: &mut NodeSt, vv: Vec<Var>) -> NodeSt {
     match ns.c.value.to_owned() {
         NodeKind::Ident(s) => {
             let n = NodeArr::find_l(s, vv.to_owned()).unwrap();
-            // println!("n.n.c : {:?}", n.n.c);
             ns.c = n.n.c;
-            // println!("ns.c: {:?}", ns.c);
+            uv.push(n.s);
             if n.n.lhs != None {
                 ns.lhs = Some(Box::new(vex(
                     &mut n.n.lhs.as_ref().unwrap().to_owned().as_ref().to_owned(),
                     vv.to_owned(),
+                    uv,
                 )));
             }
             if n.n.rhs != None {
                 ns.rhs = Some(Box::new(vex(
                     &mut n.n.rhs.as_ref().unwrap().to_owned().as_ref().to_owned(),
                     vv.to_owned(),
+                    uv,
                 )));
             }
             return ns.to_owned();

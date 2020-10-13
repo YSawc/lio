@@ -41,9 +41,9 @@ fn evaluation_final_value_test() {
 
 #[test]
 fn parser_assign_test() {
-    let t = Token::tokenize("fn { int a = 3; 1 }").unwrap();
+    let t = Token::tokenize("fn { int a = 3; a }").unwrap();
     let l = NodeArr::w_parser(t).unwrap().ret_node_st;
-    let e = { NodeSt::num(1, l.to_owned().c.loc) };
+    let e = { NodeSt::num(3, l.to_owned().c.loc) };
     assert_eq!(e, l)
 }
 

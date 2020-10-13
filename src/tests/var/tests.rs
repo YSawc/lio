@@ -3,13 +3,15 @@ use super::super::super::node::node::*;
 #[cfg(test)]
 use super::super::super::node_arr::node_arr::*;
 #[cfg(test)]
+use super::super::super::parser::error::*;
+#[cfg(test)]
 use super::super::super::token::token::*;
 #[cfg(test)]
 use super::super::super::var::var::*;
 
 #[test]
 fn simplified_variable_under_initialize_test() {
-    let t = Token::tokenize("fn { int a = 2; int b = 8*a; int c = 2*b+a; 0; }").unwrap();
+    let t = Token::tokenize("fn { int a = 2; int b = 8*a; int c = 2*b+a; c; }").unwrap();
     let l = NodeArr::w_parser(t).unwrap().l;
     let loc = l.to_owned();
     let mut il = loc.iter();
@@ -31,7 +33,7 @@ fn simplified_variable_under_initialize_test() {
 
 #[test]
 fn update_variable_test() {
-    let t = Token::tokenize("fn { int a = 3; int b = a; int c = 5; a = 1; 0 }").unwrap();
+    let t = Token::tokenize("fn { int a = 3; int b = a; int c = 5; a = 1; 0+c+b }").unwrap();
     let l = NodeArr::w_parser(t).unwrap().l;
     let loc = l.to_owned();
     let mut il = loc.iter();
@@ -49,4 +51,17 @@ fn update_variable_test() {
         NodeSt::num(1, il.next().unwrap().n.c.loc.to_owned()),
     ));
     assert_eq!(e, l.to_owned())
+}
+
+#[test]
+fn unused_variable_test() {
+    let t = Token::tokenize("fn { int a = 3; int b = a; int c = 5; b }").unwrap();
+    let l = match NodeArr::w_parser(t) {
+        Ok(_) => false,
+        Err(e) => match e {
+            ParseError::UnusedVariable(_) => true,
+            _ => false,
+        },
+    };
+    assert!(l)
 }

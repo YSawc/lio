@@ -58,6 +58,7 @@ impl NodeArr {
     pub fn stp(
         mut it: &mut std::iter::Peekable<std::slice::Iter<Annot<TokenKind>>>,
     ) -> Result<Self, ParseError> {
+        let mut uv: Vec<String> = vec![];
         let mut nv = vec![];
         let mut l: Vec<Var> = vec![];
         let mut b = false;
@@ -87,8 +88,11 @@ impl NodeArr {
 
                         match Self::find_l(_s.to_owned(), l.to_owned()) {
                             Some(mut f) => {
-                                let mut n =
-                                    vex(&mut n.to_owned().rhs.unwrap().to_owned(), l.to_owned());
+                                let mut n = vex(
+                                    &mut n.to_owned().rhs.unwrap().to_owned(),
+                                    l.to_owned(),
+                                    &mut uv,
+                                );
                                 n = simplified::exec(n);
                                 f.n = n;
                                 let ff = f.to_owned();
@@ -96,8 +100,11 @@ impl NodeArr {
                                 l.push(ff);
                             }
                             _ => {
-                                let mut n =
-                                    vex(&mut n.to_owned().rhs.unwrap().to_owned(), l.to_owned());
+                                let mut n = vex(
+                                    &mut n.to_owned().rhs.unwrap().to_owned(),
+                                    l.to_owned(),
+                                    &mut uv,
+                                );
                                 n = simplified::exec(n);
                                 let v = Var::new(_s, n);
                                 l.push(v);
@@ -110,6 +117,7 @@ impl NodeArr {
                             if it.peek().unwrap().to_owned().to_owned().value == TokenKind::RBrace {
                                 b = true;
                             }
+                            uv.push(v.s);
                             v.n
                         }
                         None => {
@@ -120,7 +128,11 @@ impl NodeArr {
                         if it.peek().unwrap().to_owned().to_owned().value == TokenKind::RBrace {
                             b = true;
                         }
-                        let mut c = vex(&mut n.to_owned().cond.unwrap().to_owned(), l.to_owned());
+                        let mut c = vex(
+                            &mut n.to_owned().cond.unwrap().to_owned(),
+                            l.to_owned(),
+                            &mut uv,
+                        );
                         c = simplified::exec(c);
                         match c.c.value {
                             NodeKind::Num(num) => {
@@ -142,7 +154,7 @@ impl NodeArr {
                             b = true;
                         }
 
-                        let n = vex(&mut n.to_owned(), l.to_owned());
+                        let n = vex(&mut n.to_owned(), l.to_owned(), &mut uv);
                         n
                     }
                 },
@@ -152,6 +164,15 @@ impl NodeArr {
 
         let mut a = Self::new(nv);
         a.l = l;
+        println!("uv: {:?}", uv);
+
+        for l in a.to_owned().l {
+            match uv.contains(&l.to_owned().s.to_owned()) {
+                true => (),
+                false => return Err(ParseError::UnusedVariable(l.n.c.loc)),
+            }
+        }
+
         Ok(a)
     }
 }

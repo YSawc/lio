@@ -51,7 +51,7 @@ assert 4 'fn { 4; }'
 assert 3 'fn { 2; 3; }'
 assert 4 'fn { return 4; }'
 assert 1 'fn { int a = 3; 1; }'
-assert 4 'fn { int a = 3; int b = 4; b; }'
+assert 12 'fn { int a = 3; int b = 4; a*b; }'
 assert 36 'fn { int a = 3; int b = 4; b*a*3; }'
 assert 60 'fn { int a = 3; int b = 4; b*a*5; }' simplified
 assert 54 'fn { int a = 3; int b = a*2; b*a*3; }'

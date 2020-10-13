@@ -89,6 +89,8 @@ impl fmt::Display for ParseError {
                 "{}: Expected operator inner function but god {}",
                 tok.loc, tok.value
             ),
+            ParseError::UnusedVariable(loc) => write!(f, "{} Unused variable detected!", loc),
+
             ParseError::Eof => write!(f, "Expected token, but not detected."),
         }
     }

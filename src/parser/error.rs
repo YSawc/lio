@@ -1,3 +1,4 @@
+use super::super::location::location::*;
 use super::super::token::token::*;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -14,6 +15,7 @@ pub enum ParseError {
     NotLBrace(Token),
     NotRBrace(Token),
     OperatorOutOfFnction(Token),
+    UnusedVariable(Loc),
     // UnexpectedToken(Token),
     // NotExpression(Token),
     // UnclosedOpenParen(Token),
