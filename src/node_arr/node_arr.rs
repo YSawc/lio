@@ -92,6 +92,7 @@ impl NodeArr {
                                     true => (),
                                     false => return Err(ParseError::UnusedVariable(f.n.c.loc)),
                                 }
+                                uv.retain(|s| s != &f.to_owned().s.to_owned());
                                 let mut n = vex(
                                     &mut n.to_owned().rhs.unwrap().to_owned(),
                                     l.to_owned(),
@@ -121,7 +122,10 @@ impl NodeArr {
                             if it.peek().unwrap().to_owned().to_owned().value == TokenKind::RBrace {
                                 b = true;
                             }
-                            uv.push(v.s);
+                            if uv.contains(&v.to_owned().s.to_owned()) {
+                            } else {
+                                uv.push(v.s);
+                            }
                             v.n
                         }
                         None => {

@@ -33,7 +33,7 @@ fn simplified_variable_under_initialize_test() {
 
 #[test]
 fn update_variable_test() {
-    let t = Token::tokenize("fn { int a = 3; int b = a; int c = 5; a = 1; 0+c+b }").unwrap();
+    let t = Token::tokenize("fn { int a = 3; int b = a; int c = 5; a = 1; a+c+b }").unwrap();
     let l = NodeArr::w_parser(t).unwrap().l;
     let loc = l.to_owned();
     let mut il = loc.iter();
@@ -79,6 +79,19 @@ fn unused_variable_check_when_parsed_whole_function_test() {
 #[test]
 fn unused_variable_check_just_before_overwrite_variable_test() {
     let t = Token::tokenize("fn { int a = 3; int a = 0; a }").unwrap();
+    let l = match NodeArr::w_parser(t) {
+        Ok(_) => false,
+        Err(e) => match e {
+            ParseError::UnusedVariable(_) => true,
+            _ => false,
+        },
+    };
+    assert!(l)
+}
+
+#[test]
+fn fixme_update_variable_test() {
+    let t = Token::tokenize("fn { int a = 3; int b = a; int c = 5; a = 1; 0+c+b }").unwrap();
     let l = match NodeArr::w_parser(t) {
         Ok(_) => false,
         Err(e) => match e {

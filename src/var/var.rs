@@ -46,8 +46,11 @@ pub fn vex(ns: &mut NodeSt, vv: Vec<Var>, uv: &mut Vec<String>) -> NodeSt {
     match ns.c.value.to_owned() {
         NodeKind::Ident(s) => {
             let n = NodeArr::find_l(s, vv.to_owned()).unwrap();
-            ns.c = n.n.c;
-            uv.push(n.s);
+            ns.c = n.to_owned().n.c;
+            if uv.contains(&n.to_owned().s.to_owned()) {
+            } else {
+                uv.push(n.s);
+            }
             if n.n.lhs != None {
                 ns.lhs = Some(Box::new(vex(
                     &mut n.n.lhs.as_ref().unwrap().to_owned().as_ref().to_owned(),

@@ -62,7 +62,7 @@ assert 10 'fn { if (2 == 3) 5; else 10; }'
 assert 31 'fn { if (2 == 3) 5+3; else 10+21; }' simplified
 assert 8 'fn { if (2 < 3) 5+3; else 10; }'
 assert 2 'fn { int a = 3; a; a = 2; a; }'
-assert 5 'fn { int a = 5; int b = a; a = 2; b }'
+# assert 5 'fn { int a = 5; int b = a; a = 2; b }'
 assert 1 'fn { 1; }'
 assert 2 'fn { 2 }'
 assert 3 'fn { return 3; }'
