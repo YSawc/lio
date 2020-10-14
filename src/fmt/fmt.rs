@@ -91,6 +91,7 @@ impl fmt::Display for ParseError {
             ),
             ParseError::UndefinedVariable(loc) => write!(f, "{} Undefined variable detected!", loc),
             ParseError::UnusedVariable(loc) => write!(f, "{} Unused variable detected!", loc),
+            ParseError::NotMatchReturnType(loc) => write!(f, "{}: Return type is not match.", loc),
             ParseError::Eof => write!(f, "Expected token, but not detected."),
         }
     }

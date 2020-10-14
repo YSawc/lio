@@ -45,6 +45,13 @@ impl NodeArr {
         et.to_owned().next();
         it.next();
 
+        let mut isi: bool = false;
+        if it.peek().unwrap().value == TokenKind::Int {
+            et.to_owned().next();
+            it.next();
+            isi = true;
+        }
+
         if it.peek() == None {
             return Err(ParseError::NotLBrace(
                 et.to_owned().next().unwrap().to_owned(),
@@ -52,7 +59,37 @@ impl NodeArr {
         }
         it.next();
 
-        Self::stp(&mut it)
+        let l = Self::stp(&mut it);
+
+        if isi {
+            match l.to_owned()?.to_owned().ret_node_st.c.value {
+                NodeKind::Num(_)
+                | NodeKind::Add
+                | NodeKind::Sub
+                | NodeKind::Mul
+                | NodeKind::Div
+                | NodeKind::E
+                | NodeKind::NE
+                | NodeKind::L
+                | NodeKind::LE
+                | NodeKind::G
+                | NodeKind::GE => return l,
+                _ => {
+                    return Err(ParseError::NotMatchReturnType(
+                        l.to_owned().unwrap().to_owned().ret_node_st.c.loc,
+                    ))
+                }
+            }
+        } else {
+            match l.to_owned()?.to_owned().ret_node_st.c.value {
+                NodeKind::Default => return l,
+                _ => {
+                    return Err(ParseError::NotMatchReturnType(
+                        l.to_owned().unwrap().to_owned().ret_node_st.c.loc,
+                    ))
+                }
+            }
+        }
     }
 
     pub fn stp(
@@ -61,6 +98,7 @@ impl NodeArr {
         let mut uv: Vec<String> = vec![];
         let mut nv = vec![];
         let mut l: Vec<Var> = vec![];
+        let mut r: NodeSt = NodeSt::default();
         let mut b = false;
         while it.peek() != None && b == false {
             nv.push(match NodeSt::parser(&mut it) {
@@ -72,7 +110,9 @@ impl NodeArr {
                             ));
                         }
                         b = true;
-                        n
+
+                        r = *n.to_owned().lhs.unwrap().to_owned();
+                        r.to_owned()
                     }
                     NodeKind::NewAssign => {
                         let mut _s = String::new();
@@ -162,7 +202,11 @@ impl NodeArr {
                             }
                             if uv.contains(&v.to_owned().s.to_owned()) {
                             } else {
-                                uv.push(v.s);
+                                uv.push(v.to_owned().s);
+                            }
+
+                            if b {
+                                r = v.to_owned().n.to_owned();
                             }
                             v.n
                         }
@@ -184,11 +228,17 @@ impl NodeArr {
                             NodeKind::Num(num) => {
                                 if num == 0 {
                                     if n.to_owned().melse_stmt != None {
+                                        if b {
+                                            r = *n.to_owned().melse_stmt.unwrap().to_owned();
+                                        }
                                         *n.to_owned().melse_stmt.unwrap().to_owned()
                                     } else {
                                         continue;
                                     }
                                 } else {
+                                    if b {
+                                        r = *n.to_owned().stmt.unwrap().to_owned();
+                                    }
                                     *n.to_owned().stmt.unwrap().to_owned()
                                 }
                             }
@@ -201,6 +251,10 @@ impl NodeArr {
                         }
 
                         let n = vex(&mut n.to_owned(), l.to_owned(), &mut uv);
+                        if b {
+                            r = n.to_owned();
+                        }
+                        // println!("r: {:?}", r);
                         n
                     }
                 },
@@ -210,6 +264,7 @@ impl NodeArr {
 
         let mut a = Self::new(nv);
         a.l = l;
+        a.ret_node_st = r;
         println!("uv: {:?}", uv);
 
         for l in a.to_owned().l {
@@ -218,6 +273,7 @@ impl NodeArr {
                 false => return Err(ParseError::UnusedVariable(l.n.c.loc)),
             }
         }
+        // println!("ret_node_st: {:?}", a.ret_node_st);
 
         Ok(a)
     }

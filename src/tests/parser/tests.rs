@@ -11,11 +11,11 @@ use super::super::super::token::token::*;
 
 #[test]
 fn parser_test() {
-    let t = Token::tokenize("fn { 12+3; }").unwrap();
+    let t = Token::tokenize("fn int { 12+3; }").unwrap();
     let l = NodeArr::w_parser(t).unwrap().ret_node_st;
     let e = {
         NodeSt {
-            c: Node::plus(Loc::new(9, 10)),
+            c: Node::plus(Loc::new(14, 15)),
             lhs: Some(l.to_owned().lhs.unwrap()),
             rhs: Some(l.to_owned().rhs.unwrap()),
             ..Default::default()
@@ -26,11 +26,11 @@ fn parser_test() {
 
 #[test]
 fn evaluation_final_value_test() {
-    let t = Token::tokenize("fn { 12+3 }").unwrap();
+    let t = Token::tokenize("fn int { 12+3 }").unwrap();
     let l = NodeArr::w_parser(t).unwrap().ret_node_st;
     let e = {
         NodeSt {
-            c: Node::plus(Loc::new(9, 10)),
+            c: Node::plus(Loc::new(14, 15)),
             lhs: Some(l.to_owned().lhs.unwrap()),
             rhs: Some(l.to_owned().rhs.unwrap()),
             ..Default::default()
@@ -41,7 +41,7 @@ fn evaluation_final_value_test() {
 
 #[test]
 fn parser_assign_test() {
-    let t = Token::tokenize("fn { int a = 3; a }").unwrap();
+    let t = Token::tokenize("fn int { int a = 3; a }").unwrap();
     let l = NodeArr::w_parser(t).unwrap().ret_node_st;
     let e = { NodeSt::num(3, l.to_owned().c.loc) };
     assert_eq!(e, l)
@@ -49,10 +49,10 @@ fn parser_assign_test() {
 
 #[test]
 fn variable_expansion_test() {
-    let t = Token::tokenize("fn { int a = 3; int b = 5; b*a; }").unwrap();
+    let t = Token::tokenize("fn int { int a = 3; int b = 5; b*a; }").unwrap();
     let l = NodeArr::w_parser(t).unwrap().ret_node_st;
     let e = NodeSt {
-        c: Node::mul(Loc::new(28, 29)),
+        c: Node::mul(Loc::new(32, 33)),
         lhs: Some(l.to_owned().lhs.unwrap()),
         rhs: Some(l.to_owned().rhs.unwrap()),
         ..Default::default()
@@ -63,7 +63,7 @@ fn variable_expansion_test() {
 
 #[test]
 fn return_with_unclosed_test() {
-    let t = Token::tokenize("fn { return 3 }").unwrap();
+    let t = Token::tokenize("fn int { return 3 }").unwrap();
     let l = match NodeArr::w_parser(t) {
         Ok(_) => false,
         Err(e) => match e {
@@ -76,7 +76,7 @@ fn return_with_unclosed_test() {
 
 #[test]
 fn operater_after_return_test() {
-    let t = Token::tokenize("fn { return 3; 4 }").unwrap();
+    let t = Token::tokenize("fn int { return 3; 4 }").unwrap();
     let l = match NodeArr::w_parser(t) {
         Ok(_) => false,
         Err(e) => match e {
@@ -130,6 +130,19 @@ fn operator_out_of_function_test() {
         Ok(_) => false,
         Err(e) => match e {
             ParseError::OperatorOutOfFnction(_) => true,
+            _ => false,
+        },
+    };
+    assert!(l)
+}
+
+#[test]
+fn not_match_return_type_test() {
+    let t = Token::tokenize("fn { 12+3; }").unwrap();
+    let l = match NodeArr::w_parser(t) {
+        Ok(_) => false,
+        Err(e) => match e {
+            ParseError::NotMatchReturnType(_) => true,
             _ => false,
         },
     };

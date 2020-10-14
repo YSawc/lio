@@ -17,6 +17,7 @@ pub enum ParseError {
     OperatorOutOfFnction(Token),
     UndefinedVariable(Loc),
     UnusedVariable(Loc),
+    NotMatchReturnType(Loc),
     // UnexpectedToken(Token),
     // NotExpression(Token),
     // UnclosedOpenParen(Token),

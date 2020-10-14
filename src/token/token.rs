@@ -92,9 +92,6 @@ impl Token {
     pub fn assign(loc: Loc) -> Self {
         Self::new(TokenKind::Assign, loc)
     }
-    pub fn new_assign(loc: Loc) -> Self {
-        Self::new(TokenKind::Assign, loc)
-    }
     pub fn map(loc: Loc) -> Self {
         Self::new(TokenKind::Map, loc)
     }

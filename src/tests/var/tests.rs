@@ -11,7 +11,7 @@ use super::super::super::var::var::*;
 
 #[test]
 fn simplified_variable_under_initialize_test() {
-    let t = Token::tokenize("fn { int a = 2; int b = 8*a; int c = 2*b+a; c; }").unwrap();
+    let t = Token::tokenize("fn int { int a = 2; int b = 8*a; int c = 2*b+a; c; }").unwrap();
     let l = NodeArr::w_parser(t).unwrap().l;
     let loc = l.to_owned();
     let mut il = loc.iter();
@@ -33,7 +33,7 @@ fn simplified_variable_under_initialize_test() {
 
 #[test]
 fn update_variable_test() {
-    let t = Token::tokenize("fn { int a = 3; int b = a; int c = 5; a = 1; a+c+b }").unwrap();
+    let t = Token::tokenize("fn int { int a = 3; int b = a; int c = 5; a = 1; a+c+b }").unwrap();
     let l = NodeArr::w_parser(t).unwrap().l;
     let loc = l.to_owned();
     let mut il = loc.iter();
@@ -55,7 +55,7 @@ fn update_variable_test() {
 
 #[test]
 fn unused_variable_check_for_used_variable_test() {
-    let t = Token::tokenize("fn { int a = 3; a; int a = 0; int b = 5; a*b }").unwrap();
+    let t = Token::tokenize("fn int { int a = 3; a; int a = 0; int b = 5; a*b }").unwrap();
     let l = match NodeArr::w_parser(t) {
         Ok(_) => true,
         Err(_) => false,
@@ -91,7 +91,7 @@ fn unused_variable_check_just_before_overwrite_variable_test() {
 
 #[test]
 fn unused_variable_check_for_update_variable_test() {
-    let t = Token::tokenize("fn { int a = 3; int b = a; int c = 5; a = 1; 0+c+b }").unwrap();
+    let t = Token::tokenize("fn int { int a = 3; int b = a; int c = 5; a = 1; 0+c+b }").unwrap();
     let l = match NodeArr::w_parser(t) {
         Ok(_) => true,
         Err(_) => false,
