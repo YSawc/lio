@@ -40,6 +40,7 @@ impl fmt::Display for TokenKind {
             TokenKind::Fn => write!(f, "fn"),
             TokenKind::LBrace => write!(f, "{{"),
             TokenKind::RBrace => write!(f, "}}"),
+            TokenKind::UnderScore => write!(f, "_"),
         }
     }
 }
@@ -92,6 +93,11 @@ impl fmt::Display for ParseError {
             ParseError::UndefinedVariable(loc) => write!(f, "{} Undefined variable detected!", loc),
             ParseError::UnusedVariable(loc) => write!(f, "{} Unused variable detected!", loc),
             ParseError::NotMatchReturnType(loc) => write!(f, "{}: Return type is not match.", loc),
+            ParseError::UnexpectedUnderScoreOperator(loc) => write!(
+                f,
+                "{}: Expected under socre as void return, but used as operator.",
+                loc
+            ),
             ParseError::Eof => write!(f, "Expected token, but not detected."),
         }
     }

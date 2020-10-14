@@ -30,6 +30,7 @@ pub enum TokenKind {
     Fn,
     LBrace,
     RBrace,
+    UnderScore,
 }
 
 pub type Token = Annot<TokenKind>;
@@ -149,6 +150,7 @@ impl Token {
             map.insert('='.into(), TokenKind::Assign);
             map.insert('{'.into(), TokenKind::LBrace);
             map.insert('}'.into(), TokenKind::RBrace);
+            map.insert('_'.into(), TokenKind::UnderScore);
             map
         }
 

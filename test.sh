@@ -62,10 +62,14 @@ assert 10 'fn int { if (2 == 3) 5; else 10; }'
 assert 31 'fn int { if (2 == 3) 5+3; else 10+21; }' simplified
 assert 8 'fn int { if (2 < 3) 5+3; else 10; }'
 assert 2 'fn int { int a = 3; a; a = 2; a; }'
-# assert 5 'fn int { int a = 5; int b = a; a = 2; b }'
+assert 5 'fn int { int a = 5; int b = a; a = 2; b }'
 assert 1 'fn int { 1; }'
 assert 2 'fn int { 2 }'
 assert 3 'fn int { return 3; }'
+assert 0 'fn { _ }'
+assert 0 'fn { int vvv = 55; 0*vvv*0; _ }'
+assert 0 'fn { int vvv = 4; 1+2*vvv/4-1; _; }'
+assert 0 'fn { int vvv = 4; 1+2*vvv/4-1; _ }' simplified
 
 echo "------------------------------"
 echo "All test passed!"

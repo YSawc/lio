@@ -25,6 +25,7 @@ pub enum NodeKind {
     Fn,
     LBrace,
     RBrace,
+    UnderScore,
     Default,
 }
 
@@ -113,12 +114,21 @@ impl Node {
     pub fn mfn(loc: Loc) -> Self {
         Self::new(NodeKind::Fn, loc)
     }
+    pub fn under_score(loc: Loc) -> Self {
+        Self::new(NodeKind::UnderScore, loc)
+    }
 }
 
 impl NodeSt {
     pub fn num(n: i8, loc: Loc) -> Self {
         NodeSt {
             c: Node::num(n, loc),
+            ..Default::default()
+        }
+    }
+    pub fn under_score(loc: Loc) -> Self {
+        NodeSt {
+            c: Node::under_score(loc),
             ..Default::default()
         }
     }

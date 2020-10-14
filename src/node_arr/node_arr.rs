@@ -82,7 +82,7 @@ impl NodeArr {
             }
         } else {
             match l.to_owned()?.to_owned().ret_node_st.c.value {
-                NodeKind::Default => return l,
+                NodeKind::UnderScore => return l,
                 _ => {
                     return Err(ParseError::NotMatchReturnType(
                         l.to_owned().unwrap().to_owned().ret_node_st.c.loc,
@@ -194,6 +194,17 @@ impl NodeArr {
                             }
                         }
                         continue;
+                    }
+                    NodeKind::UnderScore => {
+                        if it.peek().unwrap().to_owned().to_owned().value != TokenKind::RBrace {
+                            return Err(ParseError::UnexpectedUnderScoreOperator(
+                                n.to_owned().c.loc,
+                            ));
+                        }
+                        b = true;
+                        let n = NodeSt::under_score(n.c.loc);
+                        r = n.to_owned();
+                        n
                     }
                     NodeKind::Ident(s) => match Self::find_l(s, l.to_owned()) {
                         Some(v) => {

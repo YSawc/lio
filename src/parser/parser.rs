@@ -44,6 +44,12 @@ impl NodeSt {
             ..Default::default()
         }
     }
+    pub fn new_node(c: Node) -> Self {
+        Self {
+            c,
+            ..Default::default()
+        }
+    }
 }
 
 impl NodeSt {
@@ -175,6 +181,29 @@ impl NodeSt {
                     }
                     _ => return Err(ParseError::NotClosedStmt(et.next().unwrap().to_owned())),
                 }
+            }
+            Token {
+                value: TokenKind::UnderScore,
+                loc,
+            } => {
+                let mut et = it.clone();
+                it.next().unwrap();
+                let u = Node::under_score(loc.to_owned());
+                let op = Self::new_node(u);
+                if it.peek() == None {
+                    et.next();
+                    return Err(ParseError::NotClosedStmt(et.next().unwrap().to_owned()));
+                }
+                match it.peek().unwrap() {
+                    Token {
+                        value: TokenKind::SemiColon,
+                        ..
+                    } => {
+                        it.next();
+                    }
+                    _ => (),
+                }
+                return Ok(op);
             }
             _ => {
                 let lhs = Self::cmp(it)?;

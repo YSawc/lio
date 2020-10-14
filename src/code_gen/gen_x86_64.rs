@@ -38,6 +38,10 @@ fn gen_x86(f: &mut fs::File, ns: NodeSt) -> String {
             write!(f, "  jmp .L.return\n").unwrap();
             return l;
         }
+        NodeKind::UnderScore => {
+            unsafe { write!(f, "  mov $0, %{}\n", REGS[CC as usize]).unwrap() };
+            unsafe { return REGS[CC as usize].to_string() };
+        }
         _ => (),
     }
 

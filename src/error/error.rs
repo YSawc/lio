@@ -70,7 +70,8 @@ impl Error {
                     | ParseError::OperatorOutOfFnction(loc, ..) => loc.loc.clone(),
                     ParseError::UndefinedVariable(loc)
                     | ParseError::UnusedVariable(loc)
-                    | ParseError::NotMatchReturnType(loc) => loc.clone(),
+                    | ParseError::NotMatchReturnType(loc)
+                    | ParseError::UnexpectedUnderScoreOperator(loc) => loc.clone(),
                     ParseError::Eof => Loc::new(input.len() as u8, input.len() as u8 + 1),
                 };
                 (e, loc)

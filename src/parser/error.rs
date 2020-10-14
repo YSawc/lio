@@ -18,6 +18,7 @@ pub enum ParseError {
     UndefinedVariable(Loc),
     UnusedVariable(Loc),
     NotMatchReturnType(Loc),
+    UnexpectedUnderScoreOperator(Loc),
     // UnexpectedToken(Token),
     // NotExpression(Token),
     // UnclosedOpenParen(Token),

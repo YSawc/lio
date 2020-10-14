@@ -113,7 +113,7 @@ pub fn exec(ns: NodeSt) -> NodeSt {
                 _ => unreachable!(),
             }
         }
-        NodeKind::Num(_) => return ns,
+        NodeKind::Num(_) | NodeKind::UnderScore => return ns,
         _ => unreachable!(),
     };
 }

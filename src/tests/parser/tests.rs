@@ -148,3 +148,39 @@ fn not_match_return_type_test() {
     };
     assert!(l)
 }
+
+#[test]
+fn match_void_type_test() {
+    let t = Token::tokenize("fn { _ }").unwrap();
+    let l = match NodeArr::w_parser(t) {
+        Ok(_) => true,
+        _ => false,
+    };
+    assert!(l)
+}
+
+#[test]
+fn not_match_void_type_test() {
+    let t = Token::tokenize("fn int { _ }").unwrap();
+    let l = match NodeArr::w_parser(t) {
+        Ok(_) => false,
+        Err(e) => match e {
+            ParseError::NotMatchReturnType(_) => true,
+            _ => false,
+        },
+    };
+    assert!(l)
+}
+
+#[test]
+fn unexpected_underscore_operator_test() {
+    let t = Token::tokenize("fn int { _; 1 }").unwrap();
+    let l = match NodeArr::w_parser(t) {
+        Ok(_) => false,
+        Err(e) => match e {
+            ParseError::UnexpectedUnderScoreOperator(_) => true,
+            _ => false,
+        },
+    };
+    assert!(l)
+}
