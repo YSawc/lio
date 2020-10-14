@@ -90,12 +90,22 @@ fn unused_variable_check_just_before_overwrite_variable_test() {
 }
 
 #[test]
-fn fixme_update_variable_test() {
+fn unused_variable_check_for_update_variable_test() {
     let t = Token::tokenize("fn { int a = 3; int b = a; int c = 5; a = 1; 0+c+b }").unwrap();
+    let l = match NodeArr::w_parser(t) {
+        Ok(_) => true,
+        Err(_) => false,
+    };
+    assert!(l)
+}
+
+#[test]
+fn undefined_variable_test() {
+    let t = Token::tokenize("fn { int a = 3; d = 1; a }").unwrap();
     let l = match NodeArr::w_parser(t) {
         Ok(_) => false,
         Err(e) => match e {
-            ParseError::UnusedVariable(_) => true,
+            ParseError::UndefinedVariable(_) => true,
             _ => false,
         },
     };

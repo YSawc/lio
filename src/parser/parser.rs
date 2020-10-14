@@ -101,7 +101,7 @@ impl NodeSt {
                             } => {
                                 let mut et = it.clone();
                                 it.next().unwrap();
-                                let op = Node::assign(loc.to_owned());
+                                let op = Node::new_assign(loc.to_owned());
                                 let r = Self::cmp(it)?;
                                 let lhs = Self::new_nds(op, l, r);
                                 if it.peek() == None {
@@ -326,7 +326,9 @@ impl NodeSt {
                         value: TokenKind::RParen,
                         ..
                     } => Ok(rhs),
-                    _ => Err(ParseError::NotClosedParen(et.to_owned().next().unwrap().to_owned())),
+                    _ => Err(ParseError::NotClosedParen(
+                        et.to_owned().next().unwrap().to_owned(),
+                    )),
                 }
             }
             _ => Self::primary(it),

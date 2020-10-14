@@ -74,7 +74,7 @@ impl NodeArr {
                         b = true;
                         n
                     }
-                    NodeKind::Assign => {
+                    NodeKind::NewAssign => {
                         let mut _s = String::new();
                         match n.to_owned().lhs.unwrap().c.value {
                             NodeKind::Ident(si) => _s = si,
@@ -113,6 +113,44 @@ impl NodeArr {
                                 n = simplified::exec(n);
                                 let v = Var::new(_s, n);
                                 l.push(v);
+                            }
+                        }
+                        continue;
+                    }
+                    NodeKind::Assign => {
+                        let mut _s = String::new();
+                        match n.to_owned().lhs.unwrap().c.value {
+                            NodeKind::Ident(si) => _s = si,
+                            _ => {
+                                match n.to_owned().lhs.unwrap().lhs.unwrap().c.value {
+                                    NodeKind::Ident(si) => _s = si,
+                                    _ => unreachable!(),
+                                };
+                            }
+                        }
+
+                        match Self::find_l(_s.to_owned(), l.to_owned()) {
+                            Some(mut f) => {
+                                // println!("uv: {:?}", uv);
+                                match uv.contains(&f.to_owned().s.to_owned()) {
+                                    true => (),
+                                    false => return Err(ParseError::UnusedVariable(f.n.c.loc)),
+                                }
+                                let mut n = vex(
+                                    &mut n.to_owned().rhs.unwrap().to_owned(),
+                                    l.to_owned(),
+                                    &mut uv,
+                                );
+                                n = simplified::exec(n);
+                                f.n = n;
+                                let ff = f.to_owned();
+                                l.retain(|s| s.s != _s.to_owned());
+                                l.push(ff);
+                            }
+                            _ => {
+                                return Err(ParseError::UndefinedVariable(
+                                    n.to_owned().lhs.unwrap().c.loc,
+                                ))
                             }
                         }
                         continue;

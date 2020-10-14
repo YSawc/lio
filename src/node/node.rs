@@ -19,6 +19,7 @@ pub enum NodeKind {
     Int,
     Ident(String),
     Assign,
+    NewAssign,
     If,
     Else,
     Fn,
@@ -99,6 +100,9 @@ impl Node {
     }
     pub fn assign(loc: Loc) -> Self {
         Self::new(NodeKind::Assign, loc)
+    }
+    pub fn new_assign(loc: Loc) -> Self {
+        Self::new(NodeKind::NewAssign, loc)
     }
     pub fn mif(loc: Loc) -> Self {
         Self::new(NodeKind::If, loc)
