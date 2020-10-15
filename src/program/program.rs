@@ -21,30 +21,24 @@ impl Program {
 }
 
 impl Program {
-    pub fn find_v(s: String, g: Vec<Var>, l: Vec<Var>) -> Option<Var> {
-        for v in g {
-            if v.s == s {
-                return Some(v);
+    pub fn find_v(s: String, ev: Vec<Vec<Var>>) -> Option<Var> {
+        let ie = ev.iter().peekable().rev();
+
+        for evs in ie {
+            for v in evs {
+                // println!("v: {:?}", v);
+                if v.s == s {
+                    return Some(v.to_owned());
+                }
             }
         }
-
-        for v in l {
-            if v.s == s {
-                return Some(v);
-            }
-        }
-
         None
     }
 
     pub fn w_parser(vt: Vec<Token>) -> Result<Self, ParseError> {
-        // let g: Vec<Var> = vec![];
         let mut na: Vec<NodeArr> = vec![];
         let mut it = vt.iter().peekable();
-
-        // while it.peek().unwrap().value != TokenKind::Fn {}
         let g: Vec<Var> = Self::stp(&mut it)?;
-        // g.puch
 
         na.push(NodeArr::w_parser(&mut it, g.to_owned())?);
         Ok(Self::new(g, na))
@@ -54,11 +48,10 @@ impl Program {
         mut it: &mut std::iter::Peekable<std::slice::Iter<Annot<TokenKind>>>,
     ) -> Result<Vec<Var>, ParseError> {
         let mut uv: Vec<String> = vec![];
-        let mut _l = vec![];
         let mut g: Vec<Var> = vec![];
-        // let mut r : NodeSt = NodeSt::default();
         let mut b = false;
         while it.peek().unwrap().value != TokenKind::Fn && b == false {
+            let et = it.to_owned();
             match NodeSt::parser(&mut it) {
                 Ok(n) => match n.c.value {
                     NodeKind::Fn => {
@@ -75,6 +68,8 @@ impl Program {
                                 };
                             }
                         }
+                        let mut ev = vec![];
+                        ev.push(g.to_owned());
                         match NodeArr::find_l(_s.to_owned(), g.to_owned()) {
                             Some(mut f) => {
                                 match uv.contains(&f.to_owned().s.to_owned()) {
@@ -82,12 +77,8 @@ impl Program {
                                     false => return Err(ParseError::UnusedVariable(f.n.c.loc)),
                                 }
                                 uv.retain(|s| s != &f.to_owned().s.to_owned());
-                                let mut n = vex(
-                                    &mut n.to_owned().rhs.unwrap().to_owned(),
-                                    g.to_owned(),
-                                    _l.to_vec(),
-                                    &mut uv,
-                                );
+                                let mut n =
+                                    vex(&mut n.to_owned().rhs.unwrap().to_owned(), ev, &mut uv);
                                 n = simplified::exec(n);
                                 f.n = n;
                                 let ff = f.to_owned();
@@ -95,12 +86,8 @@ impl Program {
                                 g.push(ff);
                             }
                             _ => {
-                                let mut n = vex(
-                                    &mut n.to_owned().rhs.unwrap().to_owned(),
-                                    g.to_owned(),
-                                    _l.to_vec(),
-                                    &mut uv,
-                                );
+                                let mut n =
+                                    vex(&mut n.to_owned().rhs.unwrap().to_owned(), ev, &mut uv);
                                 n = simplified::exec(n);
                                 let v = Var::new(_s, n);
                                 g.push(v);
@@ -108,7 +95,11 @@ impl Program {
                         }
                         continue;
                     }
-                    _ => return Err(ParseError::Eof),
+                    _ => {
+                        return Err(ParseError::OperatorOutOfFnction(
+                            et.to_owned().next().unwrap().to_owned(),
+                        ))
+                    }
                 },
                 Err(e) => return Err(e),
             }

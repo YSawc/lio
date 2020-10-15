@@ -21,12 +21,11 @@ impl Var {
     }
 }
 
-pub fn vex(ns: &mut NodeSt, g: Vec<Var>, vv: Vec<Var>, uv: &mut Vec<String>) -> NodeSt {
+pub fn vex(ns: &mut NodeSt, ev: Vec<Vec<Var>>, uv: &mut Vec<String>) -> NodeSt {
     if ns.lhs != None {
         let l = Some(Box::new(vex(
             &mut ns.lhs.as_ref().unwrap().to_owned().as_ref().to_owned(),
-            g.to_owned(),
-            vv.to_owned(),
+            ev.to_owned(),
             uv,
         )));
         if ns.lhs != l {
@@ -37,8 +36,7 @@ pub fn vex(ns: &mut NodeSt, g: Vec<Var>, vv: Vec<Var>, uv: &mut Vec<String>) -> 
     if ns.rhs != None {
         let r = Some(Box::new(vex(
             &mut ns.rhs.as_ref().unwrap().to_owned().as_ref().to_owned(),
-            g.to_owned(),
-            vv.to_owned(),
+            ev.to_owned(),
             uv,
         )));
         if ns.rhs != r {
@@ -48,7 +46,7 @@ pub fn vex(ns: &mut NodeSt, g: Vec<Var>, vv: Vec<Var>, uv: &mut Vec<String>) -> 
 
     match ns.c.value.to_owned() {
         NodeKind::Ident(s) => {
-            let n = Program::find_v(s, g.to_owned(), vv.to_owned()).unwrap();
+            let n = Program::find_v(s, ev.to_owned()).unwrap();
             ns.c = n.to_owned().n.c;
             if uv.contains(&n.to_owned().s.to_owned()) {
             } else {
@@ -57,16 +55,14 @@ pub fn vex(ns: &mut NodeSt, g: Vec<Var>, vv: Vec<Var>, uv: &mut Vec<String>) -> 
             if n.n.lhs != None {
                 ns.lhs = Some(Box::new(vex(
                     &mut n.n.lhs.as_ref().unwrap().to_owned().as_ref().to_owned(),
-                    g.to_owned(),
-                    vv.to_owned(),
+                    ev.to_owned(),
                     uv,
                 )));
             }
             if n.n.rhs != None {
                 ns.rhs = Some(Box::new(vex(
                     &mut n.n.rhs.as_ref().unwrap().to_owned().as_ref().to_owned(),
-                    g.to_owned(),
-                    vv.to_owned(),
+                    ev.to_owned(),
                     uv,
                 )));
             }

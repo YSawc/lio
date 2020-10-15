@@ -61,7 +61,9 @@ impl NodeArr {
         }
         it.next();
 
-        let l = Self::stp(&mut it, g);
+        let mut ev: Vec<Vec<Var>> = vec![];
+        ev.push(g.to_owned());
+        let l = Self::stp(&mut it, ev);
 
         if isi {
             match l.to_owned()?.to_owned().ret_node_st.c.value {
@@ -96,7 +98,7 @@ impl NodeArr {
 
     pub fn stp(
         mut it: &mut std::iter::Peekable<std::slice::Iter<Annot<TokenKind>>>,
-        g: Vec<Var>,
+        ev: Vec<Vec<Var>>,
     ) -> Result<Self, ParseError> {
         let mut uv: Vec<String> = vec![];
         let mut nv = vec![];
@@ -128,8 +130,9 @@ impl NodeArr {
                                 };
                             }
                         }
-
-                        match Program::find_v(_s.to_owned(), g.to_owned(), l.to_owned()) {
+                        let mut ev = ev.to_owned();
+                        ev.push(l.to_owned());
+                        match Program::find_v(_s.to_owned(), ev.to_owned()) {
                             Some(mut f) => {
                                 match uv.contains(&f.to_owned().s.to_owned()) {
                                     true => (),
@@ -138,8 +141,7 @@ impl NodeArr {
                                 uv.retain(|s| s != &f.to_owned().s.to_owned());
                                 let mut n = vex(
                                     &mut n.to_owned().rhs.unwrap().to_owned(),
-                                    g.to_owned(),
-                                    l.to_owned(),
+                                    ev.to_owned(),
                                     &mut uv,
                                 );
                                 n = simplified::exec(n);
@@ -151,8 +153,7 @@ impl NodeArr {
                             _ => {
                                 let mut n = vex(
                                     &mut n.to_owned().rhs.unwrap().to_owned(),
-                                    g.to_owned(),
-                                    l.to_owned(),
+                                    ev.to_owned(),
                                     &mut uv,
                                 );
                                 n = simplified::exec(n);
@@ -174,7 +175,9 @@ impl NodeArr {
                             }
                         }
 
-                        match Program::find_v(_s.to_owned(), g.to_owned(), l.to_owned()) {
+                        let mut ev = ev.to_owned();
+                        ev.push(l.to_owned());
+                        match Program::find_v(_s.to_owned(), ev.to_owned()) {
                             Some(mut f) => {
                                 // println!("uv: {:?}", uv);
                                 match uv.contains(&f.to_owned().s.to_owned()) {
@@ -183,8 +186,7 @@ impl NodeArr {
                                 }
                                 let mut n = vex(
                                     &mut n.to_owned().rhs.unwrap().to_owned(),
-                                    g.to_owned(),
-                                    l.to_owned(),
+                                    ev.to_owned(),
                                     &mut uv,
                                 );
                                 n = simplified::exec(n);
@@ -212,33 +214,40 @@ impl NodeArr {
                         r = n.to_owned();
                         n
                     }
-                    NodeKind::Ident(s) => match Program::find_v(s, g.to_owned(), l.to_owned()) {
-                        Some(v) => {
-                            if it.peek().unwrap().to_owned().to_owned().value == TokenKind::RBrace {
-                                b = true;
-                            }
-                            if uv.contains(&v.to_owned().s.to_owned()) {
-                            } else {
-                                uv.push(v.to_owned().s);
-                            }
+                    NodeKind::Ident(s) => {
+                        let mut ev = ev.to_owned();
+                        ev.push(l.to_owned());
+                        match Program::find_v(s, ev.to_owned()) {
+                            Some(v) => {
+                                if it.peek().unwrap().to_owned().to_owned().value
+                                    == TokenKind::RBrace
+                                {
+                                    b = true;
+                                }
+                                if uv.contains(&v.to_owned().s.to_owned()) {
+                                } else {
+                                    uv.push(v.to_owned().s);
+                                }
 
-                            if b {
-                                r = v.to_owned().n.to_owned();
+                                if b {
+                                    r = v.to_owned().n.to_owned();
+                                }
+                                v.n
                             }
-                            v.n
+                            None => {
+                                return Err(ParseError::NotDefinitionVar(
+                                    it.next().unwrap().to_owned(),
+                                ))
+                            }
                         }
-                        None => {
-                            return Err(ParseError::NotDefinitionVar(it.next().unwrap().to_owned()))
-                        }
-                    },
+                    }
                     NodeKind::If => {
                         if it.peek().unwrap().to_owned().to_owned().value == TokenKind::RBrace {
                             b = true;
                         }
                         let mut c = vex(
                             &mut n.to_owned().cond.unwrap().to_owned(),
-                            g.to_owned(),
-                            l.to_owned(),
+                            ev.to_owned(),
                             &mut uv,
                         );
                         c = simplified::exec(c);
@@ -268,7 +277,9 @@ impl NodeArr {
                             b = true;
                         }
 
-                        let n = vex(&mut n.to_owned(), g.to_owned(), l.to_owned(), &mut uv);
+                        let mut ev = ev.to_owned();
+                        ev.push(l.to_owned());
+                        let n = vex(&mut n.to_owned(), ev, &mut uv);
                         if b {
                             r = n.to_owned();
                         }

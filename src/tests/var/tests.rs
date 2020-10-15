@@ -5,6 +5,8 @@ use super::super::super::node_arr::node_arr::*;
 #[cfg(test)]
 use super::super::super::parser::error::*;
 #[cfg(test)]
+use super::super::super::program::program::*;
+#[cfg(test)]
 use super::super::super::token::token::*;
 #[cfg(test)]
 use super::super::super::var::var::*;
@@ -113,6 +115,19 @@ fn undefined_variable_test() {
         Ok(_) => false,
         Err(e) => match e {
             ParseError::UndefinedVariable(_) => true,
+            _ => false,
+        },
+    };
+    assert!(l)
+}
+
+#[test]
+fn unused_variable_fo_groval_for_test() {
+    let t = Token::tokenize("int g = 10; fn int { int g = 3; g }").unwrap();
+    let l = match Program::w_parser(t) {
+        Ok(_) => false,
+        Err(e) => match e {
+            ParseError::UnusedVariable(_) => true,
             _ => false,
         },
     };
