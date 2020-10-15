@@ -6,6 +6,7 @@ pub mod map;
 pub mod node;
 pub mod node_arr;
 pub mod parser;
+pub mod program;
 pub mod simplified;
 pub mod tests;
 pub mod token;

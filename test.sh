@@ -46,7 +46,7 @@ assert 1 'fn int { 1>0; }'
 assert 1 'fn int { 1>=0; }'
 assert 1 'fn int { 1*2>=3-(2*1); } '
 assert 3 'fn int { (1*2>=3-(2*1))+2; }'
-assert 3 'fn int { (1*2>=3-(2*1))+2; }J' simplified
+assert 3 'fn int { (1*2>=3-(2*1))+2; }' simplified
 assert 4 'fn int { 4; }'
 assert 3 'fn int { 2; 3; }'
 assert 4 'fn int { return 4; }'

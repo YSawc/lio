@@ -32,8 +32,9 @@ impl NodeArr {
         }
     }
 
-    pub fn w_parser(vt: Vec<Token>) -> Result<Self, ParseError> {
-        let mut it = vt.iter().peekable();
+    pub fn w_parser(
+        mut it: &mut std::iter::Peekable<std::slice::Iter<Annot<TokenKind>>>,
+    ) -> Result<Self, ParseError> {
 
         let et = it.to_owned();
         if it.peek().unwrap().value != TokenKind::Fn {

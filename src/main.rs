@@ -1,11 +1,12 @@
 use lio::code_gen::gen_x86_64::*;
 use lio::error::error::*;
+use lio::program::program::*;
 // use lio::fmt::fmt::*;
 // use lio::parser::error::*;
 use lio::simplified::simplified::*;
 // use lio::token::error::*;
 use lio::map::map::*;
-use lio::node_arr::node_arr::*;
+// use lio::node_arr::node_arr::*;
 use lio::token::token::*;
 use std::env;
 use std::io::Write;
@@ -64,22 +65,26 @@ fn main() {
                     continue;
                 }
             };
-            let mut _na = match NodeArr::w_parser(t.to_owned()) {
-                Ok(na) => na,
+            let mut _nas = match Program::w_parser(t.to_owned()) {
+                Ok(nas) => nas,
                 Err(e) => {
                     // e.show_diagnostic(arg1); // FIXME
                     show_trace(e);
                     continue;
                 }
             };
-            println!("{:?}", _na);
+            println!("{:?}", _nas);
 
+            let mut _na = vec![];
             if fsimplified {
-                _na = simplified(_na);
+                for n in _nas.to_owned().na {
+                    _na.push(simplified(n))
+                }
                 println!("after beta: {:?}", _na);
             }
 
-            let _nst = gen(_na);
+            let mut min = _na.iter();
+            let _nst = gen(min.next().unwrap().to_owned());
         }
     } else {
         println!("INPUT: {}", arg1);
@@ -101,10 +106,8 @@ fn main() {
                 std::process::exit(1);
             }
         };
-        // println!("after maped: {:?}", t);
-
-        let mut _na = match NodeArr::w_parser(t.to_owned()) {
-            Ok(na) => na,
+        let mut _nas = match Program::w_parser(t.to_owned()) {
+            Ok(nas) => nas,
             Err(e) => {
                 // e.show_diagnostic(arg1); // FIXME
                 show_trace(e);
@@ -112,13 +115,21 @@ fn main() {
             }
         };
 
-        println!("after parsed: {:?}", _na);
-
+        let mut _na = vec![];
         if fsimplified {
-            _na = simplified(_na);
+            for n in _nas.to_owned().na {
+                _na.push(simplified(n))
+            }
             println!("after beta: {:?}", _na);
+        } else {
+            for n in _nas.to_owned().na {
+                _na.push(n)
+            }
         }
 
-        let _nst = gen(_na);
+        // println!("_na {:?}", _na);
+        let mut min = _na.iter();
+        // println!("min {:?}", min);
+        let _nst = gen(min.next().unwrap().to_owned());
     }
 }
