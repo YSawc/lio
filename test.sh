@@ -70,6 +70,14 @@ assert 0 'fn { _ }'
 assert 0 'fn { int vvv = 55; 0*vvv*0; _ }'
 assert 0 'fn { int vvv = 4; 1+2*vvv/4-1; _; }'
 assert 0 'fn { int vvv = 4; 1+2*vvv/4-1; _ }' simplified
+assert 27 'int g = 9; fn int { g*3 }'
+assert 8 'int g = 8; fn int { int v = 4; 1+v*g/4-1 }'
+assert 8 'int g = 8; fn int { int v = 4; 1+v*g/4-1; }'
+# assert 8 'int g = 8; fn int { int v = 4; return 1+v*g/4-1; }'
+assert 0 'int g = 2; fn { int v = 4; 1+v*g/4-1; _ }'
+assert 0 'int g = 2; fn { int v = 4; 1+v*g/4-1; _ }' simplified
+assert 10 'int g = 2; int l = 3; int o = 4; fn int { int v = 4; l+v*o/g-1; }' simplified
+assert 0 'int g = 2; int l = 3; int o = 4; fn { int v = 4; l+v*o/g-1; _ }'
 
 echo "------------------------------"
 echo "All test passed!"

@@ -1,5 +1,6 @@
 use super::super::node::node::*;
-use super::super::node_arr::node_arr::*;
+// use super::super::node_arr::node_arr::*;
+use super::super::program::program::*;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Var {
@@ -20,10 +21,11 @@ impl Var {
     }
 }
 
-pub fn vex(ns: &mut NodeSt, vv: Vec<Var>, uv: &mut Vec<String>) -> NodeSt {
+pub fn vex(ns: &mut NodeSt, g: Vec<Var>, vv: Vec<Var>, uv: &mut Vec<String>) -> NodeSt {
     if ns.lhs != None {
         let l = Some(Box::new(vex(
             &mut ns.lhs.as_ref().unwrap().to_owned().as_ref().to_owned(),
+            g.to_owned(),
             vv.to_owned(),
             uv,
         )));
@@ -35,6 +37,7 @@ pub fn vex(ns: &mut NodeSt, vv: Vec<Var>, uv: &mut Vec<String>) -> NodeSt {
     if ns.rhs != None {
         let r = Some(Box::new(vex(
             &mut ns.rhs.as_ref().unwrap().to_owned().as_ref().to_owned(),
+            g.to_owned(),
             vv.to_owned(),
             uv,
         )));
@@ -45,7 +48,7 @@ pub fn vex(ns: &mut NodeSt, vv: Vec<Var>, uv: &mut Vec<String>) -> NodeSt {
 
     match ns.c.value.to_owned() {
         NodeKind::Ident(s) => {
-            let n = NodeArr::find_l(s, vv.to_owned()).unwrap();
+            let n = Program::find_v(s, g.to_owned(), vv.to_owned()).unwrap();
             ns.c = n.to_owned().n.c;
             if uv.contains(&n.to_owned().s.to_owned()) {
             } else {
@@ -54,6 +57,7 @@ pub fn vex(ns: &mut NodeSt, vv: Vec<Var>, uv: &mut Vec<String>) -> NodeSt {
             if n.n.lhs != None {
                 ns.lhs = Some(Box::new(vex(
                     &mut n.n.lhs.as_ref().unwrap().to_owned().as_ref().to_owned(),
+                    g.to_owned(),
                     vv.to_owned(),
                     uv,
                 )));
@@ -61,6 +65,7 @@ pub fn vex(ns: &mut NodeSt, vv: Vec<Var>, uv: &mut Vec<String>) -> NodeSt {
             if n.n.rhs != None {
                 ns.rhs = Some(Box::new(vex(
                     &mut n.n.rhs.as_ref().unwrap().to_owned().as_ref().to_owned(),
+                    g.to_owned(),
                     vv.to_owned(),
                     uv,
                 )));

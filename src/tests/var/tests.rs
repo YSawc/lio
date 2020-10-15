@@ -13,7 +13,7 @@ use super::super::super::var::var::*;
 fn simplified_variable_under_initialize_test() {
     let t = Token::tokenize("fn int { int a = 2; int b = 8*a; int c = 2*b+a; c; }").unwrap();
     let mut t = t.iter().peekable();
-    let l = NodeArr::w_parser(&mut t).unwrap().l;
+    let l = NodeArr::w_parser(&mut t, vec![]).unwrap().l;
     let loc = l.to_owned();
     let mut il = loc.iter();
     let mut e: Vec<Var> = Vec::new();
@@ -36,7 +36,7 @@ fn simplified_variable_under_initialize_test() {
 fn update_variable_test() {
     let t = Token::tokenize("fn int { int a = 3; int b = a; int c = 5; a = 1; a+c+b }").unwrap();
     let mut t = t.iter().peekable();
-    let l = NodeArr::w_parser(&mut t).unwrap().l;
+    let l = NodeArr::w_parser(&mut t, vec![]).unwrap().l;
     let loc = l.to_owned();
     let mut il = loc.iter();
     let mut e: Vec<Var> = vec![];
@@ -59,7 +59,7 @@ fn update_variable_test() {
 fn unused_variable_check_for_used_variable_test() {
     let t = Token::tokenize("fn int { int a = 3; a; int a = 0; int b = 5; a*b }").unwrap();
     let mut t = t.iter().peekable();
-    let l = match NodeArr::w_parser(&mut t) {
+    let l = match NodeArr::w_parser(&mut t, vec![]) {
         Ok(_) => true,
         Err(_) => false,
     };
@@ -70,7 +70,7 @@ fn unused_variable_check_for_used_variable_test() {
 fn unused_variable_check_when_parsed_whole_function_test() {
     let t = Token::tokenize("fn { int a = 3; int b = a; int c = 5; b }").unwrap();
     let mut t = t.iter().peekable();
-    let l = match NodeArr::w_parser(&mut t) {
+    let l = match NodeArr::w_parser(&mut t, vec![]) {
         Ok(_) => false,
         Err(e) => match e {
             ParseError::UnusedVariable(_) => true,
@@ -84,7 +84,7 @@ fn unused_variable_check_when_parsed_whole_function_test() {
 fn unused_variable_check_just_before_overwrite_variable_test() {
     let t = Token::tokenize("fn { int a = 3; int a = 0; a }").unwrap();
     let mut t = t.iter().peekable();
-    let l = match NodeArr::w_parser(&mut t) {
+    let l = match NodeArr::w_parser(&mut t, vec![]) {
         Ok(_) => false,
         Err(e) => match e {
             ParseError::UnusedVariable(_) => true,
@@ -98,7 +98,7 @@ fn unused_variable_check_just_before_overwrite_variable_test() {
 fn unused_variable_check_for_update_variable_test() {
     let t = Token::tokenize("fn int { int a = 3; int b = a; int c = 5; a = 1; 0+c+b }").unwrap();
     let mut t = t.iter().peekable();
-    let l = match NodeArr::w_parser(&mut t) {
+    let l = match NodeArr::w_parser(&mut t, vec![]) {
         Ok(_) => true,
         Err(_) => false,
     };
@@ -109,7 +109,7 @@ fn unused_variable_check_for_update_variable_test() {
 fn undefined_variable_test() {
     let t = Token::tokenize("fn { int a = 3; d = 1; a }").unwrap();
     let mut t = t.iter().peekable();
-    let l = match NodeArr::w_parser(&mut t) {
+    let l = match NodeArr::w_parser(&mut t, vec![]) {
         Ok(_) => false,
         Err(e) => match e {
             ParseError::UndefinedVariable(_) => true,
