@@ -156,20 +156,91 @@ impl NodeSt {
                                 value: TokenKind::RParen,
                                 ..
                             } => {
+                                et = it.to_owned();
                                 it.next().unwrap();
-                                let stmt = Self::stmt(it)?;
-                                let mut lhs = Self::new_if(op, cond, stmt);
                                 match it.peek().unwrap() {
                                     Token {
-                                        value: TokenKind::Else,
+                                        value: TokenKind::LBrace,
                                         ..
                                     } => {
+                                        et = it.to_owned();
                                         it.next().unwrap();
                                         let stmt = Self::stmt(it)?;
-                                        lhs.melse_stmt = Some(Box::new(stmt));
-                                        return Ok(lhs);
+                                        let mut lhs = Self::new_if(op, cond, stmt);
+                                        match it.peek().unwrap() {
+                                            Token {
+                                                value: TokenKind::RBrace,
+                                                ..
+                                            } => {
+                                                it.next().unwrap();
+                                                match it.peek().unwrap() {
+                                                    Token {
+                                                        value: TokenKind::Else,
+                                                        ..
+                                                    } => {
+                                                        et = it.to_owned();
+                                                        it.next().unwrap();
+                                                        match it.peek().unwrap() {
+                                                            Token {
+                                                                value: TokenKind::LBrace,
+                                                                ..
+                                                            } => {
+                                                                et = it.to_owned();
+                                                                it.next().unwrap();
+                                                                let stmt = Self::stmt(it)?;
+                                                                lhs.melse_stmt =
+                                                                    Some(Box::new(stmt));
+                                                                match it.peek().unwrap() {
+                                                                    Token {
+                                                                        value: TokenKind::RBrace,
+                                                                        ..
+                                                                    } => {
+                                                                        it.next().unwrap();
+                                                                        if it.peek() != None {
+                                                                            return Ok(lhs);
+                                                                        } else {
+                                                                            return Err(
+                                                                        ParseError::NotClosedStmt(
+                                                                            et.next()
+                                                                                .unwrap()
+                                                                                .to_owned()));
+                                                                        };
+                                                                    }
+                                                                    _ => return Err(
+                                                                        ParseError::NotClosedStmt(
+                                                                            et.next()
+                                                                                .unwrap()
+                                                                                .to_owned(),
+                                                                        ),
+                                                                    ),
+                                                                }
+                                                            }
+                                                            _ => {
+                                                                return Err(
+                                                                    ParseError::NotOpenedStmt(
+                                                                        et.next()
+                                                                            .unwrap()
+                                                                            .to_owned(),
+                                                                    ),
+                                                                )
+                                                            }
+                                                        }
+                                                    }
+                                                    _ => return Ok(lhs),
+                                                }
+                                            }
+                                            _ => {
+                                                return Err(ParseError::NotClosedStmt(
+                                                    et.next().unwrap().to_owned(),
+                                                ))
+                                            }
+                                        }
                                     }
-                                    _ => return Ok(lhs),
+                                    _ => {
+                                        return Err(ParseError::NotOpenedStmt(
+                                            et.next().unwrap().to_owned(),
+                                        ))
+                                    }
                                 }
                             }
                             _ => {
@@ -179,7 +250,7 @@ impl NodeSt {
                             }
                         }
                     }
-                    _ => return Err(ParseError::NotClosedStmt(et.next().unwrap().to_owned())),
+                    _ => return Err(ParseError::NotOpenedParen(et.next().unwrap().to_owned())),
                 }
             }
             Token {

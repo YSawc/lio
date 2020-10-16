@@ -53,14 +53,24 @@ impl fmt::Display for ParseError {
             ParseError::NotImplementedOperator(tok) => {
                 write!(f, "{}: {} is not implemented operator", tok.loc, tok.value)
             }
+            ParseError::NotOpenedParen(tok) => write!(
+                f,
+                "{}: Expected opened paren but got {} ",
+                tok.loc, tok.value
+            ),
             ParseError::NotClosedParen(tok) => write!(
                 f,
-                "{}: Expected close token but got {} ",
+                "{}: Expected closeed paren but got {} ",
+                tok.loc, tok.value
+            ),
+            ParseError::NotOpenedStmt(tok) => write!(
+                f,
+                "{}: Expected opened statement but final token got {}.",
                 tok.loc, tok.value
             ),
             ParseError::NotClosedStmt(tok) => write!(
                 f,
-                "{}: Expected close statement but final token got {}.",
+                "{}: Expected closeed statement but final token got {}.",
                 tok.loc, tok.value
             ),
             ParseError::OperatorAfterRetrun(tok) => write!(

@@ -58,9 +58,9 @@ assert 54 'fn int { int a = 3; int b = a*2; b*a*3; }'
 assert 54 'fn int { int a = 3; int b = a*2; b*a*3; }' simplified
 assert 15 'fn int { int r = 1; int l = 5; l + map 2 4 + + r; }' simplified
 assert 120 'fn int { map 1 5 *; }'
-assert 10 'fn int { if (2 == 3) 5; else 10; }'
-assert 31 'fn int { if (2 == 3) 5+3; else 10+21; }' simplified
-assert 8 'fn int { if (2 < 3) 5+3; else 10; }'
+assert 10 'fn int { if (2 == 3) { 5; } else { 10; } }'
+assert 31 'fn int { if (2 == 3) { 5+3; } else { 10+21; } }' simplified
+assert 8 'fn int { if (2 < 3) { 5+3; } else { 10; } }'
 assert 2 'fn int { int a = 3; a; a = 2; a; }'
 assert 5 'fn int { int a = 5; int b = a; a = 2; b }'
 assert 1 'fn int { 1; }'
