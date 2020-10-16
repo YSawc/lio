@@ -195,24 +195,15 @@ impl NodeSt {
                                                                         value: TokenKind::RBrace,
                                                                         ..
                                                                     } => {
-                                                                        it.next().unwrap();
-                                                                        if it.peek() != None {
-                                                                            return Ok(lhs);
-                                                                        } else {
-                                                                            return Err(
-                                                                        ParseError::NotClosedStmt(
+                                                                        it.next();
+                                                                        return Ok(lhs);
+                                                                    }
+                                                                    _ => {
+                                                                        return Err(ParseError::NotClosedStmt(
                                                                             et.next()
                                                                                 .unwrap()
                                                                                 .to_owned()));
-                                                                        };
                                                                     }
-                                                                    _ => return Err(
-                                                                        ParseError::NotClosedStmt(
-                                                                            et.next()
-                                                                                .unwrap()
-                                                                                .to_owned(),
-                                                                        ),
-                                                                    ),
                                                                 }
                                                             }
                                                             _ => {

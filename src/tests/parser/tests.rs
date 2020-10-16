@@ -243,12 +243,26 @@ fn not_opened_else_stmt_test() {
 
 #[test]
 fn not_closed_else_stmt_test() {
-    let t = Token::tokenize("fn int { if (2 == 3) { 5; } else { 10; }").unwrap();
+    let t = Token::tokenize("fn int { if (2 == 3) { 5; } else { 10;  0}").unwrap();
     let mut t = t.iter().peekable();
     let n = match NodeArr::w_parser(&mut t, vec![]) {
         Ok(_) => false,
         Err(e) => match e {
             ParseError::NotClosedStmt(_) => true,
+            _ => false,
+        },
+    };
+    assert!(n)
+}
+
+#[test]
+fn eof_around_closed_else_stmt_test() {
+    let t = Token::tokenize("fn int { if (2 == 3) { 5; } else { 10; }").unwrap();
+    let mut t = t.iter().peekable();
+    let n = match NodeArr::w_parser(&mut t, vec![]) {
+        Ok(_) => false,
+        Err(e) => match e {
+            ParseError::Eof => true,
             _ => false,
         },
     };

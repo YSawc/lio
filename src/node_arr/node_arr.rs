@@ -242,6 +242,9 @@ impl NodeArr {
                         }
                     }
                     NodeKind::If => {
+                        if it.peek() == None {
+                            return Err(ParseError::Eof);
+                        }
                         if it.peek().unwrap().to_owned().to_owned().value == TokenKind::RBrace {
                             b = true;
                         }
