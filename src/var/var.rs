@@ -8,18 +8,24 @@ use rustc_hash::FxHashMap;
 pub struct Var {
     pub s: String,
     pub n: NodeSt,
+    pub m: bool,
 }
 
 impl Var {
     pub fn new(s: String, n: NodeSt) -> Self {
-        Self { s, n }
+        Self { s, n, m: false }
     }
 
     pub fn default() -> Self {
         Self {
             s: String::new(),
             n: NodeSt::default(),
+            m: false,
         }
+    }
+
+    pub fn mnew(s: String, n: NodeSt) -> Self {
+        Self { s, n, m: true }
     }
 }
 

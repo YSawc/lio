@@ -150,7 +150,6 @@ impl Token {
             map.insert('='.into(), TokenKind::Assign);
             map.insert('{'.into(), TokenKind::LBrace);
             map.insert('}'.into(), TokenKind::RBrace);
-            map.insert('_'.into(), TokenKind::UnderScore);
             map
         }
 
@@ -203,14 +202,26 @@ impl Token {
 
                 b = 0;
 
-                if input.as_bytes()[i].is_ascii_alphabetic() {
+                if input.as_bytes()[i].is_ascii_alphabetic() || input.as_bytes()[i] == b'_' {
                     let t = i;
                     let mut s = String::new();
+                    if input.as_bytes()[i] == b'_' {
+                        s.push(input.chars().nth(i).unwrap());
+                        i += 1;
+                    }
                     while i < l && input.as_bytes()[i].is_ascii_alphabetic() {
                         s.push(input.chars().nth(i).unwrap());
                         i += 1;
                     }
-                    // println!("s: {}", s);
+
+                    if s == "_" {
+                        p_data.push(Self::new(
+                            TokenKind::UnderScore,
+                            Loc::new(t as u8 + b, (i as u8 + 1) + b),
+                        ));
+                        continue;
+                    }
+
                     p_data.push(Self::ident(s, Loc::new(t as u8 + b, (i as u8 + 1) + b)));
                     continue;
                 }

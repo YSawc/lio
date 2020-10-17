@@ -80,7 +80,7 @@ fn main() {
                 for n in _nas.to_owned().na {
                     _na.push(simplified(n))
                 }
-                println!("after beta: {:?}", _na);
+                println!("after simplified: {:?}", _na);
             }
 
             let mut min = _na.iter();
@@ -120,7 +120,7 @@ fn main() {
             for n in _nas.to_owned().na {
                 _na.push(simplified(n))
             }
-            println!("after beta: {:?}", _na);
+            println!("after simplified: {:?}", _na);
         } else {
             for n in _nas.to_owned().na {
                 _na.push(n)

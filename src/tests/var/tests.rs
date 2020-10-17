@@ -19,18 +19,18 @@ fn simplified_variable_under_initialize_test() {
     let loc = l.to_owned();
     let mut il = loc.iter();
     let mut e: Vec<Var> = Vec::new();
-    e.push(Var {
-        s: "a".to_string(),
-        n: NodeSt::num(2, il.next().unwrap().n.c.loc.to_owned()),
-    });
-    e.push(Var {
-        s: "b".to_string(),
-        n: NodeSt::num(16, il.next().unwrap().n.c.loc.to_owned()),
-    });
-    e.push(Var {
-        s: "c".to_string(),
-        n: NodeSt::num(34, il.next().unwrap().n.c.loc.to_owned()),
-    });
+    e.push(Var::new(
+        "a".to_string(),
+        NodeSt::num(2, il.next().unwrap().n.c.loc.to_owned()),
+    ));
+    e.push(Var::new(
+        "b".to_string(),
+        NodeSt::num(16, il.next().unwrap().n.c.loc.to_owned()),
+    ));
+    e.push(Var::new(
+        "c".to_string(),
+        NodeSt::num(34, il.next().unwrap().n.c.loc.to_owned()),
+    ));
     assert_eq!(e, l);
 }
 

@@ -2,8 +2,8 @@ use super::super::location::location::*;
 use super::super::node::node::*;
 use super::super::parser::error::*;
 use super::super::program::program::*;
-use super::super::simplified::*;
 use super::super::simplified::beta::*;
+use super::super::simplified::*;
 use super::super::token::token::*;
 use super::super::var::var::*;
 
