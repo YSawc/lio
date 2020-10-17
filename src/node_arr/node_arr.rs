@@ -116,7 +116,11 @@ impl NodeArr {
                         }
                         b = true;
 
-                        r = *n.to_owned().lhs.unwrap().to_owned();
+                        let mut ev = ev.to_owned();
+                        ev.push(l.to_owned());
+
+                        r = vex(&mut n.to_owned().lhs.unwrap().to_owned(), ev, &mut uv);
+
                         r.to_owned()
                     }
                     NodeKind::NewAssign => {
