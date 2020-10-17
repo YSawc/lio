@@ -4,6 +4,7 @@ use super::super::node::node::*;
 use super::super::node_arr::node_arr::*;
 use super::super::parser::error::*;
 // use super::super::parser::parser::*;
+use super::super::simplified::beta::*;
 use super::super::simplified::*;
 use super::super::token::token::*;
 use super::super::var::var::*;
@@ -78,7 +79,7 @@ impl Program {
                                 }
                                 uv.retain(|s| s != &f.to_owned().s.to_owned());
                                 let mut n =
-                                    vex(&mut n.to_owned().rhs.unwrap().to_owned(), ev, &mut uv);
+                                    beta(&mut n.to_owned().rhs.unwrap().to_owned(), ev, &mut uv);
                                 n = simplified::exec(n);
                                 f.n = n;
                                 let ff = f.to_owned();
@@ -87,7 +88,7 @@ impl Program {
                             }
                             _ => {
                                 let mut n =
-                                    vex(&mut n.to_owned().rhs.unwrap().to_owned(), ev, &mut uv);
+                                    beta(&mut n.to_owned().rhs.unwrap().to_owned(), ev, &mut uv);
                                 n = simplified::exec(n);
                                 let v = Var::new(_s, n);
                                 g.push(v);

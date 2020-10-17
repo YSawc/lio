@@ -1,6 +1,8 @@
 use super::super::node::node::*;
 // use super::super::node_arr::node_arr::*;
 use super::super::program::program::*;
+use super::super::simplified::beta::*;
+use rustc_hash::FxHashMap;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Var {
@@ -21,12 +23,18 @@ impl Var {
     }
 }
 
-pub fn vex(ns: &mut NodeSt, ev: Vec<Vec<Var>>, uv: &mut Vec<String>) -> NodeSt {
+pub fn vex(
+    ns: &mut NodeSt,
+    ev: Vec<Vec<Var>>,
+    uv: &mut Vec<String>,
+    map: &mut FxHashMap<String, Var>,
+) -> NodeSt {
     if ns.lhs != None {
         let l = Some(Box::new(vex(
             &mut ns.lhs.as_ref().unwrap().to_owned().as_ref().to_owned(),
             ev.to_owned(),
             uv,
+            map,
         )));
         if ns.lhs != l {
             ns.lhs = l;
@@ -38,6 +46,7 @@ pub fn vex(ns: &mut NodeSt, ev: Vec<Vec<Var>>, uv: &mut Vec<String>) -> NodeSt {
             &mut ns.rhs.as_ref().unwrap().to_owned().as_ref().to_owned(),
             ev.to_owned(),
             uv,
+            map,
         )));
         if ns.rhs != r {
             ns.rhs = r;
@@ -46,7 +55,14 @@ pub fn vex(ns: &mut NodeSt, ev: Vec<Vec<Var>>, uv: &mut Vec<String>) -> NodeSt {
 
     match ns.c.value.to_owned() {
         NodeKind::Ident(s) => {
-            let n = Program::find_v(s, ev.to_owned()).unwrap();
+            let n = match find_map(s.to_owned(), map) {
+                Some(v) => v.to_owned(),
+                None => {
+                    let v = Program::find_v(s.to_owned(), ev.to_owned()).unwrap();
+                    map.insert(s, v.to_owned());
+                    v
+                }
+            };
             ns.c = n.to_owned().n.c;
             if uv.contains(&n.to_owned().s.to_owned()) {
             } else {
@@ -57,6 +73,7 @@ pub fn vex(ns: &mut NodeSt, ev: Vec<Vec<Var>>, uv: &mut Vec<String>) -> NodeSt {
                     &mut n.n.lhs.as_ref().unwrap().to_owned().as_ref().to_owned(),
                     ev.to_owned(),
                     uv,
+                    map,
                 )));
             }
             if n.n.rhs != None {
@@ -64,6 +81,7 @@ pub fn vex(ns: &mut NodeSt, ev: Vec<Vec<Var>>, uv: &mut Vec<String>) -> NodeSt {
                     &mut n.n.rhs.as_ref().unwrap().to_owned().as_ref().to_owned(),
                     ev.to_owned(),
                     uv,
+                    map,
                 )));
             }
             return ns.to_owned();

@@ -3,6 +3,7 @@ use super::super::node::node::*;
 use super::super::parser::error::*;
 use super::super::program::program::*;
 use super::super::simplified::*;
+use super::super::simplified::beta::*;
 use super::super::token::token::*;
 use super::super::var::var::*;
 
@@ -119,7 +120,7 @@ impl NodeArr {
                         let mut ev = ev.to_owned();
                         ev.push(l.to_owned());
 
-                        r = vex(&mut n.to_owned().lhs.unwrap().to_owned(), ev, &mut uv);
+                        r = beta(&mut n.to_owned().lhs.unwrap().to_owned(), ev, &mut uv);
 
                         r.to_owned()
                     }
@@ -143,7 +144,7 @@ impl NodeArr {
                                     false => return Err(ParseError::UnusedVariable(f.n.c.loc)),
                                 }
                                 uv.retain(|s| s != &f.to_owned().s.to_owned());
-                                let mut n = vex(
+                                let mut n = beta(
                                     &mut n.to_owned().rhs.unwrap().to_owned(),
                                     ev.to_owned(),
                                     &mut uv,
@@ -155,7 +156,7 @@ impl NodeArr {
                                 l.push(ff);
                             }
                             _ => {
-                                let mut n = vex(
+                                let mut n = beta(
                                     &mut n.to_owned().rhs.unwrap().to_owned(),
                                     ev.to_owned(),
                                     &mut uv,
@@ -188,7 +189,7 @@ impl NodeArr {
                                     true => (),
                                     false => return Err(ParseError::UnusedVariable(f.n.c.loc)),
                                 }
-                                let mut n = vex(
+                                let mut n = beta(
                                     &mut n.to_owned().rhs.unwrap().to_owned(),
                                     ev.to_owned(),
                                     &mut uv,
@@ -252,7 +253,7 @@ impl NodeArr {
                         if it.peek().unwrap().to_owned().to_owned().value == TokenKind::RBrace {
                             b = true;
                         }
-                        let mut c = vex(
+                        let mut c = beta(
                             &mut n.to_owned().cond.unwrap().to_owned(),
                             ev.to_owned(),
                             &mut uv,
@@ -286,7 +287,7 @@ impl NodeArr {
 
                         let mut ev = ev.to_owned();
                         ev.push(l.to_owned());
-                        let n = vex(&mut n.to_owned(), ev, &mut uv);
+                        let n = beta(&mut n.to_owned(), ev, &mut uv);
                         if b {
                             r = n.to_owned();
                         }
