@@ -7,6 +7,8 @@ use super::super::super::node_arr::node_arr::*;
 #[cfg(test)]
 use super::super::super::parser::error::*;
 #[cfg(test)]
+use super::super::super::program::program::*;
+#[cfg(test)]
 use super::super::super::token::token::*;
 
 #[test]
@@ -265,6 +267,26 @@ fn eof_around_closed_else_stmt_test() {
             ParseError::Eof => true,
             _ => false,
         },
+    };
+    assert!(n)
+}
+
+// #[test]
+// fn unused_variable_check_for_under_score_grobal_variable() {
+//     let t = Token::tokenize("int _g = 10; fn { _ }").unwrap();
+//     let n = match Program::w_parser(t) {
+//         Ok(_) => true,
+//         Err(_) => false,
+//     };
+//     assert!(n)
+// }
+
+#[test]
+fn unused_variable_check_for_under_score_local_variable() {
+    let t = Token::tokenize("fn { int _g = 10; _ }").unwrap();
+    let n = match Program::w_parser(t) {
+        Ok(_) => true,
+        Err(_) => false,
     };
     assert!(n)
 }

@@ -79,6 +79,9 @@ assert 0 'int g = 2; fn { int v = 4; 1+v*g/4-1; _ }' simplified
 assert 10 'int g = 2; int l = 3; int o = 4; fn int { int v = 4; l+v*o/g-1; }' simplified
 assert 0 'int g = 2; int l = 3; int o = 4; fn { int v = 4; l+v*o/g-1; _ }'
 assert 3 'int g = 10; fn int { g; int g = 3; g }'
+assert 0 'int _g = 10; fn { _ }'
+assert 0 'fn { int _u = 8; _ }'
+assert 16 'fn int { int _u = 8; int a = 2; a*_u }'
 
 echo "------------------------------"
 echo "All test passed!"

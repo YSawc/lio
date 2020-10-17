@@ -162,7 +162,13 @@ impl NodeArr {
                                     &mut uv,
                                 );
                                 n = simplified::exec(n);
-                                let v = Var::new(_s, n);
+                                let v = match _s.as_bytes()[0] {
+                                    b'_' => Var::mnew(_s, n),
+                                    _ => Var::new(_s, n),
+                                };
+                                if v.m {
+                                    uv.push(v.to_owned().s);
+                                }
                                 l.push(v);
                             }
                         }

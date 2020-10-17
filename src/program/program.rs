@@ -90,7 +90,13 @@ impl Program {
                                 let mut n =
                                     beta(&mut n.to_owned().rhs.unwrap().to_owned(), ev, &mut uv);
                                 n = simplified::exec(n);
-                                let v = Var::new(_s, n);
+                                let v = match _s.as_bytes()[0] {
+                                    b'_' => Var::mnew(_s, n),
+                                    _ => Var::new(_s, n),
+                                };
+                                if v.m {
+                                    uv.push(v.to_owned().s);
+                                }
                                 g.push(v);
                             }
                         }
