@@ -90,35 +90,31 @@ impl NodeSt {
             } => {
                 it.next().unwrap();
                 let i = Node::int(loc.to_owned());
-                match it.peek().unwrap() {
-                    Token {
-                        value: TokenKind::Ident(s),
-                        ..
-                    } => {
-                        let l = Self::new_ident(s.to_owned(), it.next().unwrap().to_owned());
-                        let l = Self::new_unary(i, l);
-                        expect_token(
-                            TokenKind::Assign,
-                            ParseError::NotAssign(it.peek().unwrap().to_owned().to_owned()),
-                            it,
-                        )?;
-                        let op = Node::new_assign(loc.to_owned());
-                        let r = Self::cmp(it)?;
-                        let lhs = Self::new_nds(op, l, r);
-                        if it.peek() == None {
-                            return Err(ParseError::NotClosedStmt(
-                                it.peek().unwrap().to_owned().to_owned(),
-                            ));
-                        }
-                        expect_token(
-                            TokenKind::SemiColon,
-                            ParseError::NotClosedStmt(it.peek().unwrap().to_owned().to_owned()),
-                            it,
-                        )?;
-                        return Ok(lhs);
-                    }
-                    _ => return Err(ParseError::NotIdent(it.next().unwrap().to_owned())),
+                let (s, _) = expect_ident(
+                    ParseError::NotIdent(it.peek().unwrap().to_owned().to_owned()),
+                    it,
+                )?;
+                let l = Self::new_ident(s.to_owned(), it.peek().unwrap().to_owned().to_owned());
+                let l = Self::new_unary(i, l);
+                expect_token(
+                    TokenKind::Assign,
+                    ParseError::NotAssign(it.peek().unwrap().to_owned().to_owned()),
+                    it,
+                )?;
+                let op = Node::new_assign(loc.to_owned());
+                let r = Self::cmp(it)?;
+                let lhs = Self::new_nds(op, l, r);
+                if it.peek() == None {
+                    return Err(ParseError::NotClosedStmt(
+                        it.peek().unwrap().to_owned().to_owned(),
+                    ));
                 }
+                expect_token(
+                    TokenKind::SemiColon,
+                    ParseError::NotClosedStmt(it.peek().unwrap().to_owned().to_owned()),
+                    it,
+                )?;
+                return Ok(lhs);
             }
             Token {
                 value: TokenKind::If,
@@ -393,7 +389,7 @@ impl NodeSt {
     }
 }
 
-fn _expect_ident(
+fn expect_ident(
     err: ParseError,
     it: &mut std::iter::Peekable<std::slice::Iter<Annot<TokenKind>>>,
 ) -> Result<(String, Loc), ParseError> {
