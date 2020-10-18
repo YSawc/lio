@@ -41,7 +41,19 @@ impl Program {
         let mut it = vt.iter().peekable();
         let g: Vec<Var> = Self::stp(&mut it)?;
 
-        na.push(NodeArr::w_parser(&mut it, g.to_owned())?);
+        let (n, mut ugv) = NodeArr::w_parser(&mut it, g.to_owned())?;
+        for l in g.to_owned() {
+            if l.to_owned().s.to_owned().as_bytes()[0] == b'_' {
+                ugv.push(l.to_owned().s);
+            }
+        }
+        for l in g.to_owned() {
+            match ugv.contains(&l.to_owned().s.to_owned()) {
+                true => (),
+                false => return Err(ParseError::UnusedVariable(l.n.c.loc)),
+            }
+        }
+        na.push(n);
         Ok(Self::new(g, na))
     }
 
@@ -53,8 +65,8 @@ impl Program {
         let mut b = false;
         while it.peek().unwrap().value != TokenKind::Fn && b == false {
             let et = it.to_owned();
-            match NodeSt::parser(&mut it) {
-                Ok(n) => match n.c.value {
+            match NodeSt::parser(&mut it)? {
+                n => match n.c.value {
                     NodeKind::Fn => {
                         b = true;
                     }
@@ -108,10 +120,8 @@ impl Program {
                         ))
                     }
                 },
-                Err(e) => return Err(e),
             }
         }
-
         println!("g: {:?}", g);
         return Ok(g);
     }

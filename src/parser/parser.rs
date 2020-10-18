@@ -140,7 +140,6 @@ impl NodeSt {
                 )?;
                 let stmt = Self::stmt(it)?;
                 let mut lhs = Self::new_if(op, cond, stmt);
-
                 expect_token(
                     TokenKind::RBrace,
                     ParseError::NotClosedStmt(it.peek().unwrap().to_owned().to_owned()),

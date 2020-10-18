@@ -7,15 +7,13 @@ use super::super::super::node_arr::node_arr::*;
 #[cfg(test)]
 use super::super::super::parser::error::*;
 #[cfg(test)]
-use super::super::super::program::program::*;
-#[cfg(test)]
 use super::super::super::token::token::*;
 
 #[test]
 fn parser_test() {
     let t = Token::tokenize("fn int { 12+3; }").unwrap();
     let mut t = t.iter().peekable();
-    let n = NodeArr::w_parser(&mut t, vec![]).unwrap().ret_node_st;
+    let n = NodeArr::w_parser(&mut t, vec![]).unwrap().0.ret_node_st;
     let e = {
         NodeSt {
             c: Node::plus(Loc::new(14, 15)),
@@ -31,7 +29,7 @@ fn parser_test() {
 fn evaluation_final_value_test() {
     let t = Token::tokenize("fn int { 12+3 }").unwrap();
     let mut t = t.iter().peekable();
-    let n = NodeArr::w_parser(&mut t, vec![]).unwrap().ret_node_st;
+    let n = NodeArr::w_parser(&mut t, vec![]).unwrap().0.ret_node_st;
     let e = {
         NodeSt {
             c: Node::plus(Loc::new(14, 15)),
@@ -47,7 +45,7 @@ fn evaluation_final_value_test() {
 fn parser_assign_test() {
     let t = Token::tokenize("fn int { int a = 3; a }").unwrap();
     let mut t = t.iter().peekable();
-    let n = NodeArr::w_parser(&mut t, vec![]).unwrap().ret_node_st;
+    let n = NodeArr::w_parser(&mut t, vec![]).unwrap().0.ret_node_st;
     let e = { NodeSt::num(3, n.to_owned().c.loc) };
     assert_eq!(e, n)
 }
@@ -56,7 +54,7 @@ fn parser_assign_test() {
 fn variable_expansion_test() {
     let t = Token::tokenize("fn int { int a = 3; int b = 5; b*a; }").unwrap();
     let mut t = t.iter().peekable();
-    let n = NodeArr::w_parser(&mut t, vec![]).unwrap().ret_node_st;
+    let n = NodeArr::w_parser(&mut t, vec![]).unwrap().0.ret_node_st;
     let e = NodeSt {
         c: Node::mul(Loc::new(32, 33)),
         lhs: Some(n.to_owned().lhs.unwrap()),
@@ -267,26 +265,6 @@ fn eof_around_closed_else_stmt_test() {
             ParseError::Eof => true,
             _ => false,
         },
-    };
-    assert!(n)
-}
-
-// #[test]
-// fn unused_variable_check_for_under_score_grobal_variable() {
-//     let t = Token::tokenize("int _g = 10; fn { _ }").unwrap();
-//     let n = match Program::w_parser(t) {
-//         Ok(_) => true,
-//         Err(_) => false,
-//     };
-//     assert!(n)
-// }
-
-#[test]
-fn unused_variable_check_for_under_score_local_variable() {
-    let t = Token::tokenize("fn { int _g = 10; _ }").unwrap();
-    let n = match Program::w_parser(t) {
-        Ok(_) => true,
-        Err(_) => false,
     };
     assert!(n)
 }

@@ -37,7 +37,7 @@ impl NodeArr {
     pub fn w_parser(
         mut it: &mut std::iter::Peekable<std::slice::Iter<Annot<TokenKind>>>,
         g: Vec<Var>,
-    ) -> Result<Self, ParseError> {
+    ) -> Result<(Self, Vec<String>), ParseError> {
         let et = it.to_owned();
         if it.peek().unwrap().value != TokenKind::Fn {
             return Err(ParseError::OperatorOutOfFnction(
@@ -64,10 +64,10 @@ impl NodeArr {
 
         let mut ev: Vec<Vec<Var>> = vec![];
         ev.push(g.to_owned());
-        let l = Self::stp(&mut it, ev);
+        let (l, ugv) = Self::stp(&mut it, ev)?;
 
         if isi {
-            match l.to_owned()?.to_owned().ret_node_st.c.value {
+            match l.to_owned().to_owned().ret_node_st.c.value {
                 NodeKind::Num(_)
                 | NodeKind::Add
                 | NodeKind::Sub
@@ -78,19 +78,19 @@ impl NodeArr {
                 | NodeKind::L
                 | NodeKind::LE
                 | NodeKind::G
-                | NodeKind::GE => return l,
+                | NodeKind::GE => return Ok((l, ugv)),
                 _ => {
                     return Err(ParseError::NotMatchReturnType(
-                        l.to_owned().unwrap().to_owned().ret_node_st.c.loc,
+                        l.to_owned().to_owned().ret_node_st.c.loc,
                     ))
                 }
             }
         } else {
-            match l.to_owned()?.to_owned().ret_node_st.c.value {
-                NodeKind::UnderScore => return l,
+            match l.to_owned().to_owned().ret_node_st.c.value {
+                NodeKind::UnderScore => return Ok((l, ugv)),
                 _ => {
                     return Err(ParseError::NotMatchReturnType(
-                        l.to_owned().unwrap().to_owned().ret_node_st.c.loc,
+                        l.to_owned().to_owned().ret_node_st.c.loc,
                     ))
                 }
             }
@@ -100,7 +100,7 @@ impl NodeArr {
     pub fn stp(
         mut it: &mut std::iter::Peekable<std::slice::Iter<Annot<TokenKind>>>,
         ev: Vec<Vec<Var>>,
-    ) -> Result<Self, ParseError> {
+    ) -> Result<(Self, Vec<String>), ParseError> {
         let mut uv: Vec<String> = vec![];
         let mut nv = vec![];
         let mut l: Vec<Var> = vec![];
@@ -235,8 +235,7 @@ impl NodeArr {
                                 {
                                     b = true;
                                 }
-                                if uv.contains(&v.to_owned().s.to_owned()) {
-                                } else {
+                                if !uv.contains(&v.to_owned().s.to_owned()) {
                                     uv.push(v.to_owned().s);
                                 }
 
@@ -318,6 +317,16 @@ impl NodeArr {
         }
         // println!("ret_node_st: {:?}", a.ret_node_st);
 
-        Ok(a)
+        let mut ugv: Vec<String> = vec![];
+        for evc in ev {
+            for v in evc {
+                // println!("v: {:?}", v);
+                match uv.contains(&v.to_owned().s.to_owned()) {
+                    true => ugv.push(v.to_owned().s.to_owned()),
+                    false => (),
+                }
+            }
+        }
+        Ok((a, ugv))
     }
 }

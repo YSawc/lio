@@ -15,7 +15,7 @@ use super::super::super::var::var::*;
 fn simplified_variable_under_initialize_test() {
     let t = Token::tokenize("fn int { int a = 2; int b = 8*a; int c = 2*b+a; c; }").unwrap();
     let mut t = t.iter().peekable();
-    let l = NodeArr::w_parser(&mut t, vec![]).unwrap().l;
+    let l = NodeArr::w_parser(&mut t, vec![]).unwrap().0.l;
     let loc = l.to_owned();
     let mut il = loc.iter();
     let mut e: Vec<Var> = Vec::new();
@@ -38,7 +38,7 @@ fn simplified_variable_under_initialize_test() {
 fn update_variable_test() {
     let t = Token::tokenize("fn int { int a = 3; int b = a; int c = 5; a = 1; a+c+b }").unwrap();
     let mut t = t.iter().peekable();
-    let l = NodeArr::w_parser(&mut t, vec![]).unwrap().l;
+    let l = NodeArr::w_parser(&mut t, vec![]).unwrap().0.l;
     let loc = l.to_owned();
     let mut il = loc.iter();
     let mut e: Vec<Var> = vec![];
@@ -108,7 +108,7 @@ fn unused_variable_check_for_update_variable_test() {
 }
 
 #[test]
-fn undefined_variable_test() {
+fn undefined_variable_check_for_local_variable_test() {
     let t = Token::tokenize("fn { int a = 3; d = 1; a }").unwrap();
     let mut t = t.iter().peekable();
     let l = match NodeArr::w_parser(&mut t, vec![]) {
@@ -122,7 +122,17 @@ fn undefined_variable_test() {
 }
 
 #[test]
-fn unused_variable_fo_groval_for_test() {
+fn unused_variable_check_for_under_score_local_variable() {
+    let t = Token::tokenize("fn { int _g = 10; _ }").unwrap();
+    let n = match Program::w_parser(t) {
+        Ok(_) => true,
+        Err(_) => false,
+    };
+    assert!(n)
+}
+
+#[test]
+fn unused_variable_check_for_global_variable_test() {
     let t = Token::tokenize("int g = 10; fn int { int g = 3; g }").unwrap();
     let l = match Program::w_parser(t) {
         Ok(_) => false,
@@ -132,4 +142,14 @@ fn unused_variable_fo_groval_for_test() {
         },
     };
     assert!(l)
+}
+
+#[test]
+fn unused_variable_check_for_under_score_global_variable() {
+    let t = Token::tokenize("int _g = 10; fn { _ }").unwrap();
+    let n = match Program::w_parser(t) {
+        Ok(_) => true,
+        Err(_) => false,
+    };
+    assert!(n)
 }
