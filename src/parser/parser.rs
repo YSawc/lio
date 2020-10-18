@@ -77,15 +77,12 @@ impl NodeSt {
                     et.next();
                     return Err(ParseError::NotClosedStmt(et.next().unwrap().to_owned()));
                 }
-                match it.next().unwrap() {
-                    Token {
-                        value: TokenKind::SemiColon,
-                        ..
-                    } => {
-                        return Ok(lhs);
-                    }
-                    _ => return Err(ParseError::NotClosedStmt(et.next().unwrap().to_owned())),
-                }
+                expect_token(
+                    TokenKind::SemiColon,
+                    ParseError::NotClosedStmt(it.peek().unwrap().to_owned().to_owned()),
+                    it,
+                )?;
+                return Ok(lhs);
             }
             Token {
                 value: TokenKind::Int,
@@ -100,38 +97,25 @@ impl NodeSt {
                     } => {
                         let l = Self::new_ident(s.to_owned(), it.next().unwrap().to_owned());
                         let l = Self::new_unary(i, l);
-                        match it.peek().unwrap() {
-                            Token {
-                                value: TokenKind::Assign,
-                                loc,
-                            } => {
-                                let mut et = it.clone();
-                                it.next().unwrap();
-                                let op = Node::new_assign(loc.to_owned());
-                                let r = Self::cmp(it)?;
-                                let lhs = Self::new_nds(op, l, r);
-                                if it.peek() == None {
-                                    et.next();
-                                    return Err(ParseError::NotClosedStmt(
-                                        et.next().unwrap().to_owned(),
-                                    ));
-                                }
-                                match it.next().unwrap() {
-                                    Token {
-                                        value: TokenKind::SemiColon,
-                                        ..
-                                    } => {
-                                        return Ok(lhs);
-                                    }
-                                    _ => {
-                                        return Err(ParseError::NotClosedStmt(
-                                            it.next().unwrap().to_owned(),
-                                        ))
-                                    }
-                                }
-                            }
-                            _ => return Err(ParseError::NotAssign(it.next().unwrap().to_owned())),
+                        expect_token(
+                            TokenKind::Assign,
+                            ParseError::NotAssign(it.peek().unwrap().to_owned().to_owned()),
+                            it,
+                        )?;
+                        let op = Node::new_assign(loc.to_owned());
+                        let r = Self::cmp(it)?;
+                        let lhs = Self::new_nds(op, l, r);
+                        if it.peek() == None {
+                            return Err(ParseError::NotClosedStmt(
+                                it.peek().unwrap().to_owned().to_owned(),
+                            ));
                         }
+                        expect_token(
+                            TokenKind::SemiColon,
+                            ParseError::NotClosedStmt(it.peek().unwrap().to_owned().to_owned()),
+                            it,
+                        )?;
+                        return Ok(lhs);
                     }
                     _ => return Err(ParseError::NotIdent(it.next().unwrap().to_owned())),
                 }
@@ -140,108 +124,53 @@ impl NodeSt {
                 value: TokenKind::If,
                 loc,
             } => {
-                let mut et = it.to_owned();
                 it.next().unwrap();
                 let op = Node::mif(loc.to_owned());
+                expect_token(
+                    TokenKind::LParen,
+                    ParseError::NotOpenedParen(it.peek().unwrap().to_owned().to_owned()),
+                    it,
+                )?;
+                let cond = Self::cmp(it)?;
+                expect_token(
+                    TokenKind::RParen,
+                    ParseError::NotClosedStmt(it.peek().unwrap().to_owned().to_owned()),
+                    it,
+                )?;
+                expect_token(
+                    TokenKind::LBrace,
+                    ParseError::NotOpenedStmt(it.peek().unwrap().to_owned().to_owned()),
+                    it,
+                )?;
+                let stmt = Self::stmt(it)?;
+                let mut lhs = Self::new_if(op, cond, stmt);
+
+                expect_token(
+                    TokenKind::RBrace,
+                    ParseError::NotClosedStmt(it.peek().unwrap().to_owned().to_owned()),
+                    it,
+                )?;
                 match it.peek().unwrap() {
                     Token {
-                        value: TokenKind::LParen,
+                        value: TokenKind::Else,
                         ..
                     } => {
-                        et = it.to_owned();
                         it.next().unwrap();
-                        let cond = Self::cmp(it)?;
-                        match it.peek().unwrap() {
-                            Token {
-                                value: TokenKind::RParen,
-                                ..
-                            } => {
-                                et = it.to_owned();
-                                it.next().unwrap();
-                                match it.peek().unwrap() {
-                                    Token {
-                                        value: TokenKind::LBrace,
-                                        ..
-                                    } => {
-                                        et = it.to_owned();
-                                        it.next().unwrap();
-                                        let stmt = Self::stmt(it)?;
-                                        let mut lhs = Self::new_if(op, cond, stmt);
-                                        match it.peek().unwrap() {
-                                            Token {
-                                                value: TokenKind::RBrace,
-                                                ..
-                                            } => {
-                                                it.next().unwrap();
-                                                match it.peek().unwrap() {
-                                                    Token {
-                                                        value: TokenKind::Else,
-                                                        ..
-                                                    } => {
-                                                        et = it.to_owned();
-                                                        it.next().unwrap();
-                                                        match it.peek().unwrap() {
-                                                            Token {
-                                                                value: TokenKind::LBrace,
-                                                                ..
-                                                            } => {
-                                                                et = it.to_owned();
-                                                                it.next().unwrap();
-                                                                let stmt = Self::stmt(it)?;
-                                                                lhs.melse_stmt =
-                                                                    Some(Box::new(stmt));
-                                                                match it.peek().unwrap() {
-                                                                    Token {
-                                                                        value: TokenKind::RBrace,
-                                                                        ..
-                                                                    } => {
-                                                                        it.next();
-                                                                        return Ok(lhs);
-                                                                    }
-                                                                    _ => {
-                                                                        return Err(ParseError::NotClosedStmt(
-                                                                            et.next()
-                                                                                .unwrap()
-                                                                                .to_owned()));
-                                                                    }
-                                                                }
-                                                            }
-                                                            _ => {
-                                                                return Err(
-                                                                    ParseError::NotOpenedStmt(
-                                                                        et.next()
-                                                                            .unwrap()
-                                                                            .to_owned(),
-                                                                    ),
-                                                                )
-                                                            }
-                                                        }
-                                                    }
-                                                    _ => return Ok(lhs),
-                                                }
-                                            }
-                                            _ => {
-                                                return Err(ParseError::NotClosedStmt(
-                                                    et.next().unwrap().to_owned(),
-                                                ))
-                                            }
-                                        }
-                                    }
-                                    _ => {
-                                        return Err(ParseError::NotOpenedStmt(
-                                            et.next().unwrap().to_owned(),
-                                        ))
-                                    }
-                                }
-                            }
-                            _ => {
-                                return Err(ParseError::NotClosedStmt(
-                                    et.next().unwrap().to_owned(),
-                                ))
-                            }
-                        }
+                        expect_token(
+                            TokenKind::LBrace,
+                            ParseError::NotOpenedStmt(it.peek().unwrap().to_owned().to_owned()),
+                            it,
+                        )?;
+                        let stmt = Self::stmt(it)?;
+                        lhs.melse_stmt = Some(Box::new(stmt));
+                        expect_token(
+                            TokenKind::RBrace,
+                            ParseError::NotClosedStmt(it.peek().unwrap().to_owned().to_owned()),
+                            it,
+                        )?;
+                        return Ok(lhs);
                     }
-                    _ => return Err(ParseError::NotOpenedParen(et.next().unwrap().to_owned())),
+                    _ => return Ok(lhs),
                 }
             }
             Token {
@@ -408,19 +337,15 @@ impl NodeSt {
                     } => Self::cmp(&mut it)?,
                     _ => unreachable!(),
                 };
-                let et = it.to_owned();
                 if it.peek() == None {
                     return Err(ParseError::Eof);
                 }
-                match it.next().unwrap() {
-                    Token {
-                        value: TokenKind::RParen,
-                        ..
-                    } => Ok(rhs),
-                    _ => Err(ParseError::NotClosedParen(
-                        et.to_owned().next().unwrap().to_owned(),
-                    )),
-                }
+                expect_token(
+                    TokenKind::RParen,
+                    ParseError::NotClosedParen(it.peek().unwrap().to_owned().to_owned()),
+                    it,
+                )?;
+                Ok(rhs)
             }
             _ => Self::primary(it),
         }
@@ -452,7 +377,6 @@ impl NodeSt {
                         let op = Node::assign(loc.to_owned());
                         let rhs = Self::expr(it)?;
                         let lhs = Self::new_nds(op, lhs, rhs);
-                        // println!("it.peek(): {:?}", it.peek());
                         return Ok(lhs);
                     }
                     _ => {
@@ -466,5 +390,30 @@ impl NodeSt {
             }
             _ => return Ok(Self::new_num(it.next().unwrap().to_owned())?),
         }
+    }
+}
+
+fn _expect_ident(
+    err: ParseError,
+    it: &mut std::iter::Peekable<std::slice::Iter<Annot<TokenKind>>>,
+) -> Result<(String, Loc), ParseError> {
+    match it.peek().unwrap() {
+        Token {
+            value: TokenKind::Ident(s),
+            ..
+        } => Ok((s.to_string(), it.next().unwrap().loc.to_owned())),
+        _ => Err(err),
+    }
+}
+
+fn expect_token(
+    ty: TokenKind,
+    err: ParseError,
+    it: &mut std::iter::Peekable<std::slice::Iter<Annot<TokenKind>>>,
+) -> Result<Loc, ParseError> {
+    if it.peek().unwrap().value == ty {
+        Ok(it.next().unwrap().loc.to_owned())
+    } else {
+        Err(err)
     }
 }
