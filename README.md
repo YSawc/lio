@@ -21,9 +21,9 @@ A toy compiler implemented by rust.
   - [x] [local](https://github.com/YSawc/lio/commit/3df3c89b00e1ceab2925bc02fead9df5c5fc7c78)
   - [x] [simplified initializing](https://github.com/YSawc/lio/commit/3c4b0c609fa4e742342443ebc280ca9ea8e016a5)
 - [ ] simplified
-  - [ ] aplha
+  - [ ] alpha
   - [x] [beta](https://github.com/YSawc/lio/commit/dd6dd3de39019f4c7bec2677140fb22e9f06fcc9)
-  - [x] [simplified](https://github.com/YSawc/lio/commit/9c70dd681b3d85dbfdbd01e9c039cda9a8a7597b)
+  - [x] [simplified](https://github.com/YSawc/lio/commit/e2199f937ca5e13c19579430e677ea922cd4cbf5)
 - [ ] unused variable checker
   - [ ] global
   - [x] [local](https://github.com/YSawc/lio/commit/da07a3dc4c1985c2116da6e4e94554c51d51e30c)
