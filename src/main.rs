@@ -56,7 +56,17 @@ fn main() {
                 continue;
             }
 
-            let t = Token::tokenize(&s).unwrap();
+            let t = match Token::tokenize(&s) {
+                Ok(t) => t,
+                Err(e) => {
+                    for e in e.to_owned() {
+                        // e.show_diagnostic(arg1); // FIXME
+                        show_trace(e);
+                    }
+                    std::process::exit(1);
+                }
+            };
+
             let t = match map(t) {
                 Ok(t) => t,
                 Err(e) => {
@@ -91,8 +101,10 @@ fn main() {
         let t = match Token::tokenize(arg1) {
             Ok(n) => n,
             Err(e) => {
-                // e.show_diagnostic(arg1); // FIXME
-                show_trace(e);
+                for e in e.to_owned() {
+                    // e.show_diagnostic(arg1); // FIXME
+                    show_trace(e);
+                }
                 std::process::exit(1);
             }
         };

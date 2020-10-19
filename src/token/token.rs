@@ -114,11 +114,13 @@ impl Token {
 }
 
 impl Token {
-    pub fn tokenize(input: &str) -> Result<Vec<Token>, TokenError> {
+    pub fn tokenize(input: &str) -> Result<Vec<Token>, Vec<TokenError>> {
         let mut p_data = Vec::new();
         let l = input.len();
         let mut b = 0;
         let mut i = 0;
+        let mut e: bool = false;
+        let mut ev: Vec<TokenError> = vec![];
 
         fn multiple_symbol_map_map() -> FxHashMap<String, TokenKind> {
             let mut map = FxHashMap::default();
@@ -225,13 +227,20 @@ impl Token {
                     p_data.push(Self::ident(s, Loc::new(t as u8 + b, (i as u8 + 1) + b)));
                     continue;
                 }
-                return Err(TokenError::invalid_token(
+                ev.push(TokenError::invalid_token(
                     input.to_string().chars().nth(i).unwrap(),
                     Loc::new(i as u8 + b, i as u8 + 1 + b),
                 ));
+                if !e {
+                    e = true;
+                }
             }
             i += 1
         }
+        if e {
+            return Err(ev);
+        }
+
         Ok(p_data)
     }
 }
