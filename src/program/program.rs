@@ -92,7 +92,7 @@ impl Program {
                                 uv.retain(|s| s != &f.to_owned().s.to_owned());
                                 let n =
                                     beta(&mut n.to_owned().rhs.unwrap().to_owned(), ev, &mut uv);
-                                n.simplified();
+                                n.to_owned().simplified();
                                 f.n = n;
                                 let ff = f.to_owned();
                                 g.retain(|s| s.s != _s.to_owned());
@@ -101,7 +101,7 @@ impl Program {
                             _ => {
                                 let n =
                                     beta(&mut n.to_owned().rhs.unwrap().to_owned(), ev, &mut uv);
-                                n.simplified();
+                                n.to_owned().simplified();
                                 let v = match _s.as_bytes()[0] {
                                     b'_' => Var::mnew(_s, n),
                                     _ => Var::new(_s, n),

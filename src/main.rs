@@ -1,12 +1,7 @@
 use lio::code_gen::gen_x86_64::*;
 use lio::error::error::*;
-use lio::program::program::*;
-// use lio::fmt::fmt::*;
-// use lio::parser::error::*;
-use lio::simplified::simplified::*;
-// use lio::token::error::*;
 use lio::map::map::*;
-// use lio::node_arr::node_arr::*;
+use lio::program::program::*;
 use lio::token::token::*;
 use std::env;
 use std::io::Write;
@@ -88,7 +83,7 @@ fn main() {
             let mut _na = vec![];
             if fsimplified {
                 for n in _nas.to_owned().na {
-                    _na.push(simplified(n))
+                    _na.push(n.simplified())
                 }
                 println!("after simplified: {:?}", _na);
             }
@@ -130,7 +125,7 @@ fn main() {
         let mut _na = vec![];
         if fsimplified {
             for n in _nas.to_owned().na {
-                _na.push(simplified(n))
+                _na.push(n.simplified())
             }
             println!("after simplified: {:?}", _na);
         } else {
