@@ -5,7 +5,7 @@ use super::super::node_arr::node_arr::*;
 use super::super::parser::error::*;
 // use super::super::parser::parser::*;
 use super::super::simplified::beta::*;
-use super::super::simplified::*;
+// use super::super::simplified::*;
 use super::super::token::token::*;
 use super::super::var::var::*;
 
@@ -90,18 +90,18 @@ impl Program {
                                     false => return Err(ParseError::UnusedVariable(f.n.c.loc)),
                                 }
                                 uv.retain(|s| s != &f.to_owned().s.to_owned());
-                                let mut n =
+                                let n =
                                     beta(&mut n.to_owned().rhs.unwrap().to_owned(), ev, &mut uv);
-                                n = simplified::exec(n);
+                                n.simplified();
                                 f.n = n;
                                 let ff = f.to_owned();
                                 g.retain(|s| s.s != _s.to_owned());
                                 g.push(ff);
                             }
                             _ => {
-                                let mut n =
+                                let n =
                                     beta(&mut n.to_owned().rhs.unwrap().to_owned(), ev, &mut uv);
-                                n = simplified::exec(n);
+                                n.simplified();
                                 let v = match _s.as_bytes()[0] {
                                     b'_' => Var::mnew(_s, n),
                                     _ => Var::new(_s, n),

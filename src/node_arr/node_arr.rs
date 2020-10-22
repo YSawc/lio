@@ -3,7 +3,7 @@ use super::super::node::node::*;
 use super::super::parser::error::*;
 use super::super::program::program::*;
 use super::super::simplified::beta::*;
-use super::super::simplified::*;
+// use super::super::simplified::*;
 use super::super::token::token::*;
 use super::super::var::var::*;
 
@@ -149,7 +149,7 @@ impl NodeArr {
                                     ev.to_owned(),
                                     &mut uv,
                                 );
-                                n = simplified::exec(n);
+                                n = n.simplified();
                                 f.n = n;
                                 let ff = f.to_owned();
                                 l.retain(|s| s.s != _s.to_owned());
@@ -161,7 +161,7 @@ impl NodeArr {
                                     ev.to_owned(),
                                     &mut uv,
                                 );
-                                n = simplified::exec(n);
+                                n = n.simplified();
                                 let v = match _s.as_bytes()[0] {
                                     b'_' => Var::mnew(_s, n),
                                     _ => Var::new(_s, n),
@@ -200,7 +200,7 @@ impl NodeArr {
                                     ev.to_owned(),
                                     &mut uv,
                                 );
-                                n = simplified::exec(n);
+                                n = n.simplified();
                                 f.n = n;
                                 let ff = f.to_owned();
                                 l.retain(|s| s.s != _s.to_owned());
@@ -263,7 +263,7 @@ impl NodeArr {
                             ev.to_owned(),
                             &mut uv,
                         );
-                        c = simplified::exec(c);
+                        c = c.simplified();
                         match c.c.value {
                             NodeKind::Num(num) => {
                                 if num == 0 {
