@@ -23,6 +23,12 @@ impl From<ParseError> for Error {
     }
 }
 
+impl From<MapError> for Error {
+    fn from(e: MapError) -> Self {
+        Error::Map(e)
+    }
+}
+
 impl StdError for TokenError {}
 
 impl StdError for ParseError {}

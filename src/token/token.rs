@@ -2,6 +2,7 @@ use super::super::location::location::*;
 use super::error::*;
 use rustc_hash::FxHashMap;
 use std::fmt::Debug;
+use std::iter;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum TokenKind {
@@ -113,14 +114,30 @@ impl Token {
     }
 }
 
+struct Lexer<'a> {
+    pub peek: iter::Peekable<std::str::Chars<'a>>,
+    pub p_data: Vec<Annot<TokenKind>>,
+    pub e: bool,
+    pub ev: Vec<TokenError>,
+}
+
+impl<'a> Lexer<'a> {
+    fn new(input: &'a str) -> Self {
+        Lexer {
+            peek: input.chars().peekable(),
+            p_data: vec![],
+            e: false,
+            ev: vec![],
+        }
+    }
+}
+
 impl Token {
     pub fn tokenize(input: &str) -> Result<Vec<Token>, Vec<TokenError>> {
-        let mut p_data = Vec::new();
+        let mut lexer = Lexer::new(input);
         let l = input.len();
         let mut b = 0;
         let mut i = 0;
-        let mut e: bool = false;
-        let mut ev: Vec<TokenError> = vec![];
 
         fn multiple_symbol_map_map() -> FxHashMap<String, TokenKind> {
             let mut map = FxHashMap::default();
@@ -166,14 +183,16 @@ impl Token {
                 }
                 i -= 1;
                 let n: i8 = input[t..i + 1].to_string().parse().unwrap();
-                p_data.push(Self::number(n, Loc::new(t as u8 + b, (i + 1) as u8 + b)));
+                lexer
+                    .p_data
+                    .push(Self::number(n, Loc::new(t as u8 + b, (i + 1) as u8 + b)));
             } else if input.as_bytes()[i] == b' ' {
                 b += 1;
             } else {
                 let mut _m = false;
                 for k in ms.to_owned() {
                     if input[i..].starts_with(&k.0) {
-                        p_data.push(Self::new(
+                        lexer.p_data.push(Self::new(
                             k.1,
                             Loc::new(i as u8 + b, (i as u8 + k.0.len() as u8) + b),
                         ));
@@ -190,7 +209,9 @@ impl Token {
 
                 for k in ss.to_owned() {
                     if input.chars().nth(i).unwrap() == k.0 {
-                        p_data.push(Self::new(k.1, Loc::new(i as u8 + b, (i as u8 + 1) + b)));
+                        lexer
+                            .p_data
+                            .push(Self::new(k.1, Loc::new(i as u8 + b, (i as u8 + 1) + b)));
                         i += 1;
                         _m = true;
                         break;
@@ -217,31 +238,33 @@ impl Token {
                     }
 
                     if s == "_" {
-                        p_data.push(Self::new(
+                        lexer.p_data.push(Self::new(
                             TokenKind::UnderScore,
                             Loc::new(t as u8 + b, (i as u8 + 1) + b),
                         ));
                         continue;
                     }
 
-                    p_data.push(Self::ident(s, Loc::new(t as u8 + b, (i as u8 + 1) + b)));
+                    lexer
+                        .p_data
+                        .push(Self::ident(s, Loc::new(t as u8 + b, (i as u8 + 1) + b)));
                     continue;
                 }
-                ev.push(TokenError::invalid_token(
+                lexer.ev.push(TokenError::invalid_token(
                     input.to_string().chars().nth(i).unwrap(),
                     Loc::new(i as u8 + b, i as u8 + 1 + b),
                 ));
-                if !e {
-                    e = true;
+                if !lexer.e {
+                    lexer.e = true;
                 }
             }
             i += 1
         }
-        if e {
-            return Err(ev);
+        if lexer.e {
+            return Err(lexer.ev);
         }
 
-        Ok(p_data)
+        Ok(lexer.p_data)
     }
 }
 
