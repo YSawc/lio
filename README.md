@@ -3,7 +3,11 @@
 [![CircleCI](https://circleci.com/gh/YSawc/lio.svg?style=shield)](https://circleci.com/gh/YSawc/lio)
 [![](http://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
-A toy compiler implemented by rust.
+A toy compiler emits llvm-ir implemented by rust.
+
+## Dependencies
+
+- llvm11: ex) `sudo bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"`
 
 ## Tests
 
