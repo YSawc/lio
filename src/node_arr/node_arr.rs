@@ -8,8 +8,16 @@ use super::super::token::token::*;
 use super::super::var::var::*;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub enum RetTy {
+    Int32,
+    Void,
+    Default,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct NodeArr {
     pub node_st_vec: Vec<NodeSt>,
+    pub ty: RetTy,
     pub ret_node_st: NodeSt,
     pub l: Vec<Var>,
 }
@@ -29,6 +37,7 @@ impl NodeArr {
     pub fn new(v: Vec<NodeSt>) -> Self {
         Self {
             node_st_vec: v.to_owned(),
+            ty: RetTy::Default,
             ret_node_st: v.to_owned().last().unwrap().to_owned(),
             l: vec![],
         }
@@ -64,7 +73,13 @@ impl NodeArr {
 
         let mut ev: Vec<Vec<Var>> = vec![];
         ev.push(g.to_owned());
-        let (l, ugv) = Self::stp(&mut it, ev)?;
+        let (mut l, ugv) = Self::stp(&mut it, ev)?;
+
+        if isi {
+            l.ty = RetTy::Int32;
+        } else {
+            l.ty = RetTy::Void;
+        }
 
         if isi {
             match l.to_owned().to_owned().ret_node_st.c.value {

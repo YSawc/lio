@@ -144,7 +144,7 @@ fn main() {
         if !ll {
             let _nst = gen_x86_64(min.next().unwrap().to_owned());
         } else {
-            let _nst = gen_ll(min.next().unwrap().to_owned());
+            let _nst = gen_llvm_ir(min.next().unwrap().to_owned());
         }
     }
 }

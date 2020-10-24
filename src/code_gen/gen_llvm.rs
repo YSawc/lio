@@ -5,7 +5,7 @@ use std::io::Write;
 
 static mut CC: u8 = 0;
 
-pub fn gen_ll(na: NodeArr) {
+pub fn gen_llvm_ir(na: NodeArr) {
     const DIR: &str = "workspace/tmp.ll";
     fs::File::create(DIR).unwrap();
     fs::remove_file(DIR).unwrap();
@@ -29,23 +29,31 @@ pub fn gen_ll(na: NodeArr) {
     write!(f, "  call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str, i64 0, i64 0), i32 %0)\n").unwrap();
     write!(f, "  ret i32 %0\n").unwrap();
     write!(f, "}}\n").unwrap();
-    write!(f, "define i32 @main() nounwind {{\n").unwrap();
+    if na.ty == RetTy::Int32 {
+        write!(f, "define i32 @main() nounwind {{\n").unwrap();
+    } else {
+        write!(f, "define void @main() nounwind {{\n").unwrap();
+    }
     let mut nai = na.node_st_vec.iter().peekable();
 
     println!("nai: {:?}", nai);
 
     while nai.peek() != None {
-        gen_llvm_ir(&mut f, nai.next().unwrap().to_owned());
+        emitter(&mut f, nai.next().unwrap().to_owned());
     }
 
-    unsafe {
-        write!(f, "  %{} = load i32, i32* %{}, align 4", CC, CC - 1).unwrap();
-        write!(f, "  ret i32 %{}\n", CC).unwrap();
+    if na.ty == RetTy::Int32 {
+        unsafe {
+            write!(f, "  %{} = load i32, i32* %{}, align 4", CC, CC - 1).unwrap();
+            write!(f, "  ret i32 %{}\n", CC).unwrap();
+        }
+    } else {
+        write!(f, "  ret void\n").unwrap();
     }
     write!(f, "}}").unwrap();
 }
 
-fn gen_llvm_ir(f: &mut fs::File, ns: NodeSt) {
+fn emitter(f: &mut fs::File, ns: NodeSt) {
     match ns.c.value {
         NodeKind::Num(n) => {
             unsafe {
@@ -67,15 +75,14 @@ fn gen_llvm_ir(f: &mut fs::File, ns: NodeSt) {
         //     }
         //     return ();
         // }
-        // NodeKind::UnderScore => {
-        //     unsafe { write!(f, "  mov $0, %{}\n", REGS[CC as usize]).unwrap() };
-        //     return ();
-        // }
+        NodeKind::UnderScore => {
+            return ();
+        }
         _ => (),
     }
 
-    let _l = gen_llvm_ir(f, ns.lhs.unwrap().as_ref().to_owned());
-    let _r = gen_llvm_ir(f, ns.rhs.unwrap().as_ref().to_owned());
+    let _l = emitter(f, ns.lhs.unwrap().as_ref().to_owned());
+    let _r = emitter(f, ns.rhs.unwrap().as_ref().to_owned());
 
     match ns.c.value {
         //     NodeKind::Add => {

@@ -18,7 +18,7 @@ pub fn gen_x86_64(na: NodeArr) {
     let mut r = String::new();
     let mut nai = na.node_st_vec.iter().peekable();
     while nai.peek() != None {
-        r = gen_x86_64_code(&mut f, nai.next().unwrap().to_owned());
+        r = emitter(&mut f, nai.next().unwrap().to_owned());
     }
 
     write!(f, ".L.return:\n").unwrap();
@@ -26,7 +26,7 @@ pub fn gen_x86_64(na: NodeArr) {
     write!(f, "  ret\n").unwrap();
 }
 
-fn gen_x86_64_code(f: &mut fs::File, ns: NodeSt) -> String {
+fn emitter(f: &mut fs::File, ns: NodeSt) -> String {
     match ns.c.value {
         NodeKind::Num(n) => {
             unsafe { write!(f, "  mov ${}, %{}\n", n, REGS[CC as usize]).unwrap() };
@@ -34,7 +34,7 @@ fn gen_x86_64_code(f: &mut fs::File, ns: NodeSt) -> String {
             unsafe { return REGS[CC as usize - 1].to_string() };
         }
         NodeKind::Return => {
-            let l = gen_x86_64_code(f, ns.lhs.unwrap().as_ref().to_owned());
+            let l = emitter(f, ns.lhs.unwrap().as_ref().to_owned());
             write!(f, "  jmp .L.return\n").unwrap();
             return l;
         }
@@ -45,8 +45,8 @@ fn gen_x86_64_code(f: &mut fs::File, ns: NodeSt) -> String {
         _ => (),
     }
 
-    let l = gen_x86_64_code(f, ns.lhs.unwrap().as_ref().to_owned());
-    let r = gen_x86_64_code(f, ns.rhs.unwrap().as_ref().to_owned());
+    let l = emitter(f, ns.lhs.unwrap().as_ref().to_owned());
+    let r = emitter(f, ns.rhs.unwrap().as_ref().to_owned());
 
     match ns.c.value {
         NodeKind::Add => {
