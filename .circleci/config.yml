@@ -89,7 +89,7 @@ jobs:
       - run:
           name: build & test
           command: |
-            apt install lsb-release wget software-properties-common
+            sudo apt install lsb-release wget software-properties-common
             sudo bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
             cargo test
             sh test.sh
