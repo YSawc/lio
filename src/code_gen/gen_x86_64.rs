@@ -6,7 +6,7 @@ use std::io::Write;
 const REGS: [&str; 8] = ["rdi", "rsi", "r10", "r11", "r12", "r13", "r14", "r15"];
 static mut CC: u8 = 0;
 
-pub fn gen(na: NodeArr) {
+pub fn gen_x86_64(na: NodeArr) {
     const DIR: &str = "workspace/tmp.s";
     fs::File::create(DIR).unwrap();
     fs::remove_file(DIR).unwrap();
@@ -18,7 +18,7 @@ pub fn gen(na: NodeArr) {
     let mut r = String::new();
     let mut nai = na.node_st_vec.iter().peekable();
     while nai.peek() != None {
-        r = gen_x86(&mut f, nai.next().unwrap().to_owned());
+        r = gen_x86_64_code(&mut f, nai.next().unwrap().to_owned());
     }
 
     write!(f, ".L.return:\n").unwrap();
@@ -26,7 +26,7 @@ pub fn gen(na: NodeArr) {
     write!(f, "  ret\n").unwrap();
 }
 
-fn gen_x86(f: &mut fs::File, ns: NodeSt) -> String {
+fn gen_x86_64_code(f: &mut fs::File, ns: NodeSt) -> String {
     match ns.c.value {
         NodeKind::Num(n) => {
             unsafe { write!(f, "  mov ${}, %{}\n", n, REGS[CC as usize]).unwrap() };
@@ -34,7 +34,7 @@ fn gen_x86(f: &mut fs::File, ns: NodeSt) -> String {
             unsafe { return REGS[CC as usize - 1].to_string() };
         }
         NodeKind::Return => {
-            let l = gen_x86(f, ns.lhs.unwrap().as_ref().to_owned());
+            let l = gen_x86_64_code(f, ns.lhs.unwrap().as_ref().to_owned());
             write!(f, "  jmp .L.return\n").unwrap();
             return l;
         }
@@ -45,8 +45,8 @@ fn gen_x86(f: &mut fs::File, ns: NodeSt) -> String {
         _ => (),
     }
 
-    let l = gen_x86(f, ns.lhs.unwrap().as_ref().to_owned());
-    let r = gen_x86(f, ns.rhs.unwrap().as_ref().to_owned());
+    let l = gen_x86_64_code(f, ns.lhs.unwrap().as_ref().to_owned());
+    let r = gen_x86_64_code(f, ns.rhs.unwrap().as_ref().to_owned());
 
     match ns.c.value {
         NodeKind::Add => {
@@ -113,33 +113,4 @@ fn gen_x86(f: &mut fs::File, ns: NodeSt) -> String {
         }
         _ => unimplemented!(),
     }
-}
-
-pub fn gen_ll(_na: NodeArr) {
-    const DIR: &str = "workspace/tmp.ll";
-    fs::File::create(DIR).unwrap();
-    fs::remove_file(DIR).unwrap();
-    let mut f = fs::File::create(DIR).unwrap();
-
-    write!(f, "%FILE = type opaque\n").unwrap();
-    write!(f, "\n").unwrap();
-    write!(
-        f,
-        "@str = private unnamed_addr constant [4 x i8] c\"%d\\0A\\00\", align 1\n"
-    )
-    .unwrap();
-    write!(f, "declare i32 @fprintf(%FILE*, i8*, ...)\n").unwrap();
-    write!(f, "declare i32 @printf(i8*, ...)\n").unwrap();
-    write!(f, "declare i32 @atoi(...)\n").unwrap();
-    write!(f, "define i32 @print(i32) nounwind {{\n").unwrap();
-    write!(f, "  call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str, i64 0, i64 0), i32 %0)\n").unwrap();
-    write!(f, "  ret i32 %0\n").unwrap();
-    write!(f, "}}\n").unwrap();
-    write!(f, "define i32 @main() nounwind {{\n").unwrap();
-    write!(f, "  %1 = alloca i32, align 4\n").unwrap();
-    write!(f, "  store i32 42, i32* %1\n").unwrap();
-    write!(f, "  %2 = load i32, i32* %1, align 4\n").unwrap();
-    write!(f, "  call i32 (i32) @print(i32 %2)\n").unwrap();
-    write!(f, "  ret i32 %3\n").unwrap();
-    write!(f, "}}").unwrap();
 }

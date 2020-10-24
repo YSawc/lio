@@ -1,3 +1,4 @@
+use lio::code_gen::gen_llvm::*;
 use lio::code_gen::gen_x86_64::*;
 use lio::error::error::*;
 use lio::map::map::*;
@@ -92,7 +93,7 @@ fn main() {
             }
 
             let mut min = _na.iter();
-            let _nst = gen(min.next().unwrap().to_owned());
+            let _nst = gen_x86_64(min.next().unwrap().to_owned());
         }
     } else {
         println!("INPUT: {}", arg1);
@@ -141,7 +142,7 @@ fn main() {
         let mut min = _na.iter();
         // println!("min {:?}", min);
         if !ll {
-            let _nst = gen(min.next().unwrap().to_owned());
+            let _nst = gen_x86_64(min.next().unwrap().to_owned());
         } else {
             let _nst = gen_ll(min.next().unwrap().to_owned());
         }

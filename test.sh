@@ -107,7 +107,7 @@ echo "Starts llvm tests!"
   fi
 }
 
-assert_llvm 42 'fn { _ }' ll
+assert_llvm 42 'fn int { return 42; }' ll
 
 echo "------------------------------"
 echo "All llvm test passed!\n"
