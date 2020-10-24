@@ -85,12 +85,12 @@ assert_x86_64 0 'fn { int _u = 8; _ }'
 assert_x86_64 16 'fn int { int _u = 8; int a = 2; a*_u }'
 
 echo "------------------------------"
-echo "All x86_64 test passed!"
+echo "All x86_64 test passed!\n"
 
 assert_llvm() {
   expected="$1"
   input="$2"
-  simplified="$3"
+  ll="$3"
 
 echo "Starts llvm tests!"
  echo "------------------------------"
@@ -107,7 +107,7 @@ echo "Starts llvm tests!"
   fi
 }
 
-assert_llvm 42 'fn { _ }'
+assert_llvm 42 'fn { _ }' ll
 
 echo "------------------------------"
-echo "All llvm test passed!"
+echo "All llvm test passed!\n"
