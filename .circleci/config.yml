@@ -89,7 +89,7 @@ jobs:
       - run:
           name: build & test
           command: |
-            sudo apt install -y llvm
+            sudo bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
             cargo test
             sh test.sh
       - save_cache_
