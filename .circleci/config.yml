@@ -91,6 +91,7 @@ jobs:
           command: |
             sudo apt install lsb-release wget software-properties-common
             sudo bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
+            sudo apt install llvm-runtime
             cargo test
             sh test.sh
       - save_cache_
