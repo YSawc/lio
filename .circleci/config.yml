@@ -89,6 +89,7 @@ jobs:
       - run:
           name: build & test
           command: |
+            sudo apt install -y llvm
             cargo test
             sh test.sh
       - save_cache_

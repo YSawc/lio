@@ -11,9 +11,12 @@ fn main() {
     let args: Vec<String> = env::args().collect();
     let arg1 = &args[1];
     let mut fsimplified = false;
+    let mut ll = false;
     if args.len() > 2 {
         if args[2] == "simplified" {
             fsimplified = true;
+        } else if args[2] == "ll" {
+            ll = true;
         }
     }
 
@@ -137,6 +140,10 @@ fn main() {
         // println!("_na {:?}", _na);
         let mut min = _na.iter();
         // println!("min {:?}", min);
-        let _nst = gen(min.next().unwrap().to_owned());
+        if !ll {
+            let _nst = gen(min.next().unwrap().to_owned());
+        } else {
+            let _nst = gen_ll(min.next().unwrap().to_owned());
+        }
     }
 }

@@ -114,3 +114,32 @@ fn gen_x86(f: &mut fs::File, ns: NodeSt) -> String {
         _ => unimplemented!(),
     }
 }
+
+pub fn gen_ll(_na: NodeArr) {
+    const DIR: &str = "workspace/tmp.ll";
+    fs::File::create(DIR).unwrap();
+    fs::remove_file(DIR).unwrap();
+    let mut f = fs::File::create(DIR).unwrap();
+
+    write!(f, "%FILE = type opaque\n").unwrap();
+    write!(f, "\n").unwrap();
+    write!(
+        f,
+        "@str = private unnamed_addr constant [4 x i8] c\"%d\\0A\\00\", align 1\n"
+    )
+    .unwrap();
+    write!(f, "declare i32 @fprintf(%FILE*, i8*, ...)\n").unwrap();
+    write!(f, "declare i32 @printf(i8*, ...)\n").unwrap();
+    write!(f, "declare i32 @atoi(...)\n").unwrap();
+    write!(f, "define i32 @print(i32) nounwind {{\n").unwrap();
+    write!(f, "  call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str, i64 0, i64 0), i32 %0)\n").unwrap();
+    write!(f, "  ret i32 %0\n").unwrap();
+    write!(f, "}}\n").unwrap();
+    write!(f, "define i32 @main() nounwind {{\n").unwrap();
+    write!(f, "  %1 = alloca i32, align 4\n").unwrap();
+    write!(f, "  store i32 42, i32* %1\n").unwrap();
+    write!(f, "  %2 = load i32, i32* %1, align 4\n").unwrap();
+    write!(f, "  call i32 (i32) @print(i32 %2)\n").unwrap();
+    write!(f, "  ret i32 %3\n").unwrap();
+    write!(f, "}}").unwrap();
+}
