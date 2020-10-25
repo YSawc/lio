@@ -26,6 +26,8 @@ pub enum NodeKind {
     LBrace,
     RBrace,
     UnderScore,
+    NewVar(i32),
+    Var(i32),
     Default,
 }
 
@@ -117,6 +119,12 @@ impl Node {
     pub fn under_score(loc: Loc) -> Self {
         Self::new(NodeKind::UnderScore, loc)
     }
+    pub fn new_var(i: i32, loc: Loc) -> Self {
+        Self::new(NodeKind::NewVar(i), loc)
+    }
+    pub fn var(i: i32, loc: Loc) -> Self {
+        Self::new(NodeKind::Var(i), loc)
+    }
 }
 
 impl NodeSt {
@@ -129,6 +137,20 @@ impl NodeSt {
     pub fn under_score(loc: Loc) -> Self {
         NodeSt {
             c: Node::under_score(loc),
+            ..Default::default()
+        }
+    }
+    pub fn ass_var(i: i32, nst: NodeSt, loc: Loc) -> Self {
+        NodeSt {
+            c: Node::new_var(i, loc),
+            rhs: Some(Box::new(nst)),
+            ..Default::default()
+        }
+    }
+
+    pub fn var(i: i32, loc: Loc) -> Self {
+        NodeSt {
+            c: Node::var(i, loc),
             ..Default::default()
         }
     }

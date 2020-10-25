@@ -1,5 +1,6 @@
 use super::super::node::node::*;
 use super::super::node_arr::node_arr::*;
+use rustc_hash::FxHashMap;
 use std::fs;
 use std::io::Write;
 
@@ -30,16 +31,17 @@ pub fn gen_llvm_ir(na: NodeArr) {
     write!(f, "  ret i32 %0\n").unwrap();
     write!(f, "}}\n").unwrap();
     // if na.ty == RetTy::Int32 {
-        write!(f, "define i32 @main() nounwind {{\n").unwrap();
+    write!(f, "define i32 @main() nounwind {{\n").unwrap();
     // } else {
-        // write!(f, "define void @main() nounwind {{\n").unwrap();
+    // write!(f, "define void @main() nounwind {{\n").unwrap();
     // }
     let mut nai = na.node_st_vec.iter().peekable();
 
-    println!("nai: {:?}", nai);
+    // println!("nai: {:?}", nai);
 
     while nai.peek() != None {
-        emitter(&mut f, nai.next().unwrap().to_owned());
+        let mut hm: FxHashMap<i32, u8> = FxHashMap::default();
+        emitter(&mut f, &mut hm, nai.next().unwrap().to_owned());
     }
 
     if na.ty == RetTy::Int32 {
@@ -53,7 +55,7 @@ pub fn gen_llvm_ir(na: NodeArr) {
     write!(f, "}}").unwrap();
 }
 
-fn emitter(f: &mut fs::File, ns: NodeSt) {
+fn emitter(f: &mut fs::File, hm: &mut FxHashMap<i32, u8>, ns: NodeSt) {
     match ns.c.value {
         NodeKind::Num(n) => {
             unsafe {
@@ -78,11 +80,25 @@ fn emitter(f: &mut fs::File, ns: NodeSt) {
         NodeKind::UnderScore => {
             return ();
         }
+        NodeKind::NewVar(i) => {
+            emitter(f, hm, ns.to_owned().rhs.unwrap().as_ref().to_owned());
+            unsafe {
+                write!(f, "  %{} = alloca i32, align 4\n", CC).unwrap();
+                write!(f, "  %{} = load i32, i32* %{}, align 4\n", CC + 1, CC).unwrap();
+                hm.insert(i, CC + 2);
+                // write!(f, "  store i32 *%{}, i32* %{}\n", CC - 1, CC).unwrap();
+                write!(f, "  store i32 %{}, i32* %{}, align 4\n", CC + 1, CC - 1).unwrap();
+                CC += 1;
+            }
+            return ();
+        }
         _ => (),
     }
 
-    let _l = emitter(f, ns.lhs.unwrap().as_ref().to_owned());
-    let _r = emitter(f, ns.rhs.unwrap().as_ref().to_owned());
+    // println!("ns.c.value: {:?}", ns.c.value);
+
+    let _l = emitter(f, hm, ns.lhs.unwrap().as_ref().to_owned());
+    let _r = emitter(f, hm, ns.rhs.unwrap().as_ref().to_owned());
 
     match ns.c.value {
         //     NodeKind::Add => {

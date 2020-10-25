@@ -81,6 +81,11 @@ impl NodeArr {
             l.ty = RetTy::Void;
         }
 
+        println!(
+            "l.to_owned().to_owned().ret_node_st.c.value: {:?}",
+            l.to_owned().to_owned().ret_node_st.c.value
+        );
+
         if isi {
             match l.to_owned().to_owned().ret_node_st.c.value {
                 NodeKind::Num(_)
@@ -93,7 +98,8 @@ impl NodeArr {
                 | NodeKind::L
                 | NodeKind::LE
                 | NodeKind::G
-                | NodeKind::GE => return Ok((l, ugv)),
+                | NodeKind::GE
+                | NodeKind::NewAssign => return Ok((l, ugv)),
                 _ => {
                     return Err(ParseError::NotMatchReturnType(
                         l.to_owned().to_owned().ret_node_st.c.loc,
@@ -120,6 +126,7 @@ impl NodeArr {
         let mut nv = vec![];
         let mut l: Vec<Var> = vec![];
         let mut r: NodeSt = NodeSt::default();
+        let mut aln: i32 = 0;
         let mut b = false;
         while it.peek() != None && b == false {
             nv.push(match NodeSt::parser(&mut it) {
@@ -159,35 +166,45 @@ impl NodeArr {
                                     false => return Err(ParseError::UnusedVariable(f.n.c.loc)),
                                 }
                                 uv.retain(|s| s != &f.to_owned().s.to_owned());
-                                let mut n = beta(
+                                let mut lhs = beta(
+                                    // let mut n = beta(
                                     &mut n.to_owned().rhs.unwrap().to_owned(),
                                     ev.to_owned(),
                                     &mut uv,
                                 );
-                                n = n.simplified();
-                                f.n = n;
+                                lhs = lhs.simplified();
+                                f.n = n.to_owned();
                                 let ff = f.to_owned();
                                 l.retain(|s| s.s != _s.to_owned());
                                 l.push(ff);
+
+                                let avar = NodeSt::ass_var(f.to_owned().aln, lhs, n.c.loc);
+                                avar
                             }
-                            _ => {
-                                let mut n = beta(
+                            None => {
+                                let mut lhs = beta(
+                                    // let mut n = beta(
                                     &mut n.to_owned().rhs.unwrap().to_owned(),
                                     ev.to_owned(),
                                     &mut uv,
                                 );
-                                n = n.simplified();
+                                lhs = lhs.simplified();
+                                // n = n.simplified();
                                 let v = match _s.as_bytes()[0] {
-                                    b'_' => Var::mnew(_s, n),
-                                    _ => Var::new(_s, n),
+                                    b'_' => Var::mnew(_s, n.to_owned()),
+                                    _ => Var::new(_s, n.to_owned()),
                                 };
-                                if v.m {
+                                if v.to_owned().m {
                                     uv.push(v.to_owned().s);
                                 }
-                                l.push(v);
+                                l.push(v.to_owned());
+
+                                let avar = NodeSt::ass_var(v.to_owned().aln, lhs, n.c.loc);
+                                // println!("avar: {:?}", avar);
+                                avar
                             }
                         }
-                        continue;
+                        // continue;
                     }
                     NodeKind::Assign => {
                         let mut _s = String::new();
@@ -227,7 +244,7 @@ impl NodeArr {
                                 ))
                             }
                         }
-                        continue;
+                        n
                     }
                     NodeKind::UnderScore => {
                         if it.peek().unwrap().to_owned().to_owned().value != TokenKind::RBrace {
@@ -243,21 +260,26 @@ impl NodeArr {
                     NodeKind::Ident(s) => {
                         let mut ev = ev.to_owned();
                         ev.push(l.to_owned());
-                        match Program::find_v(s, ev.to_owned()) {
-                            Some(v) => {
+                        match Program::find_v(s.to_owned(), ev.to_owned()) {
+                            Some(mut v) => {
                                 if it.peek().unwrap().to_owned().to_owned().value
                                     == TokenKind::RBrace
                                 {
                                     b = true;
                                 }
+
                                 if !uv.contains(&v.to_owned().s.to_owned()) {
-                                    uv.push(v.to_owned().s);
+                                    uv.push(v.to_owned().s.to_owned());
+                                    v.aln = aln;
+                                    aln += 1;
                                 }
 
                                 if b {
                                     r = v.to_owned().n.to_owned();
+                                    println!();
                                 }
-                                v.n
+                                let n = NodeSt::var(v.aln, n.c.loc);
+                                n
                             }
                             None => {
                                 return Err(ParseError::NotDefinitionVar(

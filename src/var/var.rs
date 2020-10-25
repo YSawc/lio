@@ -9,11 +9,17 @@ pub struct Var {
     pub s: String,
     pub n: NodeSt,
     pub m: bool,
+    pub aln: i32,
 }
 
 impl Var {
     pub fn new(s: String, n: NodeSt) -> Self {
-        Self { s, n, m: false }
+        Self {
+            s,
+            n,
+            m: false,
+            aln: 0,
+        }
     }
 
     pub fn default() -> Self {
@@ -21,11 +27,17 @@ impl Var {
             s: String::new(),
             n: NodeSt::default(),
             m: false,
+            aln: 0,
         }
     }
 
     pub fn mnew(s: String, n: NodeSt) -> Self {
-        Self { s, n, m: true }
+        Self {
+            s,
+            n,
+            m: true,
+            aln: 0,
+        }
     }
 }
 
