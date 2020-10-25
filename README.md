@@ -7,7 +7,12 @@ A toy compiler emits llvm-ir implemented by rust.
 
 ## Dependencies
 
-- llvm11: ex) `sudo bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"`
+- llvm11:
+ex)
+```
+sudo bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"`
+sudo apt install llvm-runtime
+```
 
 ## Tests
 

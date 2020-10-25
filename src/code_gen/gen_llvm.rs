@@ -29,11 +29,11 @@ pub fn gen_llvm_ir(na: NodeArr) {
     write!(f, "  call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str, i64 0, i64 0), i32 %0)\n").unwrap();
     write!(f, "  ret i32 %0\n").unwrap();
     write!(f, "}}\n").unwrap();
-    if na.ty == RetTy::Int32 {
+    // if na.ty == RetTy::Int32 {
         write!(f, "define i32 @main() nounwind {{\n").unwrap();
-    } else {
-        write!(f, "define void @main() nounwind {{\n").unwrap();
-    }
+    // } else {
+        // write!(f, "define void @main() nounwind {{\n").unwrap();
+    // }
     let mut nai = na.node_st_vec.iter().peekable();
 
     println!("nai: {:?}", nai);
@@ -48,7 +48,7 @@ pub fn gen_llvm_ir(na: NodeArr) {
             write!(f, "  ret i32 %{}\n", CC).unwrap();
         }
     } else {
-        write!(f, "  ret void\n").unwrap();
+        write!(f, "  ret i32 0\n").unwrap();
     }
     write!(f, "}}").unwrap();
 }
