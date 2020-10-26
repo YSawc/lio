@@ -4,17 +4,14 @@ use rustc_hash::FxHashMap;
 use std::fs;
 use std::io::Write;
 
-static mut CC: u8 = 0;
+static mut CC: u8 = 1;
+static mut RCC: u8 = 1;
 
 pub fn gen_llvm_ir(na: NodeArr) {
     const DIR: &str = "workspace/tmp.ll";
     fs::File::create(DIR).unwrap();
     fs::remove_file(DIR).unwrap();
     let mut f = fs::File::create(DIR).unwrap();
-
-    unsafe {
-        CC += 1;
-    }
 
     write!(f, "%FILE = type opaque\n").unwrap();
     write!(f, "\n").unwrap();
@@ -30,23 +27,20 @@ pub fn gen_llvm_ir(na: NodeArr) {
     write!(f, "  call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str, i64 0, i64 0), i32 %0)\n").unwrap();
     write!(f, "  ret i32 %0\n").unwrap();
     write!(f, "}}\n").unwrap();
-    // if na.ty == RetTy::Int32 {
+
     write!(f, "define i32 @main() nounwind {{\n").unwrap();
-    // } else {
-    // write!(f, "define void @main() nounwind {{\n").unwrap();
-    // }
     let mut nai = na.node_st_vec.iter().peekable();
-
-    // println!("nai: {:?}", nai);
-
+    let mut hm: FxHashMap<i32, u8> = FxHashMap::default();
     while nai.peek() != None {
-        let mut hm: FxHashMap<i32, u8> = FxHashMap::default();
-        emitter(&mut f, &mut hm, nai.next().unwrap().to_owned());
+        hm = match emitter(&mut f, &mut hm, nai.next().unwrap().to_owned()) {
+            Some(hm) => hm,
+            None => hm,
+        };
     }
 
     if na.ty == RetTy::Int32 {
         unsafe {
-            write!(f, "  %{} = load i32, i32* %{}, align 4", CC, CC - 1).unwrap();
+            write!(f, "  %{} = add nsw i32 %{}, 0\n", CC, CC - 1).unwrap();
             write!(f, "  ret i32 %{}\n", CC).unwrap();
         }
     } else {
@@ -55,47 +49,50 @@ pub fn gen_llvm_ir(na: NodeArr) {
     write!(f, "}}").unwrap();
 }
 
-fn emitter(f: &mut fs::File, hm: &mut FxHashMap<i32, u8>, ns: NodeSt) {
+fn emitter(
+    f: &mut fs::File,
+    hm: &mut FxHashMap<i32, u8>,
+    ns: NodeSt,
+) -> Option<FxHashMap<i32, u8>> {
     match ns.c.value {
         NodeKind::Num(n) => {
             unsafe {
                 write!(f, "  %{} = alloca i32, align 4\n", CC).unwrap();
-                write!(f, "  store i32 {}, i32* %{}\n", n, CC).unwrap();
-                CC += 1;
+                write!(f, "  store i32 {}, i32* %{}, align 4\n", n, CC).unwrap();
+                write!(f, "  %{} = load i32, i32* %{}, align 4\n", CC + 1, CC).unwrap();
+                RCC = CC;
+                CC += 2;
             }
-            return ();
+            return None;
         }
-        // NodeKind::Return => {
-        //     unsafe {
-        //         write!(f, "%{} = load i32, i32* %{}, align 4", CC + 1, CC).unwrap();
-        //     }
-        //     unsafe {
-        //         CC += 1;
-        //     }
-        //     unsafe {
-        //         write!(f, "ret i32 %{}", CC).unwrap();
-        //     }
-        //     return ();
-        // }
         NodeKind::UnderScore => {
-            return ();
+            return None;
         }
         NodeKind::NewVar(i) => {
             emitter(f, hm, ns.to_owned().rhs.unwrap().as_ref().to_owned());
             unsafe {
+                hm.insert(i, CC);
                 write!(f, "  %{} = alloca i32, align 4\n", CC).unwrap();
-                write!(f, "  %{} = load i32, i32* %{}, align 4\n", CC + 1, CC).unwrap();
-                hm.insert(i, CC + 2);
-                // write!(f, "  store i32 *%{}, i32* %{}\n", CC - 1, CC).unwrap();
-                write!(f, "  store i32 %{}, i32* %{}, align 4\n", CC + 1, CC - 1).unwrap();
+                write!(f, "  store i32 %{}, i32* %{}, align 4\n", CC - 1, CC).unwrap();
                 CC += 1;
             }
-            return ();
+            return Some(hm.to_owned());
+        }
+        NodeKind::Var(i) => {
+            unsafe {
+                write!(
+                    f,
+                    "  %{} = load i32, i32* %{}, align 4\n",
+                    CC,
+                    hm.get(&i).unwrap()
+                )
+                .unwrap();
+                CC += 1;
+            }
+            return None;
         }
         _ => (),
     }
-
-    // println!("ns.c.value: {:?}", ns.c.value);
 
     let _l = emitter(f, hm, ns.lhs.unwrap().as_ref().to_owned());
     let _r = emitter(f, hm, ns.rhs.unwrap().as_ref().to_owned());

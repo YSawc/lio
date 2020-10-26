@@ -1,5 +1,4 @@
 use super::super::node::node::*;
-// use super::super::node_arr::node_arr::*;
 use super::super::program::program::*;
 use super::super::simplified::beta::*;
 use rustc_hash::FxHashMap;
@@ -81,27 +80,14 @@ pub fn vex(
                     v
                 }
             };
-            ns.c = n.to_owned().n.c;
+            ns.c = Node::var(n.aln, ns.to_owned().c.loc);
             if uv.contains(&n.to_owned().s.to_owned()) {
             } else {
                 uv.push(n.s);
             }
-            if n.n.lhs != None {
-                ns.lhs = Some(Box::new(vex(
-                    &mut n.n.lhs.as_ref().unwrap().to_owned().as_ref().to_owned(),
-                    ev.to_owned(),
-                    uv,
-                    map,
-                )));
-            }
-            if n.n.rhs != None {
-                ns.rhs = Some(Box::new(vex(
-                    &mut n.n.rhs.as_ref().unwrap().to_owned().as_ref().to_owned(),
-                    ev.to_owned(),
-                    uv,
-                    map,
-                )));
-            }
+            let mut vn = NodeSt::var(n.aln, ns.to_owned().c.loc);
+            vn.lhs = ns.lhs.to_owned();
+            vn.rhs = ns.rhs.to_owned();
             return ns.to_owned();
         }
         _ => return ns.to_owned(),

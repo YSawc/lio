@@ -81,11 +81,6 @@ impl NodeArr {
             l.ty = RetTy::Void;
         }
 
-        println!(
-            "l.to_owned().to_owned().ret_node_st.c.value: {:?}",
-            l.to_owned().to_owned().ret_node_st.c.value
-        );
-
         if isi {
             match l.to_owned().to_owned().ret_node_st.c.value {
                 NodeKind::Num(_)
@@ -99,7 +94,9 @@ impl NodeArr {
                 | NodeKind::LE
                 | NodeKind::G
                 | NodeKind::GE
-                | NodeKind::NewAssign => return Ok((l, ugv)),
+                | NodeKind::NewAssign
+                | NodeKind::Ident(_)
+                | NodeKind::Var(_) => return Ok((l, ugv)),
                 _ => {
                     return Err(ParseError::NotMatchReturnType(
                         l.to_owned().to_owned().ret_node_st.c.loc,
@@ -141,9 +138,7 @@ impl NodeArr {
 
                         let mut ev = ev.to_owned();
                         ev.push(l.to_owned());
-
                         r = beta(&mut n.to_owned().lhs.unwrap().to_owned(), ev, &mut uv);
-
                         r.to_owned()
                     }
                     NodeKind::NewAssign => {
@@ -167,7 +162,6 @@ impl NodeArr {
                                 }
                                 uv.retain(|s| s != &f.to_owned().s.to_owned());
                                 let mut lhs = beta(
-                                    // let mut n = beta(
                                     &mut n.to_owned().rhs.unwrap().to_owned(),
                                     ev.to_owned(),
                                     &mut uv,
@@ -183,13 +177,11 @@ impl NodeArr {
                             }
                             None => {
                                 let mut lhs = beta(
-                                    // let mut n = beta(
                                     &mut n.to_owned().rhs.unwrap().to_owned(),
                                     ev.to_owned(),
                                     &mut uv,
                                 );
                                 lhs = lhs.simplified();
-                                // n = n.simplified();
                                 let v = match _s.as_bytes()[0] {
                                     b'_' => Var::mnew(_s, n.to_owned()),
                                     _ => Var::new(_s, n.to_owned()),
@@ -200,11 +192,9 @@ impl NodeArr {
                                 l.push(v.to_owned());
 
                                 let avar = NodeSt::ass_var(v.to_owned().aln, lhs, n.c.loc);
-                                // println!("avar: {:?}", avar);
                                 avar
                             }
                         }
-                        // continue;
                     }
                     NodeKind::Assign => {
                         let mut _s = String::new();
