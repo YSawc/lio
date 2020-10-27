@@ -91,7 +91,7 @@ impl NodeSt {
                     _ => unreachable!(),
                 }
             }
-            NodeKind::Num(_) | NodeKind::UnderScore => (),
+            NodeKind::Num(_) | NodeKind::UnderScore | NodeKind::NewVar(_) => (),
             _ => unreachable!(),
         };
         self

@@ -21,6 +21,12 @@ fn main() {
         }
     }
 
+    if args.len() > 3 {
+        if args[3] == "simplified" {
+            fsimplified = true;
+        }
+    }
+
     if arg1 == "repl" {
         loop {
             print!("> ");

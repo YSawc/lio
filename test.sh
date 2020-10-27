@@ -90,12 +90,12 @@ echo "All x86_64 test passed!\n"
 assert_llvm() {
   expected="$1"
   input="$2"
-  ll="$3"
+  simplified="$3"
 
 echo "Starts llvm tests!"
  echo "------------------------------"
  echo "[[rust output]]"
-  cargo run "$2" ll && lli ./workspace/tmp.ll
+  cargo run "$2" ll "$3" && lli ./workspace/tmp.ll
   actual="$?"
 
  echo "[[ shell output ]]"
@@ -112,6 +112,8 @@ assert_llvm 0 'fn { _ }'
 assert_llvm 0 'fn { int _a = 3*4; _ }'
 assert_llvm 7 'fn int { int a = 3+4; return a; }'
 assert_llvm 12 'fn int { int a = 3*4; a }'
+assert_llvm 8 'fn int { int _a = 3*4; 2+3*2 }' simplified
+assert_llvm 8 'fn int { int _a = 3*4; int _b = 6/2; 2+3*2 }' simplified
 
 echo "------------------------------"
 echo "All llvm test passed!\n"
