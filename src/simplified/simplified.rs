@@ -29,25 +29,46 @@ impl NodeSt {
             | NodeKind::LE
             | NodeKind::G
             | NodeKind::GE => {
+                let mut lnn = true;
+                let mut rnn = true;
                 let ln = self.lhs.as_ref().unwrap().as_ref().to_owned().simplified();
                 let llf = ln.c.loc.f;
                 let l = match ln.c.value {
                     NodeKind::Num(n) => n,
-                    _ => unreachable!(),
+                    _ => {
+                        lnn = false;
+                        0
+                    }
                 };
-                let r = match self
-                    .rhs
-                    .as_ref()
-                    .unwrap()
-                    .as_ref()
-                    .to_owned()
-                    .simplified()
-                    .c
-                    .value
-                {
+
+                let rn = self.rhs.as_ref().unwrap().as_ref().to_owned().simplified();
+                let r = match rn.c.value {
                     NodeKind::Num(n) => n,
-                    _ => unreachable!(),
+                    _ => {
+                        rnn = false;
+                        0
+                    }
                 };
+
+                if !lnn || !rnn {
+                    self.lhs = match lnn {
+                        true => Some(Box::new(NodeSt::num(
+                            l,
+                            Loc::new(llf, (llf as i8 + (l / 10) + 1) as u8),
+                        ))),
+                        false => Some(Box::new(ln)),
+                    };
+
+                    self.rhs = match rnn {
+                        true => Some(Box::new(NodeSt::num(
+                            r,
+                            Loc::new(llf, (llf as i8 + (r / 10) + 1) as u8),
+                        ))),
+                        false => Some(Box::new(rn)),
+                    };
+                    return self;
+                }
+
                 self = match self.c.value {
                     NodeKind::Add => {
                         NodeSt::num(l + r, Loc::new(llf, (llf as i8 + ((l + r) / 10) + 1) as u8))
@@ -91,7 +112,7 @@ impl NodeSt {
                     _ => unreachable!(),
                 }
             }
-            NodeKind::Num(_) | NodeKind::UnderScore | NodeKind::NewVar(_) => (),
+            NodeKind::Num(_) | NodeKind::UnderScore | NodeKind::NewVar(_) | NodeKind::Var(_) => (),
             _ => unreachable!(),
         };
         self

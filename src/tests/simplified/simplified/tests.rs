@@ -26,3 +26,33 @@ fn simplified_with_minus_test() {
     let l = NodeSt::num(1, Loc::new(12, 13));
     assert_eq!(l, n);
 }
+
+#[test]
+fn simplified_with_variable_test() {
+    let t = Token::tokenize("fn int { int a = 1; 2*3-a;}").unwrap();
+    let mut t = t.iter().peekable();
+    let n = NodeArr::w_parser(&mut t, vec![]).unwrap().0;
+    let n = n.simplified().ret_node_st;
+    let l = NodeSt {
+        c: Annot {
+            value: NodeKind::Sub,
+            loc: Loc { f: 26, e: 27 },
+        },
+        lhs: Some(Box::new(NodeSt {
+            c: Annot {
+                value: NodeKind::Num(6),
+                loc: Loc { f: 23, e: 24 },
+            },
+            ..Default::default()
+        })),
+        rhs: Some(Box::new(NodeSt {
+            c: Annot {
+                value: NodeKind::Var(0),
+                loc: Loc { f: 24, e: 26 },
+            },
+            ..Default::default()
+        })),
+        ..Default::default()
+    };
+    assert_eq!(l, n);
+}

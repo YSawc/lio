@@ -39,7 +39,7 @@ sudo apt install llvm-runtime
   - [x] [not checkes for under score variable](https://github.com/YSawc/lio/commit/0c95ef3d9c57e8578d584aaef5dc42fca986a3c9)
 - [x] [checker for return type](https://github.com/YSawc/lio/commit/cb7864e64982aeb98adda36f606e96cb451b0784)
 - [ ] multiple error notification
-  - [ ] tokenize
+  - [x] [tokenize](https://github.com/YSawc/lio/commit/d09ae5afe26fd3daf1dcddd3dd333224cffe247c)
   - [ ] parser
   - [ ] whole of program
 - [ ] command selector in several mathine architecture
