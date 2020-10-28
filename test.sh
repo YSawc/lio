@@ -119,6 +119,12 @@ assert_llvm 9 'fn int { int a = 3*4; 2+a-5 }'
 assert_llvm 4 'fn int { int a = 3*4; 2+a-5*2 }' simplified
 assert_llvm 2 'fn int { int a = 3*4; a/2-2*2 }' simplified
 assert_llvm 6 'fn int { int a = 3*4; a/2 }'
+assert_llvm 3 'fn int { 3*(6==(3*2)) } '
+assert_llvm 3 'fn int { 3*(6==(3*2)) } ' simplified
+assert_llvm 3 'fn int { (1*2>=3-(2*1))+2; }'
+assert_llvm 3 'fn int { (1*2>=3-(2*1))+2; }' simplified
+assert_llvm 5 'fn int { int xx = 4; (1*2>=xx-(2*1))+4; }'
+assert_llvm 7 'fn int { int xx = 4; (1*2>=xx-(2*1))+6; }' simplified
 
 echo "------------------------------"
 echo "All llvm test passed!\n"

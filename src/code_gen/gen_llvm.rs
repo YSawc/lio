@@ -7,8 +7,7 @@ use std::io::Write;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Femitter {
     pub rc: u8,
-    pub lr: u8,
-    pub rr: u8,
+    pub vr: Vec<u8>,
     pub hm: FxHashMap<i32, u8>,
 }
 
@@ -16,8 +15,7 @@ impl Femitter {
     pub fn new() -> Self {
         Femitter {
             rc: 1,
-            lr: 0,
-            rr: 0,
+            vr: vec![],
             hm: FxHashMap::default(),
         }
     }
@@ -79,8 +77,7 @@ impl Femitter {
                     self.rc
                 )
                 .unwrap();
-
-                self.rr = self.rc + 1;
+                self.vr.push(self.rc + 1);
                 self.rc += 2;
                 return ();
             }
@@ -109,7 +106,7 @@ impl Femitter {
                     self.hm.get(&i).unwrap()
                 )
                 .unwrap();
-                self.rr = self.rc;
+                self.vr.push(self.rc);
                 self.rc += 1;
                 return ();
             }
@@ -117,88 +114,88 @@ impl Femitter {
         }
 
         self.emitter(f, ns.to_owned().lhs.unwrap().as_ref().to_owned());
-        self.lr = self.rr;
         self.emitter(f, ns.to_owned().rhs.unwrap().as_ref().to_owned());
+
+        let rr = self.vr.pop().unwrap();
+        let lr = self.vr.pop().unwrap();
 
         match ns.c.value {
             NodeKind::Add => {
-                write!(
-                    f,
-                    "  %{} = add nsw i32 %{}, %{}\n",
-                    self.rc, self.lr, self.rr
-                )
-                .unwrap();
-                self.rr = self.rc;
+                write!(f, "  %{} = add nsw i32 %{}, %{}\n", self.rc, lr, rr).unwrap();
+                self.vr.push(self.rc);
                 self.rc += 1;
             }
             NodeKind::Sub => {
-                write!(
-                    f,
-                    "  %{} = sub nsw i32 %{}, %{}\n",
-                    self.rc, self.lr, self.rr
-                )
-                .unwrap();
-                self.rr = self.rc;
+                write!(f, "  %{} = sub nsw i32 %{}, %{}\n", self.rc, lr, rr).unwrap();
+                self.vr.push(self.rc);
                 self.rc += 1;
             }
             NodeKind::Mul => {
-                write!(
-                    f,
-                    "  %{} = mul nsw i32 %{}, %{}\n",
-                    self.rc, self.lr, self.rr
-                )
-                .unwrap();
-                self.rr = self.rc;
+                write!(f, "  %{} = mul nsw i32 %{}, %{}\n", self.rc, lr, rr).unwrap();
+                self.vr.push(self.rc);
                 self.rc += 1;
             }
             NodeKind::Div => {
-                write!(f, "  %{} = sdiv i32 %{}, %{}\n", self.rc, self.lr, self.rr).unwrap();
-                self.rr = self.rc;
+                write!(f, "  %{} = sdiv i32 %{}, %{}\n", self.rc, lr, rr).unwrap();
+                self.vr.push(self.rc);
                 self.rc += 1;
             }
-            //     NodeKind::Sur => {
-            //         write!(f, "  mov %{}, %rax\n", l).unwrap();
-            //         write!(f, "  cqo\n").unwrap();
-            //         write!(f, "  idiv %{}\n", r).unwrap();
-            //         write!(f, "  mov %rdx, %{}\n", l).unwrap();
-            //         return ();
-            //     }
-            //     NodeKind::E => {
-            //         write!(f, "  cmp %{}, %{}\n", r, l).unwrap();
-            //         write!(f, "  sete %al\n").unwrap();
-            //         write!(f, "  movzb %al, %{}\n", l).unwrap();
-            //         return ();
-            //     }
-            //     NodeKind::NE => {
-            //         write!(f, "  cmp %{}, %{}\n", r, l).unwrap();
-            //         write!(f, "  setne %al\n").unwrap();
-            //         write!(f, "  movzb %al, %{}\n", l).unwrap();
-            //         return ();
-            //     }
-            //     NodeKind::L => {
-            //         write!(f, "  cmp %{}, %{}\n", r, l).unwrap();
-            //         write!(f, "  setl %al\n").unwrap();
-            //         write!(f, "  movzb %al, %{}\n", l).unwrap();
-            //         return ();
-            //     }
-            //     NodeKind::LE => {
-            //         write!(f, "  cmp %{}, %{}\n", r, l).unwrap();
-            //         write!(f, "  setle %al\n").unwrap();
-            //         write!(f, "  movzb %al, %{}\n", l).unwrap();
-            //         return l;
-            //     }
-            //     NodeKind::G => {
-            //         write!(f, "  cmp %{}, %{}\n", r, l).unwrap();
-            //         write!(f, "  setg %al\n").unwrap();
-            //         write!(f, "  movzb %al, %{}\n", l).unwrap();
-            //         return l;
-            //     }
-            //     NodeKind::GE => {
-            //         write!(f, "  cmp %{}, %{}\n", r, l).unwrap();
-            //         write!(f, "  setge %al\n").unwrap();
-            //         write!(f, "  movzb %al, %{}\n", l).unwrap();
-            //         return l;
-            //     }
+            NodeKind::Sur => {
+                write!(f, "  %{} = srem i32 %{}, %{}\n", self.rc, lr, rr).unwrap();
+                self.vr.push(self.rc);
+                self.rc += 1;
+            }
+            NodeKind::E
+            | NodeKind::NE
+            | NodeKind::L
+            | NodeKind::LE
+            | NodeKind::G
+            | NodeKind::GE => {
+                match ns.c.value {
+                    NodeKind::E => {
+                        write!(f, "  %{} = icmp eq i32 %{}, %{}\n", self.rc, lr, rr).unwrap();
+                        write!(f, "  %{} = zext i1 %{} to i32\n", self.rc + 1, self.rc).unwrap();
+                    }
+                    NodeKind::NE => {
+                        write!(f, "  %{} = icmp ne i32 %{}, %{}\n", self.rc, lr, rr).unwrap();
+                        write!(f, "  %{} = zext i1 %{} to i32\n", self.rc + 1, self.rc).unwrap();
+                    }
+                    NodeKind::L => {
+                        write!(f, "  %{} = icmp slt i32 %{}, %{}\n", self.rc, lr, rr).unwrap();
+                        write!(f, "  %{} = zext i1 %{} to i32\n", self.rc + 1, self.rc).unwrap();
+                    }
+                    NodeKind::LE => {
+                        write!(f, "  %{} = icmp sle i32 %{}, %{}\n", self.rc, lr, rr).unwrap();
+                        write!(f, "  %{} = zext i1 %{} to i32\n", self.rc + 1, self.rc).unwrap();
+                    }
+                    NodeKind::G => {
+                        write!(f, "  %{} = icmp sgt i32 %{}, %{}\n", self.rc, lr, rr).unwrap();
+                        write!(f, "  %{} = zext i1 %{} to i32\n", self.rc + 1, self.rc).unwrap();
+                    }
+                    NodeKind::GE => {
+                        write!(f, "  %{} = icmp sge i32 %{}, %{}\n", self.rc, lr, rr).unwrap();
+                        write!(f, "  %{} = zext i1 %{} to i32\n", self.rc + 1, self.rc).unwrap();
+                    }
+                    _ => unreachable!(),
+                }
+                write!(f, "  %{} = alloca i32, align 4\n", self.rc + 2).unwrap();
+                write!(
+                    f,
+                    "  store i32 %{}, i32* %{}, align 4\n",
+                    self.rc + 1,
+                    self.rc + 2
+                )
+                .unwrap();
+                write!(
+                    f,
+                    "  %{} = load i32, i32* %{}, align 4\n",
+                    self.rc + 3,
+                    self.rc + 2
+                )
+                .unwrap();
+                self.vr.push(self.rc + 3);
+                self.rc += 4;
+            }
             _ => unimplemented!(),
         }
     }
