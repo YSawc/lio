@@ -50,7 +50,7 @@ impl NodeArr {
         let mut fm = Femitter::new();
         let mut nai = self.node_st_vec.iter().peekable();
         while nai.peek() != None {
-            fm.emitter(&mut f, nai.next().unwrap().to_owned())
+            fm.fgen(&mut f, nai.next().unwrap().to_owned())
         }
 
         if self.ty == RetTy::Int32 {
@@ -80,7 +80,7 @@ impl Femitter {
                 )
                 .unwrap();
 
-                self.rr = self.rc;
+                self.rr = self.rc + 1;
                 self.rc += 2;
                 return ();
             }
@@ -109,35 +109,53 @@ impl Femitter {
                     self.hm.get(&i).unwrap()
                 )
                 .unwrap();
+                self.rr = self.rc;
                 self.rc += 1;
                 return ();
             }
             _ => (),
         }
 
-        let _l = self.emitter(f, ns.lhs.unwrap().as_ref().to_owned());
-        let _r = self.emitter(f, ns.rhs.unwrap().as_ref().to_owned());
+        self.emitter(f, ns.to_owned().lhs.unwrap().as_ref().to_owned());
+        self.lr = self.rr;
+        self.emitter(f, ns.to_owned().rhs.unwrap().as_ref().to_owned());
 
         match ns.c.value {
-            //     NodeKind::Add => {
-            //         write!(f, "  add %{}, %{}\n", r, l).unwrap();
-            //         return ();
-            //     }
-            //     NodeKind::Sub => {
-            //         write!(f, "  sub %{}, %{}\n", r, l).unwrap();
-            //         return ();
-            //     }
-            //     NodeKind::Mul => {
-            //         write!(f, "  imul %{}, %{}\n", r, l).unwrap();
-            //         return ();
-            //     }
-            //     NodeKind::Div => {
-            //         write!(f, "  mov %{}, %rax\n", l).unwrap();
-            //         write!(f, "  cqo\n").unwrap();
-            //         write!(f, "  idiv %{}\n", r).unwrap();
-            //         write!(f, "  mov %rax, %{}\n", l).unwrap();
-            //         return ();
-            //     }
+            NodeKind::Add => {
+                write!(
+                    f,
+                    "  %{} = add nsw i32 %{}, %{}\n",
+                    self.rc, self.lr, self.rr
+                )
+                .unwrap();
+                self.rr = self.rc;
+                self.rc += 1;
+            }
+            NodeKind::Sub => {
+                write!(
+                    f,
+                    "  %{} = sub nsw i32 %{}, %{}\n",
+                    self.rc, self.lr, self.rr
+                )
+                .unwrap();
+                self.rr = self.rc;
+                self.rc += 1;
+            }
+            NodeKind::Mul => {
+                write!(
+                    f,
+                    "  %{} = mul nsw i32 %{}, %{}\n",
+                    self.rc, self.lr, self.rr
+                )
+                .unwrap();
+                self.rr = self.rc;
+                self.rc += 1;
+            }
+            NodeKind::Div => {
+                write!(f, "  %{} = sdiv i32 %{}, %{}\n", self.rc, self.lr, self.rr).unwrap();
+                self.rr = self.rc;
+                self.rc += 1;
+            }
             //     NodeKind::Sur => {
             //         write!(f, "  mov %{}, %rax\n", l).unwrap();
             //         write!(f, "  cqo\n").unwrap();

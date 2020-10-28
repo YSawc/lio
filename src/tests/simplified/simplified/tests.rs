@@ -29,7 +29,7 @@ fn simplified_with_minus_test() {
 
 #[test]
 fn simplified_with_variable_test() {
-    let t = Token::tokenize("fn int { int a = 1; 2*3-a;}").unwrap();
+    let t = Token::tokenize("fn int { int a = 1; 2*3-a; }").unwrap();
     let mut t = t.iter().peekable();
     let n = NodeArr::w_parser(&mut t, vec![]).unwrap().0;
     let n = n.simplified().ret_node_st;
