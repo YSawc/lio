@@ -27,7 +27,7 @@ pub enum NodeKind {
     RBrace,
     UnderScore,
     NewVar(i32),
-    RVar(i32),
+    ReAssignVar(i32),
     Var(i32),
     Default,
 }
@@ -123,8 +123,8 @@ impl Node {
     pub fn new_var(i: i32, loc: Loc) -> Self {
         Self::new(NodeKind::NewVar(i), loc)
     }
-    pub fn r_var(i: i32, loc: Loc) -> Self {
-        Self::new(NodeKind::RVar(i), loc)
+    pub fn re_assign_var(i: i32, loc: Loc) -> Self {
+        Self::new(NodeKind::ReAssignVar(i), loc)
     }
     pub fn var(i: i32, loc: Loc) -> Self {
         Self::new(NodeKind::Var(i), loc)
@@ -153,7 +153,7 @@ impl NodeSt {
     }
     pub fn r_var(i: i32, nst: NodeSt, loc: Loc) -> Self {
         NodeSt {
-            c: Node::r_var(i, loc),
+            c: Node::re_assign_var(i, loc),
             rhs: Some(Box::new(nst)),
             ..Default::default()
         }

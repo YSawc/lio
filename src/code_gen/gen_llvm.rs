@@ -98,7 +98,7 @@ impl Femitter {
                 self.rc += 1;
                 return ();
             }
-            NodeKind::RVar(i) => {
+            NodeKind::ReAssignVar(i) => {
                 self.emitter(f, ns.to_owned().rhs.unwrap().as_ref().to_owned());
                 write!(
                     f,

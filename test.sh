@@ -7,7 +7,7 @@ assert_x86_64() {
   input="$2"
   simplified="$3"
 
-echo "Starts x86_64 tests!"
+echo "\nStarts x86_64 tests!"
  echo "------------------------------"
  echo "[[rust output]]"
   cargo run "$2" "$3" && cc -o ./workspace/tmp ./workspace/tmp.s && ./workspace/tmp
@@ -15,9 +15,9 @@ echo "Starts x86_64 tests!"
 
  echo "[[ shell output ]]"
   if [ "$actual" = "$expected" ]; then
-    echo "TEST[[$input => $actual]]"
+    echo "TEST[[$input => $actual]]\n"
   else
-    echo "TEST[[$input => $expected expected, but got $actual]]"
+    echo "TEST[[$input => $expected expected, but got $actual]]\n"
     exit 1
   fi
 }
@@ -100,9 +100,9 @@ echo "Starts llvm tests!"
 
  echo "[[ shell output ]]"
   if [ "$actual" = "$expected" ]; then
-    echo "TEST[[$input => $actual]]"
+    echo "TEST[[$input => $actual]]\n"
   else
-    echo "TEST[[$input => $expected expected, but got $actual]]"
+    echo "TEST[[$input => $expected expected, but got $actual]]\n"
     exit 1
   fi
 }
