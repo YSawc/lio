@@ -33,6 +33,7 @@ sudo apt install llvm-runtime
   - [ ] alpha
   - [x] [beta](https://github.com/YSawc/lio/commit/dd6dd3de39019f4c7bec2677140fb22e9f06fcc9)
   - [x] [simplified](https://github.com/YSawc/lio/commit/e2199f937ca5e13c19579430e677ea922cd4cbf5)
+  - [x] [simplified mixed variable](https://github.com/YSawc/lio/commit/f843da7c562e6ea6aa8a2a486b31d2e7d991ad46)
 - [ ] unused variable checker
   - [x] [global](https://github.com/YSawc/lio/commit/a8c70e5e3824b5b61afaf07ff636bdeca46b41b6)
   - [x] [local](https://github.com/YSawc/lio/commit/da07a3dc4c1985c2116da6e4e94554c51d51e30c)
