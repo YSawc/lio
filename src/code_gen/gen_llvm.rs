@@ -98,6 +98,17 @@ impl Femitter {
                 self.rc += 1;
                 return ();
             }
+            NodeKind::RVar(i) => {
+                self.emitter(f, ns.to_owned().rhs.unwrap().as_ref().to_owned());
+                write!(
+                    f,
+                    "  store i32 %{}, i32* %{}, align 4\n",
+                    self.rc - 1,
+                    self.hm.get(&i).unwrap()
+                )
+                .unwrap();
+                return ();
+            }
             NodeKind::Var(i) => {
                 write!(
                     f,

@@ -95,6 +95,7 @@ impl NodeArr {
                 | NodeKind::G
                 | NodeKind::GE
                 | NodeKind::NewAssign
+                | NodeKind::Assign
                 | NodeKind::Ident(_)
                 | NodeKind::Var(_) => return Ok((l, ugv)),
                 _ => {
@@ -218,16 +219,18 @@ impl NodeArr {
                                     true => (),
                                     false => return Err(ParseError::UnusedVariable(f.n.c.loc)),
                                 }
-                                let mut n = beta(
+                                let mut lhs = beta(
                                     &mut n.to_owned().rhs.unwrap().to_owned(),
                                     ev.to_owned(),
                                     &mut uv,
                                 );
-                                n = n.simplified();
-                                f.n = n;
+                                lhs = lhs.simplified();
+                                f.n = n.to_owned();
                                 let ff = f.to_owned();
                                 l.retain(|s| s.s != _s.to_owned());
                                 l.push(ff);
+                                let rvar = NodeSt::r_var(f.to_owned().aln, lhs, n.c.loc);
+                                rvar
                             }
                             _ => {
                                 return Err(ParseError::UndefinedVariable(
@@ -235,7 +238,6 @@ impl NodeArr {
                                 ))
                             }
                         }
-                        n
                     }
                     NodeKind::UnderScore => {
                         if it.peek().unwrap().to_owned().to_owned().value != TokenKind::RBrace {
@@ -267,7 +269,6 @@ impl NodeArr {
 
                                 if b {
                                     r = v.to_owned().n.to_owned();
-                                    println!();
                                 }
                                 let n = NodeSt::var(v.aln, n.c.loc);
                                 n
