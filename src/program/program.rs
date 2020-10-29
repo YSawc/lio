@@ -62,6 +62,7 @@ impl Program {
     ) -> Result<Vec<Var>, ParseError> {
         let mut uv: Vec<String> = vec![];
         let mut g: Vec<Var> = vec![];
+        let mut aln: i32 = 0;
         let mut b = false;
         while it.peek().unwrap().value != TokenKind::Fn && b == false {
             let et = it.to_owned();
@@ -102,9 +103,10 @@ impl Program {
                                 let n =
                                     beta(&mut n.to_owned().rhs.unwrap().to_owned(), ev, &mut uv);
                                 n.to_owned().simplified();
+                                aln += 1;
                                 let v = match _s.as_bytes()[0] {
-                                    b'_' => Var::mnew(_s, n),
-                                    _ => Var::new(_s, n),
+                                    b'_' => Var::mnew(_s, n, aln),
+                                    _ => Var::new(_s, n, aln),
                                 };
                                 if v.m {
                                     uv.push(v.to_owned().s);

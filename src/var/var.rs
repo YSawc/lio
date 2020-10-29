@@ -12,12 +12,12 @@ pub struct Var {
 }
 
 impl Var {
-    pub fn new(s: String, n: NodeSt) -> Self {
+    pub fn new(s: String, n: NodeSt, aln: i32) -> Self {
         Self {
             s,
             n,
             m: false,
-            aln: 0,
+            aln,
         }
     }
 
@@ -30,13 +30,8 @@ impl Var {
         }
     }
 
-    pub fn mnew(s: String, n: NodeSt) -> Self {
-        Self {
-            s,
-            n,
-            m: true,
-            aln: 0,
-        }
+    pub fn mnew(s: String, n: NodeSt, aln: i32) -> Self {
+        Self { s, n, m: true, aln }
     }
 }
 

@@ -47,7 +47,7 @@ fn simplified_with_variable_test() {
         })),
         rhs: Some(Box::new(NodeSt {
             c: Annot {
-                value: NodeKind::Var(0),
+                value: NodeKind::Var(1),
                 loc: Loc { f: 24, e: 26 },
             },
             ..Default::default()
