@@ -9,15 +9,27 @@ pub struct Var {
     pub n: NodeSt,
     pub m: bool,
     pub aln: i32,
+    pub gf: i8,
 }
 
 impl Var {
-    pub fn new(s: String, n: NodeSt, aln: i32) -> Self {
+    pub fn new_l(s: String, n: NodeSt, aln: i32) -> Self {
         Self {
             s,
             n,
             m: false,
             aln,
+            gf: 0,
+        }
+    }
+
+    pub fn new_g(s: String, n: NodeSt, aln: i32) -> Self {
+        Self {
+            s,
+            n,
+            m: false,
+            aln,
+            gf: 1,
         }
     }
 
@@ -27,11 +39,28 @@ impl Var {
             n: NodeSt::default(),
             m: false,
             aln: 0,
+            gf: 0,
+        }
+    }
+
+    pub fn gmnew(s: String, n: NodeSt, aln: i32) -> Self {
+        Self {
+            s,
+            n,
+            m: true,
+            aln,
+            gf: 1,
         }
     }
 
     pub fn mnew(s: String, n: NodeSt, aln: i32) -> Self {
-        Self { s, n, m: true, aln }
+        Self {
+            s,
+            n,
+            m: true,
+            aln,
+            gf: 0,
+        }
     }
 }
 
@@ -75,14 +104,20 @@ pub fn vex(
                     v
                 }
             };
-            ns.c = Node::var(n.aln, ns.to_owned().c.loc);
+            let mut _vn: NodeSt = NodeSt::default();
+            if n.gf == 1 {
+                ns.c = Node::g_var(n.aln, ns.to_owned().c.loc);
+                _vn = NodeSt::g_var(n.aln, ns.to_owned().c.loc);
+            } else {
+                ns.c = Node::l_var(n.aln, ns.to_owned().c.loc);
+                _vn = NodeSt::l_var(n.aln, ns.to_owned().c.loc);
+            }
             if uv.contains(&n.to_owned().s.to_owned()) {
             } else {
                 uv.push(n.s);
             }
-            let mut vn = NodeSt::var(n.aln, ns.to_owned().c.loc);
-            vn.lhs = ns.lhs.to_owned();
-            vn.rhs = ns.rhs.to_owned();
+            _vn.lhs = ns.lhs.to_owned();
+            _vn.rhs = ns.rhs.to_owned();
             return ns.to_owned();
         }
         _ => return ns.to_owned(),

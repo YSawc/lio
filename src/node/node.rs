@@ -20,6 +20,8 @@ pub enum NodeKind {
     Ident(String),
     Assign,
     NewAssign,
+    NewAssignG,
+    NewAssignL,
     If,
     Else,
     Fn,
@@ -28,7 +30,8 @@ pub enum NodeKind {
     UnderScore,
     NewVar(i32),
     ReAssignVar(i32),
-    Var(i32),
+    GVar(i32),
+    LVar(i32),
     Default,
 }
 
@@ -108,6 +111,9 @@ impl Node {
     pub fn new_assign(loc: Loc) -> Self {
         Self::new(NodeKind::NewAssign, loc)
     }
+    pub fn new_assign_l(loc: Loc) -> Self {
+        Self::new(NodeKind::NewAssignL, loc)
+    }
     pub fn mif(loc: Loc) -> Self {
         Self::new(NodeKind::If, loc)
     }
@@ -126,8 +132,11 @@ impl Node {
     pub fn re_assign_var(i: i32, loc: Loc) -> Self {
         Self::new(NodeKind::ReAssignVar(i), loc)
     }
-    pub fn var(i: i32, loc: Loc) -> Self {
-        Self::new(NodeKind::Var(i), loc)
+    pub fn g_var(i: i32, loc: Loc) -> Self {
+        Self::new(NodeKind::GVar(i), loc)
+    }
+    pub fn l_var(i: i32, loc: Loc) -> Self {
+        Self::new(NodeKind::LVar(i), loc)
     }
 }
 
@@ -158,10 +167,15 @@ impl NodeSt {
             ..Default::default()
         }
     }
-
-    pub fn var(i: i32, loc: Loc) -> Self {
+    pub fn g_var(i: i32, loc: Loc) -> Self {
         NodeSt {
-            c: Node::var(i, loc),
+            c: Node::g_var(i, loc),
+            ..Default::default()
+        }
+    }
+    pub fn l_var(i: i32, loc: Loc) -> Self {
+        NodeSt {
+            c: Node::l_var(i, loc),
             ..Default::default()
         }
     }

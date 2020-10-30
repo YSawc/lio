@@ -91,22 +91,22 @@ impl Program {
                                     false => return Err(ParseError::UnusedVariable(f.n.c.loc)),
                                 }
                                 uv.retain(|s| s != &f.to_owned().s.to_owned());
-                                let n =
+                                let mut lhs =
                                     beta(&mut n.to_owned().rhs.unwrap().to_owned(), ev, &mut uv);
-                                n.to_owned().simplified();
-                                f.n = n;
+                                lhs = lhs.to_owned().simplified();
+                                f.n = lhs;
                                 let ff = f.to_owned();
                                 g.retain(|s| s.s != _s.to_owned());
                                 g.push(ff);
                             }
                             _ => {
-                                let n =
+                                let mut lhs =
                                     beta(&mut n.to_owned().rhs.unwrap().to_owned(), ev, &mut uv);
-                                n.to_owned().simplified();
+                                lhs = lhs.to_owned().simplified();
                                 aln += 1;
                                 let v = match _s.as_bytes()[0] {
-                                    b'_' => Var::mnew(_s, n, aln),
-                                    _ => Var::new(_s, n, aln),
+                                    b'_' => Var::gmnew(_s, lhs, aln),
+                                    _ => Var::new_g(_s, lhs, aln),
                                 };
                                 if v.m {
                                     uv.push(v.to_owned().s);

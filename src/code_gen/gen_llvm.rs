@@ -41,7 +41,7 @@ impl NodeArr {
         write!(f, "define i32 @print(i32) nounwind {{\n").unwrap();
         write!(f, "  call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str, i64 0, i64 0), i32 %0)\n").unwrap();
         write!(f, "  ret i32 %0\n").unwrap();
-        write!(f, "}}\n").unwrap();
+        write!(f, "}}\n\n").unwrap();
 
         write!(f, "define i32 @main() nounwind {{\n").unwrap();
 
@@ -109,7 +109,12 @@ impl Femitter {
                 .unwrap();
                 return ();
             }
-            NodeKind::Var(i) => {
+            NodeKind::GVar(s) => {
+                write!(f, "  %{} = load i32, i32* @{}, align 4\n", self.rc, s).unwrap();
+                self.rc += 1;
+                return ();
+            }
+            NodeKind::LVar(i) => {
                 write!(
                     f,
                     "  %{} = load i32, i32* %{}, align 4\n",

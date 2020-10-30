@@ -112,7 +112,11 @@ impl NodeSt {
                     _ => unreachable!(),
                 }
             }
-            NodeKind::Num(_) | NodeKind::UnderScore | NodeKind::NewVar(_) | NodeKind::Var(_) => (),
+            NodeKind::Num(_)
+            | NodeKind::UnderScore
+            | NodeKind::NewVar(_)
+            | NodeKind::LVar(_)
+            | NodeKind::GVar(_) => (),
             _ => unreachable!(),
         };
         self

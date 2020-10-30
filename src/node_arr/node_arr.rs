@@ -94,10 +94,13 @@ impl NodeArr {
                 | NodeKind::LE
                 | NodeKind::G
                 | NodeKind::GE
+                | NodeKind::NewAssignG
+                | NodeKind::NewAssignL
                 | NodeKind::NewAssign
                 | NodeKind::Assign
                 | NodeKind::Ident(_)
-                | NodeKind::Var(_) => return Ok((l, ugv)),
+                | NodeKind::GVar(_)
+                | NodeKind::LVar(_) => return Ok((l, ugv)),
                 _ => {
                     return Err(ParseError::NotMatchReturnType(
                         l.to_owned().to_owned().ret_node_st.c.loc,
@@ -186,7 +189,7 @@ impl NodeArr {
                                 aln += 1;
                                 let v = match _s.as_bytes()[0] {
                                     b'_' => Var::mnew(_s, n.to_owned(), aln),
-                                    _ => Var::new(_s, n.to_owned(), aln),
+                                    _ => Var::new_l(_s, n.to_owned(), aln),
                                 };
                                 if v.to_owned().m {
                                     uv.push(v.to_owned().s);
@@ -270,8 +273,14 @@ impl NodeArr {
                                 if b {
                                     r = v.to_owned().n.to_owned();
                                 }
-                                let n = NodeSt::var(v.aln, n.c.loc);
-                                n
+
+                                let mut _n: NodeSt = NodeSt::default();
+                                if v.gf == 1 {
+                                    _n = NodeSt::g_var(v.aln, n.c.loc);
+                                } else {
+                                    _n = NodeSt::l_var(v.aln, n.c.loc);
+                                }
+                                _n
                             }
                             None => {
                                 return Err(ParseError::NotDefinitionVar(
