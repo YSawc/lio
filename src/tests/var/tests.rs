@@ -72,7 +72,7 @@ fn undefined_variable_check_for_local_variable_test() {
 }
 
 #[test]
-fn unused_variable_check_for_under_score_local_variable() {
+fn unused_variable_check_for_under_score_local_variable_test() {
     let t = Token::tokenize("fn { int _g = 10; _ }").unwrap();
     let n = match Program::w_parser(t) {
         Ok(_) => true,
@@ -95,7 +95,7 @@ fn unused_variable_check_for_global_variable_test() {
 }
 
 #[test]
-fn unused_variable_check_for_under_score_global_variable() {
+fn unused_variable_check_for_under_score_global_variable_test() {
     let t = Token::tokenize("int _g = 10; fn { _ }").unwrap();
     let n = match Program::w_parser(t) {
         Ok(_) => true,

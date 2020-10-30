@@ -52,21 +52,6 @@ fn parser_assign_test() {
     assert!(n)
 }
 
-// #[test]
-// fn variable_expansion_test() {
-//     let t = Token::tokenize("fn int { int a = 3; int b = 5; b*a; }").unwrap();
-//     let mut t = t.iter().peekable();
-//     let n = NodeArr::w_parser(&mut t, vec![]).unwrap().0.ret_node_st;
-//     let e = NodeSt {
-//         c: Node::mul(Loc::new(32, 33)),
-//         lhs: Some(n.to_owned().lhs.unwrap()),
-//         rhs: Some(n.to_owned().rhs.unwrap()),
-//         ..Default::default()
-//     };
-
-//     assert_eq!(e, n)
-// }
-
 #[test]
 fn return_with_unclosed_test() {
     let t = Token::tokenize("fn int { return 3 }").unwrap();

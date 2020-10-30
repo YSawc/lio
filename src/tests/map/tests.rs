@@ -1,7 +1,5 @@
 #[cfg(test)]
 use super::super::super::location::location::*;
-// #[cfg(test)]
-// use super::super::super::token::error::*;
 #[cfg(test)]
 use super::super::super::map::map::*;
 #[cfg(test)]
