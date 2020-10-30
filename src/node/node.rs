@@ -30,7 +30,7 @@ pub enum NodeKind {
     UnderScore,
     NewVar(i32),
     ReAssignVar(i32),
-    GVar(i32),
+    GVar(String),
     LVar(i32),
     Default,
 }
@@ -132,8 +132,8 @@ impl Node {
     pub fn re_assign_var(i: i32, loc: Loc) -> Self {
         Self::new(NodeKind::ReAssignVar(i), loc)
     }
-    pub fn g_var(i: i32, loc: Loc) -> Self {
-        Self::new(NodeKind::GVar(i), loc)
+    pub fn g_var(s: String, loc: Loc) -> Self {
+        Self::new(NodeKind::GVar(s), loc)
     }
     pub fn l_var(i: i32, loc: Loc) -> Self {
         Self::new(NodeKind::LVar(i), loc)
@@ -167,9 +167,9 @@ impl NodeSt {
             ..Default::default()
         }
     }
-    pub fn g_var(i: i32, loc: Loc) -> Self {
+    pub fn g_var(s: String, loc: Loc) -> Self {
         NodeSt {
-            c: Node::g_var(i, loc),
+            c: Node::g_var(s, loc),
             ..Default::default()
         }
     }
@@ -177,6 +177,15 @@ impl NodeSt {
         NodeSt {
             c: Node::l_var(i, loc),
             ..Default::default()
+        }
+    }
+}
+
+impl NodeSt {
+    pub fn get_num(&self) -> i8 {
+        match self.c.value {
+            NodeKind::Num(i) => i,
+            _ => unimplemented!(),
         }
     }
 }

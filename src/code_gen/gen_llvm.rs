@@ -44,11 +44,22 @@ impl Program {
         write!(f, "  ret i32 %0\n").unwrap();
         write!(f, "}}\n\n").unwrap();
 
-        let naf = self.na.iter().next().unwrap();
+        let mut gi = self.g.iter().peekable();
+        while gi.peek() != None {
+            let g = gi.next().unwrap();
+            write!(
+                f,
+                "@{} = dso_local global i32 {}, align 4\n\n",
+                g.s,
+                g.n.get_num(),
+            )
+            .unwrap();
+        }
 
         write!(f, "define i32 @main() nounwind {{\n").unwrap();
 
         let mut fm = Femitter::new();
+        let naf = self.na.iter().next().unwrap();
         let mut nai = naf.node_st_vec.iter().peekable();
         while nai.peek() != None {
             fm.fgen(&mut f, nai.next().unwrap().to_owned())
@@ -85,6 +96,7 @@ impl Femitter {
     }
 
     pub fn emitter(&mut self, f: &mut fs::File, ns: NodeSt) {
+        // println!("ns.c.value: {:?}", ns.c.value);
         match ns.c.value {
             NodeKind::Num(n) => {
                 write!(f, "  %{} = alloca i32, align 4\n", self.rc).unwrap();
@@ -126,6 +138,12 @@ impl Femitter {
                     self.hm.get(&i).unwrap()
                 )
                 .unwrap();
+                return ();
+            }
+            NodeKind::GVar(s) => {
+                write!(f, "  %{} = load i32, i32* @{}, align 4\n", self.rc, s).unwrap();
+                self.vr.push(self.rc);
+                self.rc += 1;
                 return ();
             }
             NodeKind::LVar(i) => {

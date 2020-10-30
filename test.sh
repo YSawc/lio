@@ -142,16 +142,16 @@ assert_llvm 0 'fn { _ }'
 assert_llvm 0 'fn { int vvv = 55; 0*vvv*0; _ }'
 assert_llvm 0 'fn { int vvv = 4; 1+2*vvv/4-1; _; }'
 assert_llvm 0 'fn { int vvv = 4; 1+2*vvv/4-1; _ }' simplified
-# assert_llvm 27 'int g = 9; fn int { g*3 }'
-# assert_llvm 8 'int g = 8; fn int { int v = 4; 1+v*g/4-1 }'
-# assert_llvm 8 'int g = 8; fn int { int v = 4; 1+v*g/4-1; }'
-# assert_llvm 8 'int g = 8; fn int { int v = 4; return 1+v*g/4-1; }'
-# assert_llvm 0 'int g = 2; fn { int v = 4; 1+v*g/4-1; _ }'
-# assert_llvm 0 'int g = 2; fn { int v = 4; 1+v*g/4-1; _ }' simplified
-# assert_llvm 10 'int g = 2; int l = 3; int o = 4; fn int { int v = 4; l+v*o/g-1; }' simplified
-# assert_llvm 0 'int g = 2; int l = 3; int o = 4; fn { int v = 4; l+v*o/g-1; _ }'
+assert_llvm 27 'int g = 9; fn int { g*3 }'
+assert_llvm 8 'int g = 8; fn int { int v = 4; 1+v*g/4-1 }'
+assert_llvm 8 'int g = 8; fn int { int v = 4; 1+v*g/4-1; }'
+assert_llvm 8 'int g = 8; fn int { int v = 4; return 1+v*g/4-1; }'
+assert_llvm 0 'int g = 2; fn { int v = 4; 1+v*g/4-1; _ }'
+assert_llvm 0 'int g = 2; fn { int v = 4; 1+v*g/4-1; _ }' simplified
+assert_llvm 10 'int g = 2; int l = 3; int o = 4; fn int { int v = 4; l+v*o/g-1; }' simplified
+assert_llvm 0 'int g = 2; int l = 3; int o = 4; fn { int v = 4; l+v*o/g-1; _ }'
 # assert_llvm 3 'int g = 10; fn int { g; int g = 3; g }'
-# assert_llvm 0 'int _g = 10; fn { _ }'
+assert_llvm 0 'int _g = 10; fn { _ }'
 assert_llvm 0 'fn { int _u = 8; _ }'
 assert_llvm 16 'fn int { int _u = 8; int a = 2; a*_u }'
 assert_llvm 34 'fn int { int _u = 8; int a = 2; 4+2*a*_u-2 }'

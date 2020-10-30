@@ -100,14 +100,14 @@ pub fn vex(
                 Some(v) => v.to_owned(),
                 None => {
                     let v = Program::find_v(s.to_owned(), ev.to_owned()).unwrap();
-                    map.insert(s, v.to_owned());
+                    map.insert(s.to_owned(), v.to_owned());
                     v
                 }
             };
             let mut _vn: NodeSt = NodeSt::default();
             if n.gf == 1 {
-                ns.c = Node::g_var(n.aln, ns.to_owned().c.loc);
-                _vn = NodeSt::g_var(n.aln, ns.to_owned().c.loc);
+                ns.c = Node::g_var(s.to_owned(), ns.to_owned().c.loc);
+                _vn = NodeSt::g_var(s, ns.to_owned().c.loc);
             } else {
                 ns.c = Node::l_var(n.aln, ns.to_owned().c.loc);
                 _vn = NodeSt::l_var(n.aln, ns.to_owned().c.loc);

@@ -275,7 +275,7 @@ impl NodeArr {
 
                                 let mut _n: NodeSt = NodeSt::default();
                                 if v.gf == 1 {
-                                    _n = NodeSt::g_var(v.aln, n.c.loc);
+                                    _n = NodeSt::g_var(s, n.c.loc);
                                 } else {
                                     _n = NodeSt::l_var(v.aln, n.c.loc);
                                 }
