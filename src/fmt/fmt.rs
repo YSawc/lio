@@ -100,6 +100,9 @@ impl fmt::Display for ParseError {
                 "{}: Expected operator inner function but god {}",
                 tok.loc, tok.value
             ),
+            ParseError::NotACompileTimeConstant(loc) => {
+                write!(f, "{}: Not a compile time constant!", loc)
+            }
             ParseError::UndefinedVariable(loc) => write!(f, "{} Undefined variable detected!", loc),
             ParseError::UnusedVariable(loc) => write!(f, "{} Unused variable detected!", loc),
             ParseError::NotMatchReturnType(loc) => write!(f, "{}: Return type is not match.", loc),

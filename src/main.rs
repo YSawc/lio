@@ -149,7 +149,7 @@ fn main() {
         if !ll {
             gen_x86_64(min.next().unwrap().to_owned());
         } else {
-            min.next().unwrap().to_owned().gen_llvm_ir();
+            _nas.gen_llvm_ir();
         }
     }
 }

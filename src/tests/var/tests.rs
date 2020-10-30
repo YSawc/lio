@@ -153,3 +153,16 @@ fn unused_variable_check_for_under_score_global_variable() {
     };
     assert!(n)
 }
+
+#[test]
+fn not_a_compile_time_constant_test() {
+    let t = Token::tokenize("int _g = 3; int e = _g+1; fn { _ }").unwrap();
+    let n = match Program::w_parser(t) {
+        Ok(_) => false,
+        Err(e) => match e {
+            ParseError::NotACompileTimeConstant(_) => true,
+            _ => false,
+        },
+    };
+    assert!(n)
+}

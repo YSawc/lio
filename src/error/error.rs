@@ -76,7 +76,8 @@ impl Error {
                     | ParseError::NotLBrace(loc, ..)
                     | ParseError::NotRBrace(loc, ..)
                     | ParseError::OperatorOutOfFnction(loc, ..) => loc.loc.clone(),
-                    ParseError::UndefinedVariable(loc)
+                    ParseError::NotACompileTimeConstant(loc)
+                    | ParseError::UndefinedVariable(loc)
                     | ParseError::UnusedVariable(loc)
                     | ParseError::NotMatchReturnType(loc)
                     | ParseError::UnexpectedUnderScoreOperator(loc) => loc.clone(),

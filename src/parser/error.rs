@@ -17,6 +17,7 @@ pub enum ParseError {
     NotLBrace(Token),
     NotRBrace(Token),
     OperatorOutOfFnction(Token),
+    NotACompileTimeConstant(Loc),
     UndefinedVariable(Loc),
     UnusedVariable(Loc),
     NotMatchReturnType(Loc),

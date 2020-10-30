@@ -103,6 +103,13 @@ impl Program {
                                 let mut lhs =
                                     beta(&mut n.to_owned().rhs.unwrap().to_owned(), ev, &mut uv);
                                 lhs = lhs.to_owned().simplified();
+
+                                match lhs.c.value {
+                                    NodeKind::Num(_) => (),
+                                    _ => {
+                                        return Err(ParseError::NotACompileTimeConstant(lhs.c.loc))
+                                    }
+                                }
                                 aln += 1;
                                 let v = match _s.as_bytes()[0] {
                                     b'_' => Var::gmnew(_s, lhs, aln),

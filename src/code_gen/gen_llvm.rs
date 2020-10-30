@@ -1,5 +1,6 @@
 use super::super::node::node::*;
 use super::super::node_arr::node_arr::*;
+use super::super::program::program::*;
 use rustc_hash::FxHashMap;
 use std::fs;
 use std::io::Write;
@@ -21,7 +22,7 @@ impl Femitter {
     }
 }
 
-impl NodeArr {
+impl Program {
     pub fn gen_llvm_ir(&self) {
         const DIR: &str = "workspace/tmp.ll";
         fs::File::create(DIR).unwrap();
@@ -43,15 +44,17 @@ impl NodeArr {
         write!(f, "  ret i32 %0\n").unwrap();
         write!(f, "}}\n\n").unwrap();
 
+        let naf = self.na.iter().next().unwrap();
+
         write!(f, "define i32 @main() nounwind {{\n").unwrap();
 
         let mut fm = Femitter::new();
-        let mut nai = self.node_st_vec.iter().peekable();
+        let mut nai = naf.node_st_vec.iter().peekable();
         while nai.peek() != None {
             fm.fgen(&mut f, nai.next().unwrap().to_owned())
         }
 
-        if self.ty == RetTy::Int32 {
+        if naf.ty == RetTy::Int32 {
             write!(f, "  %{} = add nsw i32 %{}, 0\n", fm.rc, fm.rc - 1).unwrap();
             write!(f, "  ret i32 %{}\n", fm.rc).unwrap();
         } else {
@@ -62,9 +65,25 @@ impl NodeArr {
 }
 
 impl Femitter {
+    pub fn ggen(&mut self, f: &mut fs::File, ns: NodeSt) {
+        self.emitter(f, ns)
+    }
+
+    pub fn gemitter(&mut self, f: &mut fs::File, ns: NodeSt) {
+        match ns.c.value {
+            NodeKind::GVar(s) => {
+                write!(f, "  @{} = dso_local global i32 {}, align 4\n", self.rc, s).unwrap();
+                self.rc += 1;
+                return ();
+            }
+            _ => unimplemented!(),
+        }
+    }
+
     pub fn fgen(&mut self, f: &mut fs::File, ns: NodeSt) {
         self.emitter(f, ns)
     }
+
     pub fn emitter(&mut self, f: &mut fs::File, ns: NodeSt) {
         match ns.c.value {
             NodeKind::Num(n) => {
@@ -107,11 +126,6 @@ impl Femitter {
                     self.hm.get(&i).unwrap()
                 )
                 .unwrap();
-                return ();
-            }
-            NodeKind::GVar(s) => {
-                write!(f, "  %{} = load i32, i32* @{}, align 4\n", self.rc, s).unwrap();
-                self.rc += 1;
                 return ();
             }
             NodeKind::LVar(i) => {
