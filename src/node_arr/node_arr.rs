@@ -158,7 +158,7 @@ impl NodeArr {
                         let mut ev = ev.to_owned();
                         ev.push(l.to_owned());
                         match Program::find_v(_s.to_owned(), ev.to_owned()) {
-                            Some(mut f) => {
+                            Some(f) => {
                                 match uv.contains(&f.to_owned().s.to_owned()) {
                                     true => (),
                                     false => return Err(ParseError::UnusedVariable(f.n.c.loc)),
@@ -170,12 +170,17 @@ impl NodeArr {
                                     &mut uv,
                                 );
                                 lhs = lhs.simplified();
-                                f.n = n.to_owned();
-                                let ff = f.to_owned();
-                                l.retain(|s| s.s != _s.to_owned());
-                                l.push(ff);
 
-                                let avar = NodeSt::ass_var(f.to_owned().aln, lhs, n.c.loc);
+                                let v = match _s.as_bytes()[0] {
+                                    b'_' => Var::mnew(_s, n.to_owned(), aln),
+                                    _ => Var::new_l(_s, n.to_owned(), aln),
+                                };
+                                if v.to_owned().m {
+                                    uv.push(v.to_owned().s);
+                                }
+                                l.push(v.to_owned());
+
+                                let avar = NodeSt::ass_var(v.to_owned().aln, lhs, n.c.loc);
                                 avar
                             }
                             None => {
