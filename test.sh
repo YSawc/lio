@@ -155,6 +155,7 @@ assert_llvm 0 'int _g = 10; fn { _ }'
 assert_llvm 0 'fn { int _u = 8; _ }'
 assert_llvm 16 'fn int { int _u = 8; int a = 2; a*_u }'
 assert_llvm 34 'fn int { int _u = 8; int a = 2; 4+2*a*_u-2 }'
+assert_llvm 1 'fn int {int i = 1; if (i) { 0 } else { 0 } i }'
 
 echo "------------------------------"
 echo "All llvm test passed!\n"

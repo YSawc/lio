@@ -10,6 +10,7 @@ pub struct Femitter {
     pub rc: u8,
     pub vr: Vec<u8>,
     pub hm: FxHashMap<i32, u8>,
+    pub lah: u8,
 }
 
 impl Femitter {
@@ -18,6 +19,7 @@ impl Femitter {
             rc: 1,
             vr: vec![],
             hm: FxHashMap::default(),
+            lah: 0,
         }
     }
 }
@@ -158,6 +160,37 @@ impl Femitter {
                 self.rc += 1;
                 return ();
             }
+            NodeKind::If => {
+                self.emitter(f, ns.to_owned().cond.unwrap().as_ref().to_owned());
+                write!(f, "  %{} = icmp ne i32 %{}, 0\n", self.rc, self.rc - 1).unwrap();
+                self.calc_label(ns.to_owned().stmt.unwrap().as_ref().to_owned());
+                let stmt_lah = self.rc + self.lah + 1;
+                self.lah = 0;
+                write!(
+                    f,
+                    "  br i1 %{}, label %{}, label %{}\n",
+                    self.rc,
+                    self.rc + 1,
+                    stmt_lah
+                )
+                .unwrap();
+                write!(f, "\n{}:\n", self.rc + 1).unwrap();
+                self.rc += 2;
+
+                self.emitter(f, ns.to_owned().cond.unwrap().as_ref().to_owned());
+                self.calc_label(ns.to_owned().melse_stmt.unwrap().as_ref().to_owned());
+                let melse_stmt_lah = self.rc + self.lah + 1;
+                self.rc += 1;
+                self.lah = 0;
+                write!(f, "  br label %{}", melse_stmt_lah).unwrap();
+                write!(f, "\n{}:\n", stmt_lah).unwrap();
+
+                self.emitter(f, ns.to_owned().melse_stmt.unwrap().as_ref().to_owned());
+                self.rc += 1;
+                write!(f, "  br label %{}", melse_stmt_lah).unwrap();
+                write!(f, "\n{}:\n", melse_stmt_lah).unwrap();
+                return ();
+            }
             _ => (),
         }
 
@@ -243,6 +276,69 @@ impl Femitter {
                 .unwrap();
                 self.vr.push(self.rc + 3);
                 self.rc += 4;
+            }
+            _ => unimplemented!(),
+        }
+    }
+
+    pub fn calc_label(&mut self, ns: NodeSt) {
+        // println!("ns.c.value: {:?}", ns.c.value);
+        match ns.c.value {
+            NodeKind::Num(_) => {
+                self.lah += 2;
+                return ();
+            }
+            NodeKind::UnderScore => {
+                return ();
+            }
+            NodeKind::NewVar(_) => {
+                self.lah += 1;
+                return ();
+            }
+            NodeKind::ReAssignVar(_) => {
+                return ();
+            }
+            NodeKind::GVar(_) => {
+                self.lah += 1;
+                return ();
+            }
+            NodeKind::LVar(_) => {
+                self.lah += 1;
+                return ();
+            }
+            NodeKind::If => {
+                self.lah += 4;
+                return ();
+            }
+            _ => (),
+        }
+
+        self.calc_label(ns.to_owned().lhs.unwrap().as_ref().to_owned());
+        self.calc_label(ns.to_owned().rhs.unwrap().as_ref().to_owned());
+
+        match ns.c.value {
+            NodeKind::Add => {
+                self.lah += 1;
+            }
+            NodeKind::Sub => {
+                self.lah += 1;
+            }
+            NodeKind::Mul => {
+                self.lah += 1;
+            }
+            NodeKind::Div => {
+                self.lah += 1;
+            }
+            NodeKind::Sur => {
+                self.lah += 1;
+            }
+            NodeKind::E
+            | NodeKind::NE
+            | NodeKind::L
+            | NodeKind::LE
+            | NodeKind::G
+            | NodeKind::GE => {
+                self.lah += 4;
             }
             _ => unimplemented!(),
         }

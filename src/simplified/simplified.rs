@@ -17,6 +17,7 @@ impl NodeArr {
 
 impl NodeSt {
     pub fn simplified(mut self) -> Self {
+        // println!("self.c.value: {:?}", self.c.value);
         match self.c.value {
             NodeKind::Add
             | NodeKind::Sub

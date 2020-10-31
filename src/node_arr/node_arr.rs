@@ -300,11 +300,10 @@ impl NodeArr {
                         if it.peek().unwrap().to_owned().to_owned().value == TokenKind::RBrace {
                             b = true;
                         }
-                        let mut c = beta(
-                            &mut n.to_owned().cond.unwrap().to_owned(),
-                            ev.to_owned(),
-                            &mut uv,
-                        );
+
+                        let mut ev = ev.to_owned();
+                        ev.push(l.to_owned());
+                        let mut c = beta(&mut n.to_owned().cond.unwrap(), ev.to_owned(), &mut uv);
                         c = c.simplified();
                         match c.c.value {
                             NodeKind::Num(num) => {
@@ -324,7 +323,49 @@ impl NodeArr {
                                     *n.to_owned().stmt.unwrap().to_owned()
                                 }
                             }
-                            _ => unreachable!(),
+                            _ => {
+                                let mut ev = ev.to_owned();
+                                ev.push(l.to_owned());
+                                let n = beta(&mut n.to_owned(), ev.to_owned(), &mut uv);
+                                match n.to_owned().cond.unwrap().c.value {
+                                    NodeKind::Ident(s) => {
+                                        let mut ev = ev.to_owned();
+                                        ev.push(l.to_owned());
+                                        match Program::find_v(s.to_owned(), ev.to_owned()) {
+                                            Some(mut v) => {
+                                                if it.peek().unwrap().to_owned().to_owned().value
+                                                    == TokenKind::RBrace
+                                                {
+                                                    b = true;
+                                                }
+
+                                                if !uv.contains(&v.to_owned().s.to_owned()) {
+                                                    uv.push(v.to_owned().s.to_owned());
+                                                    v.aln = aln;
+                                                    aln += 1;
+                                                }
+
+                                                if b {
+                                                    r = v.to_owned().n.to_owned();
+                                                }
+
+                                                let mut _n: NodeSt = NodeSt::default();
+                                                if v.gf == 1 {
+                                                    _n = NodeSt::g_var(s, n.to_owned().c.loc);
+                                                } else {
+                                                    _n = NodeSt::l_var(v.aln, n.to_owned().c.loc);
+                                                }
+                                                // _n
+                                                let mut n = n.to_owned();
+                                                n.cond = Some(Box::new(_n));
+                                                n
+                                            }
+                                            _ => unimplemented!(),
+                                        }
+                                    }
+                                    _ => unimplemented!(),
+                                }
+                            }
                         }
                     }
                     _ => {
