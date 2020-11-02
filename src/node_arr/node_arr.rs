@@ -309,18 +309,26 @@ impl NodeArr {
                             NodeKind::Num(num) => {
                                 if num == 0 {
                                     if n.to_owned().melse_stmt != None {
+                                        let (melse_stmt, _) = NodeSt::statement_parser(
+                                            &mut n.melse_stmt.unwrap().as_ref().to_owned(),
+                                            ev,
+                                        )?;
                                         if b {
-                                            r = *n.to_owned().melse_stmt.unwrap().to_owned();
+                                            r = melse_stmt.to_owned()
                                         }
-                                        *n.to_owned().melse_stmt.unwrap().to_owned()
+                                        melse_stmt
                                     } else {
                                         continue;
                                     }
                                 } else {
+                                    let (stmt_p, _) = NodeSt::statement_parser(
+                                        &mut n.stmt.unwrap().as_ref().to_owned(),
+                                        ev,
+                                    )?;
                                     if b {
-                                        r = *n.to_owned().stmt.unwrap().to_owned();
+                                        r = stmt_p.to_owned();
                                     }
-                                    *n.to_owned().stmt.unwrap().to_owned()
+                                    stmt_p
                                 }
                             }
                             _ => {
@@ -355,7 +363,6 @@ impl NodeArr {
                                                 } else {
                                                     _n = NodeSt::l_var(v.aln, n.to_owned().c.loc);
                                                 }
-                                                // _n
                                                 let mut n = n.to_owned();
                                                 n.cond = Some(Box::new(_n));
                                                 n
@@ -411,5 +418,47 @@ impl NodeArr {
             }
         }
         Ok((a, ugv))
+    }
+}
+
+impl NodeSt {
+    pub fn statement_parser(
+        nd: &mut NodeSt,
+        // mut nd: &mut NodeSt,
+        ev: Vec<Vec<Var>>,
+    ) -> Result<(Self, Vec<String>), ParseError> {
+        let mut min = nd.cstmt.iter().peekable();
+        let mut uv: Vec<String> = vec![];
+        let mut nv = vec![];
+        // let n: NodeSt = NodeSt::default();
+        // let mut n: NodeSt = NodeSt::default();
+        let l: Vec<Var> = vec![];
+        // let mut aln: i32 = 0;
+        while min.to_owned().peek() != None {
+            nv.push(match min.to_owned().peek().unwrap().c.value {
+                _ => {
+                    let mut ev = ev.to_owned();
+                    ev.push(l.to_owned());
+                    let n = beta(
+                        &mut min.next().unwrap().to_owned().as_ref().to_owned(),
+                        ev,
+                        &mut uv,
+                    );
+                    // println!("r: {:?}", r);
+                    n
+                }
+            });
+        }
+
+        // for n in nv {
+        //     let mut nn = NodeSt::default();
+        //     nn.cstmt  = Some(Box::new(n));
+        //     r.cstmt = Some(Box::new(nn));
+        // }
+
+        let r = nv.last().unwrap().to_owned();
+        println!("statement_parser.. r: {:?}", r);
+
+        Ok((r, uv))
     }
 }

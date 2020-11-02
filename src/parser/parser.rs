@@ -12,11 +12,11 @@ impl NodeSt {
         }
     }
 
-    pub fn new_if(c: Node, cond: NodeSt, stmt: NodeSt) -> Self {
+    pub fn new_if(c: Node, cond: NodeSt, vstmt: NodeSt) -> Self {
         Self {
             c,
             cond: Some(Box::new(cond)),
-            stmt: Some(Box::new(stmt)),
+            stmt: Some(Box::new(vstmt)),
             ..Default::default()
         }
     }
@@ -138,8 +138,11 @@ impl NodeSt {
                     ParseError::NotOpenedStmt(it.peek().unwrap().to_owned().to_owned()),
                     it,
                 )?;
-                let stmt = Self::stmt(it)?;
-                let mut lhs = Self::new_if(op, cond, stmt);
+                let mut vstmt: NodeSt = NodeSt::default();
+                while it.peek().unwrap().value != TokenKind::RBrace {
+                    vstmt.cstmt = Some(Box::new(Self::stmt(it)?));
+                }
+                let mut lhs = Self::new_if(op, cond.to_owned(), vstmt);
                 expect_token(
                     TokenKind::RBrace,
                     ParseError::NotClosedStmt(it.peek().unwrap().to_owned().to_owned()),
@@ -156,8 +159,12 @@ impl NodeSt {
                             ParseError::NotOpenedStmt(it.peek().unwrap().to_owned().to_owned()),
                             it,
                         )?;
-                        let stmt = Self::stmt(it)?;
-                        lhs.melse_stmt = Some(Box::new(stmt));
+                        let mut velse_stmt: NodeSt = NodeSt::default();
+                        while it.peek().unwrap().value != TokenKind::RBrace {
+                            velse_stmt.cstmt = Some(Box::new(Self::stmt(it)?));
+                        }
+
+                        lhs.melse_stmt = Some(Box::new(velse_stmt));
                         expect_token(
                             TokenKind::RBrace,
                             ParseError::NotClosedStmt(it.peek().unwrap().to_owned().to_owned()),
