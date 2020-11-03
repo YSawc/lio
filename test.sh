@@ -95,7 +95,7 @@ assert_llvm() {
 echo "Starts llvm tests!"
  echo "------------------------------"
  echo "[[rust output]]"
-  cargo run "$2" ll "$3" && lli ./workspace/tmp.ll
+  cargo run "$2" ll "$3" && lli-11 ./workspace/tmp.ll
   actual="$?"
 
  echo "[[ shell output ]]"
