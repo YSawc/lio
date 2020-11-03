@@ -49,9 +49,8 @@ pub struct NodeSt {
     pub lhs: Option<Box<NodeSt>>,
     pub rhs: Option<Box<NodeSt>>,
     pub cond: Option<Box<NodeSt>>,
-    pub stmt: Option<Box<NodeSt>>,
-    pub melse_stmt: Option<Box<NodeSt>>,
-    pub cstmt: Option<Box<NodeSt>>,
+    pub if_stmts: Option<Box<Vec<NodeSt>>>,
+    pub else_if_stmts: Option<Box<Vec<NodeSt>>>,
 }
 
 impl Node {

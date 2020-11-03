@@ -12,11 +12,11 @@ impl NodeSt {
         }
     }
 
-    pub fn new_if(c: Node, cond: NodeSt, vstmt: NodeSt) -> Self {
+    pub fn new_if(c: Node, cond: NodeSt, vstmt: Vec<NodeSt>) -> Self {
         Self {
             c,
             cond: Some(Box::new(cond)),
-            stmt: Some(Box::new(vstmt)),
+            if_stmts: Some(Box::new(vstmt)),
             ..Default::default()
         }
     }
@@ -138,11 +138,14 @@ impl NodeSt {
                     ParseError::NotOpenedStmt(it.peek().unwrap().to_owned().to_owned()),
                     it,
                 )?;
-                let mut vstmt: NodeSt = NodeSt::default();
+
+                let mut if_stmts: Vec<NodeSt> = vec![];
                 while it.peek().unwrap().value != TokenKind::RBrace {
-                    vstmt.cstmt = Some(Box::new(Self::stmt(it)?));
+                    if_stmts.push(Self::stmt(it)?);
                 }
-                let mut lhs = Self::new_if(op, cond.to_owned(), vstmt);
+
+                let mut lhs = Self::new_if(op, cond.to_owned(), if_stmts);
+
                 expect_token(
                     TokenKind::RBrace,
                     ParseError::NotClosedStmt(it.peek().unwrap().to_owned().to_owned()),
@@ -159,12 +162,14 @@ impl NodeSt {
                             ParseError::NotOpenedStmt(it.peek().unwrap().to_owned().to_owned()),
                             it,
                         )?;
-                        let mut velse_stmt: NodeSt = NodeSt::default();
+
+                        let mut else_if_stmts: Vec<NodeSt> = vec![];
                         while it.peek().unwrap().value != TokenKind::RBrace {
-                            velse_stmt.cstmt = Some(Box::new(Self::stmt(it)?));
+                            else_if_stmts.push(Self::stmt(it)?);
                         }
 
-                        lhs.melse_stmt = Some(Box::new(velse_stmt));
+                        lhs.else_if_stmts = Some(Box::new(else_if_stmts));
+
                         expect_token(
                             TokenKind::RBrace,
                             ParseError::NotClosedStmt(it.peek().unwrap().to_owned().to_owned()),
