@@ -131,254 +131,295 @@ impl NodeArr {
         while it.peek() != None && b == false {
             nv.push(match NodeSt::parser(&mut it) {
                 Ok(n) => match n.c.value {
-                    NodeKind::Return => {
-                        if it.peek().unwrap().to_owned().to_owned().value != TokenKind::RBrace {
-                            return Err(ParseError::OperatorAfterRetrun(
-                                it.next().unwrap().to_owned(),
-                            ));
-                        }
-                        b = true;
+                    NodeKind::Return
+                    | NodeKind::NewAssign
+                    | NodeKind::Assign
+                    | NodeKind::UnderScore
+                    | NodeKind::Ident(_)
+                    | NodeKind::If => {
+                        match n.c.value {
+                            NodeKind::Return => {
+                                if it.peek().unwrap().to_owned().to_owned().value
+                                    != TokenKind::RBrace
+                                {
+                                    return Err(ParseError::OperatorAfterRetrun(
+                                        it.next().unwrap().to_owned(),
+                                    ));
+                                }
+                                b = true;
 
-                        let mut ev = ev.to_owned();
-                        ev.push(l.to_owned());
-                        r = beta(&mut n.to_owned().lhs.unwrap().to_owned(), ev, &mut uv);
-                        r.to_owned()
-                    }
-                    NodeKind::NewAssign => {
-                        let mut _s = String::new();
-                        match n.to_owned().lhs.unwrap().c.value {
-                            NodeKind::Ident(si) => _s = si,
-                            _ => {
-                                match n.to_owned().lhs.unwrap().lhs.unwrap().c.value {
+                                let mut ev = ev.to_owned();
+                                ev.push(l.to_owned());
+                                r = beta(&mut n.to_owned().lhs.unwrap().to_owned(), ev, &mut uv);
+                                r.to_owned()
+                            }
+                            NodeKind::NewAssign => {
+                                let mut _s = String::new();
+                                match n.to_owned().lhs.unwrap().c.value {
                                     NodeKind::Ident(si) => _s = si,
-                                    _ => unreachable!(),
-                                };
-                            }
-                        }
-                        let mut ev = ev.to_owned();
-                        ev.push(l.to_owned());
-                        match Program::find_v(_s.to_owned(), ev.to_owned()) {
-                            Some(f) => {
-                                match uv.contains(&f.to_owned().s.to_owned()) {
-                                    true => (),
-                                    false => return Err(ParseError::UnusedVariable(f.n.c.loc)),
+                                    _ => {
+                                        match n.to_owned().lhs.unwrap().lhs.unwrap().c.value {
+                                            NodeKind::Ident(si) => _s = si,
+                                            _ => unreachable!(),
+                                        };
+                                    }
                                 }
-                                uv.retain(|s| s != &f.to_owned().s.to_owned());
-                                let mut lhs = beta(
-                                    &mut n.to_owned().rhs.unwrap().to_owned(),
-                                    ev.to_owned(),
-                                    &mut uv,
-                                );
-                                lhs = lhs.simplified();
+                                let mut ev = ev.to_owned();
+                                ev.push(l.to_owned());
+                                match Program::find_v(_s.to_owned(), ev.to_owned()) {
+                                    Some(f) => {
+                                        match uv.contains(&f.to_owned().s.to_owned()) {
+                                            true => (),
+                                            false => {
+                                                return Err(ParseError::UnusedVariable(f.n.c.loc))
+                                            }
+                                        }
+                                        uv.retain(|s| s != &f.to_owned().s.to_owned());
+                                        let mut lhs = beta(
+                                            &mut n.to_owned().rhs.unwrap().to_owned(),
+                                            ev.to_owned(),
+                                            &mut uv,
+                                        );
+                                        lhs = lhs.simplified();
 
-                                let v = match _s.as_bytes()[0] {
-                                    b'_' => Var::mnew(_s, n.to_owned(), aln),
-                                    _ => Var::new_l(_s, n.to_owned(), aln),
-                                };
-                                if v.to_owned().m {
-                                    uv.push(v.to_owned().s);
+                                        let v = match _s.as_bytes()[0] {
+                                            b'_' => Var::mnew(_s, n.to_owned(), aln),
+                                            _ => Var::new_l(_s, n.to_owned(), aln),
+                                        };
+                                        if v.to_owned().m {
+                                            uv.push(v.to_owned().s);
+                                        }
+                                        l.push(v.to_owned());
+
+                                        let avar = NodeSt::ass_var(v.to_owned().aln, lhs, n.c.loc);
+                                        avar
+                                    }
+                                    None => {
+                                        let mut lhs = beta(
+                                            &mut n.to_owned().rhs.unwrap().to_owned(),
+                                            ev.to_owned(),
+                                            &mut uv,
+                                        );
+                                        lhs = lhs.simplified();
+                                        aln += 1;
+                                        let v = match _s.as_bytes()[0] {
+                                            b'_' => Var::mnew(_s, n.to_owned(), aln),
+                                            _ => Var::new_l(_s, n.to_owned(), aln),
+                                        };
+                                        if v.to_owned().m {
+                                            uv.push(v.to_owned().s);
+                                        }
+                                        l.push(v.to_owned());
+
+                                        let avar = NodeSt::ass_var(v.to_owned().aln, lhs, n.c.loc);
+                                        avar
+                                    }
                                 }
-                                l.push(v.to_owned());
-
-                                let avar = NodeSt::ass_var(v.to_owned().aln, lhs, n.c.loc);
-                                avar
                             }
-                            None => {
-                                let mut lhs = beta(
-                                    &mut n.to_owned().rhs.unwrap().to_owned(),
-                                    ev.to_owned(),
-                                    &mut uv,
-                                );
-                                lhs = lhs.simplified();
-                                aln += 1;
-                                let v = match _s.as_bytes()[0] {
-                                    b'_' => Var::mnew(_s, n.to_owned(), aln),
-                                    _ => Var::new_l(_s, n.to_owned(), aln),
-                                };
-                                if v.to_owned().m {
-                                    uv.push(v.to_owned().s);
-                                }
-                                l.push(v.to_owned());
-
-                                let avar = NodeSt::ass_var(v.to_owned().aln, lhs, n.c.loc);
-                                avar
-                            }
-                        }
-                    }
-                    NodeKind::Assign => {
-                        let mut _s = String::new();
-                        match n.to_owned().lhs.unwrap().c.value {
-                            NodeKind::Ident(si) => _s = si,
-                            _ => {
-                                match n.to_owned().lhs.unwrap().lhs.unwrap().c.value {
+                            NodeKind::Assign => {
+                                let mut _s = String::new();
+                                match n.to_owned().lhs.unwrap().c.value {
                                     NodeKind::Ident(si) => _s = si,
-                                    _ => unreachable!(),
-                                };
-                            }
-                        }
-
-                        let mut ev = ev.to_owned();
-                        ev.push(l.to_owned());
-                        match Program::find_v(_s.to_owned(), ev.to_owned()) {
-                            Some(mut f) => {
-                                // println!("uv: {:?}", uv);
-                                match uv.contains(&f.to_owned().s.to_owned()) {
-                                    true => (),
-                                    false => return Err(ParseError::UnusedVariable(f.n.c.loc)),
+                                    _ => {
+                                        match n.to_owned().lhs.unwrap().lhs.unwrap().c.value {
+                                            NodeKind::Ident(si) => _s = si,
+                                            _ => unreachable!(),
+                                        };
+                                    }
                                 }
-                                let mut lhs = beta(
-                                    &mut n.to_owned().rhs.unwrap().to_owned(),
-                                    ev.to_owned(),
-                                    &mut uv,
-                                );
-                                lhs = lhs.simplified();
-                                f.n = n.to_owned();
-                                let ff = f.to_owned();
-                                l.retain(|s| s.s != _s.to_owned());
-                                l.push(ff);
-                                let rvar = NodeSt::r_var(f.to_owned().aln, lhs, n.c.loc);
-                                rvar
+
+                                let mut ev = ev.to_owned();
+                                ev.push(l.to_owned());
+                                match Program::find_v(_s.to_owned(), ev.to_owned()) {
+                                    Some(mut f) => {
+                                        // println!("uv: {:?}", uv);
+                                        match uv.contains(&f.to_owned().s.to_owned()) {
+                                            true => (),
+                                            false => {
+                                                return Err(ParseError::UnusedVariable(f.n.c.loc))
+                                            }
+                                        }
+                                        let mut lhs = beta(
+                                            &mut n.to_owned().rhs.unwrap().to_owned(),
+                                            ev.to_owned(),
+                                            &mut uv,
+                                        );
+                                        lhs = lhs.simplified();
+                                        f.n = n.to_owned();
+                                        let ff = f.to_owned();
+                                        l.retain(|s| s.s != _s.to_owned());
+                                        l.push(ff);
+                                        let rvar = NodeSt::r_var(f.to_owned().aln, lhs, n.c.loc);
+                                        rvar
+                                    }
+                                    _ => {
+                                        return Err(ParseError::UndefinedVariable(
+                                            n.to_owned().lhs.unwrap().c.loc,
+                                        ))
+                                    }
+                                }
                             }
-                            _ => {
-                                return Err(ParseError::UndefinedVariable(
-                                    n.to_owned().lhs.unwrap().c.loc,
-                                ))
+                            NodeKind::UnderScore => {
+                                if it.peek().unwrap().to_owned().to_owned().value
+                                    != TokenKind::RBrace
+                                {
+                                    return Err(ParseError::UnexpectedUnderScoreOperator(
+                                        n.to_owned().c.loc,
+                                    ));
+                                }
+                                b = true;
+                                let n = NodeSt::under_score(n.c.loc);
+                                r = n.to_owned();
+                                n
                             }
-                        }
-                    }
-                    NodeKind::UnderScore => {
-                        if it.peek().unwrap().to_owned().to_owned().value != TokenKind::RBrace {
-                            return Err(ParseError::UnexpectedUnderScoreOperator(
-                                n.to_owned().c.loc,
-                            ));
-                        }
-                        b = true;
-                        let n = NodeSt::under_score(n.c.loc);
-                        r = n.to_owned();
-                        n
-                    }
-                    NodeKind::Ident(s) => {
-                        let mut ev = ev.to_owned();
-                        ev.push(l.to_owned());
-                        match Program::find_v(s.to_owned(), ev.to_owned()) {
-                            Some(mut v) => {
+                            NodeKind::Ident(s) => {
+                                let mut ev = ev.to_owned();
+                                ev.push(l.to_owned());
+                                match Program::find_v(s.to_owned(), ev.to_owned()) {
+                                    Some(mut v) => {
+                                        if it.peek().unwrap().to_owned().to_owned().value
+                                            == TokenKind::RBrace
+                                        {
+                                            b = true;
+                                        }
+
+                                        if !uv.contains(&v.to_owned().s.to_owned()) {
+                                            uv.push(v.to_owned().s.to_owned());
+                                            v.aln = aln;
+                                            aln += 1;
+                                        }
+
+                                        if b {
+                                            r = v.to_owned().n.to_owned();
+                                        }
+
+                                        let mut _n: NodeSt = NodeSt::default();
+                                        if v.gf == 1 {
+                                            _n = NodeSt::g_var(s, n.c.loc);
+                                        } else {
+                                            _n = NodeSt::l_var(v.aln, n.c.loc);
+                                        }
+                                        _n
+                                    }
+                                    None => {
+                                        return Err(ParseError::NotDefinitionVar(
+                                            it.next().unwrap().to_owned(),
+                                        ))
+                                    }
+                                }
+                            }
+                            NodeKind::If => {
+                                if it.peek() == None {
+                                    return Err(ParseError::Eof);
+                                }
                                 if it.peek().unwrap().to_owned().to_owned().value
                                     == TokenKind::RBrace
                                 {
                                     b = true;
                                 }
 
-                                if !uv.contains(&v.to_owned().s.to_owned()) {
-                                    uv.push(v.to_owned().s.to_owned());
-                                    v.aln = aln;
-                                    aln += 1;
-                                }
-
-                                if b {
-                                    r = v.to_owned().n.to_owned();
-                                }
-
-                                let mut _n: NodeSt = NodeSt::default();
-                                if v.gf == 1 {
-                                    _n = NodeSt::g_var(s, n.c.loc);
-                                } else {
-                                    _n = NodeSt::l_var(v.aln, n.c.loc);
-                                }
-                                _n
-                            }
-                            None => {
-                                return Err(ParseError::NotDefinitionVar(
-                                    it.next().unwrap().to_owned(),
-                                ))
-                            }
-                        }
-                    }
-                    NodeKind::If => {
-                        if it.peek() == None {
-                            return Err(ParseError::Eof);
-                        }
-                        if it.peek().unwrap().to_owned().to_owned().value == TokenKind::RBrace {
-                            b = true;
-                        }
-
-                        let mut ev = ev.to_owned();
-                        ev.push(l.to_owned());
-                        let mut c = beta(&mut n.to_owned().cond.unwrap(), ev.to_owned(), &mut uv);
-                        c = c.simplified();
-                        match c.c.value {
-                            NodeKind::Num(num) => {
-                                if num == 0 {
-                                    if n.to_owned().else_if_stmts != None {
-                                        let (else_if_stmts, _) = NodeSt::statement_parser(
-                                            n.to_owned().else_if_stmts.unwrap().as_ref().to_owned(),
-                                            ev,
-                                        )?;
-
-                                        if b {
-                                            r = else_if_stmts.to_owned().last().unwrap().to_owned()
-                                        }
-                                        let mut n = n.to_owned();
-                                        n.else_if_stmts = Some(Box::new(else_if_stmts));
-                                        n
-                                    } else {
-                                        continue;
-                                    }
-                                } else {
-                                    let (if_stmts, _) = NodeSt::statement_parser(
-                                        n.to_owned().if_stmts.unwrap().as_ref().to_owned(),
-                                        ev,
-                                    )?;
-                                    if b {
-                                        r = if_stmts.to_owned().last().unwrap().to_owned();
-                                    }
-
-                                    let mut n = n.to_owned();
-                                    n.if_stmts = Some(Box::new(if_stmts));
-                                    n
-                                }
-                            }
-                            _ => {
                                 let mut ev = ev.to_owned();
                                 ev.push(l.to_owned());
-                                let n = beta(&mut n.to_owned(), ev.to_owned(), &mut uv);
-                                match n.to_owned().cond.unwrap().c.value {
-                                    NodeKind::Ident(s) => {
-                                        let mut ev = ev.to_owned();
-                                        ev.push(l.to_owned());
-                                        match Program::find_v(s.to_owned(), ev.to_owned()) {
-                                            Some(mut v) => {
-                                                if it.peek().unwrap().to_owned().to_owned().value
-                                                    == TokenKind::RBrace
-                                                {
-                                                    b = true;
-                                                }
-
-                                                if !uv.contains(&v.to_owned().s.to_owned()) {
-                                                    uv.push(v.to_owned().s.to_owned());
-                                                    v.aln = aln;
-                                                    aln += 1;
-                                                }
+                                let mut c =
+                                    beta(&mut n.to_owned().cond.unwrap(), ev.to_owned(), &mut uv);
+                                c = c.simplified();
+                                match c.c.value {
+                                    NodeKind::Num(num) => {
+                                        if num == 0 {
+                                            if n.to_owned().else_if_stmts != None {
+                                                let (else_if_stmts, _) = NodeSt::statement_parser(
+                                                    n.to_owned()
+                                                        .else_if_stmts
+                                                        .unwrap()
+                                                        .as_ref()
+                                                        .to_owned(),
+                                                    ev,
+                                                )?;
 
                                                 if b {
-                                                    r = v.to_owned().n.to_owned();
-                                                }
-
-                                                let mut _n: NodeSt = NodeSt::default();
-                                                if v.gf == 1 {
-                                                    _n = NodeSt::g_var(s, n.to_owned().c.loc);
-                                                } else {
-                                                    _n = NodeSt::l_var(v.aln, n.to_owned().c.loc);
+                                                    r = else_if_stmts
+                                                        .to_owned()
+                                                        .last()
+                                                        .unwrap()
+                                                        .to_owned()
                                                 }
                                                 let mut n = n.to_owned();
-                                                n.cond = Some(Box::new(_n));
+                                                n.else_if_stmts = Some(Box::new(else_if_stmts));
                                                 n
+                                            } else {
+                                                continue;
+                                            }
+                                        } else {
+                                            let (if_stmts, _) = NodeSt::statement_parser(
+                                                n.to_owned().if_stmts.unwrap().as_ref().to_owned(),
+                                                ev,
+                                            )?;
+                                            if b {
+                                                r = if_stmts.to_owned().last().unwrap().to_owned();
+                                            }
+
+                                            let mut n = n.to_owned();
+                                            n.if_stmts = Some(Box::new(if_stmts));
+                                            n
+                                        }
+                                    }
+                                    _ => {
+                                        let mut ev = ev.to_owned();
+                                        ev.push(l.to_owned());
+                                        let n = beta(&mut n.to_owned(), ev.to_owned(), &mut uv);
+                                        match n.to_owned().cond.unwrap().c.value {
+                                            NodeKind::Ident(s) => {
+                                                let mut ev = ev.to_owned();
+                                                ev.push(l.to_owned());
+                                                match Program::find_v(s.to_owned(), ev.to_owned()) {
+                                                    Some(mut v) => {
+                                                        if it
+                                                            .peek()
+                                                            .unwrap()
+                                                            .to_owned()
+                                                            .to_owned()
+                                                            .value
+                                                            == TokenKind::RBrace
+                                                        {
+                                                            b = true;
+                                                        }
+
+                                                        if !uv.contains(&v.to_owned().s.to_owned())
+                                                        {
+                                                            uv.push(v.to_owned().s.to_owned());
+                                                            v.aln = aln;
+                                                            aln += 1;
+                                                        }
+
+                                                        if b {
+                                                            r = v.to_owned().n.to_owned();
+                                                        }
+
+                                                        let mut _n: NodeSt = NodeSt::default();
+                                                        if v.gf == 1 {
+                                                            _n = NodeSt::g_var(
+                                                                s,
+                                                                n.to_owned().c.loc,
+                                                            );
+                                                        } else {
+                                                            _n = NodeSt::l_var(
+                                                                v.aln,
+                                                                n.to_owned().c.loc,
+                                                            );
+                                                        }
+                                                        let mut n = n.to_owned();
+                                                        n.cond = Some(Box::new(_n));
+                                                        n
+                                                    }
+                                                    _ => unimplemented!(),
+                                                }
                                             }
                                             _ => unimplemented!(),
                                         }
                                     }
-                                    _ => unimplemented!(),
                                 }
                             }
+                            _ => unreachable!(),
                         }
                     }
                     _ => {
