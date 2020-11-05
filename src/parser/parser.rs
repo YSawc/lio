@@ -215,20 +215,23 @@ impl NodeSt {
             }
             _ => {
                 let lhs = Self::cmp(it)?;
-                match it.peek().unwrap() {
-                    Token {
-                        value: TokenKind::SemiColon,
-                        ..
-                    } => {
-                        it.next();
-                        return Ok(lhs);
-                    }
-                    Token {
-                        value: TokenKind::RBrace,
-                        ..
-                    } => {
-                        return Ok(lhs);
-                    }
+                match it.peek().unwrap().value {
+                    TokenKind::SemiColon | TokenKind::RBrace => match it.peek().unwrap() {
+                        Token {
+                            value: TokenKind::SemiColon,
+                            ..
+                        } => {
+                            it.next();
+                            return Ok(lhs);
+                        }
+                        Token {
+                            value: TokenKind::RBrace,
+                            ..
+                        } => {
+                            return Ok(lhs);
+                        }
+                        _ => unreachable!(),
+                    },
                     _ => return Err(ParseError::NotClosedStmt(it.next().unwrap().to_owned())),
                 }
             }
