@@ -199,15 +199,15 @@ impl NodeSt {
                             et.next();
                             return Err(ParseError::NotClosedStmt(et.next().unwrap().to_owned()));
                         }
-                        match it.peek().unwrap() {
-                            Token {
-                                value: TokenKind::SemiColon,
-                                ..
-                            } => {
-                                it.next();
-                            }
-                            _ => (),
-                        }
+
+                        unexpect_token(
+                            TokenKind::SemiColon,
+                            ParseError::UnexpectedUnderScoreOperator(
+                                it.peek().unwrap().to_owned().to_owned().loc,
+                            ),
+                            it,
+                        )?;
+
                         return Ok(op);
                     }
                     _ => unreachable!(),
@@ -435,5 +435,17 @@ fn expect_token(
         Ok(it.next().unwrap().loc.to_owned())
     } else {
         Err(err)
+    }
+}
+
+fn unexpect_token(
+    ty: TokenKind,
+    err: ParseError,
+    it: &mut std::iter::Peekable<std::slice::Iter<Annot<TokenKind>>>,
+) -> Result<(), ParseError> {
+    if it.peek().unwrap().value == ty {
+        Err(err)
+    } else {
+        Ok(())
     }
 }

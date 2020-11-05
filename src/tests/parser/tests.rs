@@ -255,3 +255,17 @@ fn eof_around_closed_else_stmt_test() {
     };
     assert!(n)
 }
+
+#[test]
+fn unexpected_under_score_operator_test() {
+    let t = Token::tokenize("fn { _; }").unwrap();
+    let mut t = t.iter().peekable();
+    let n = match NodeArr::w_parser(&mut t, vec![]) {
+        Ok(_) => false,
+        Err(e) => match e {
+            ParseError::UnexpectedUnderScoreOperator(_) => true,
+            _ => false,
+        },
+    };
+    assert!(n)
+}

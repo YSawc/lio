@@ -140,7 +140,7 @@ assert_llvm 2 'fn int { 2 }'
 assert_llvm 3 'fn int { return 3; }'
 assert_llvm 0 'fn { _ }'
 assert_llvm 0 'fn { int vvv = 55; 0*vvv*0; _ }'
-assert_llvm 0 'fn { int vvv = 4; 1+2*vvv/4-1; _; }'
+assert_llvm 0 'fn { int vvv = 4; 1+2*vvv/4-1; _ }'
 assert_llvm 0 'fn { int vvv = 4; 1+2*vvv/4-1; _ }' simplified
 assert_llvm 27 'int g = 9; fn int { g*3 }'
 assert_llvm 8 'int g = 8; fn int { int v = 4; 1+v*g/4-1 }'
