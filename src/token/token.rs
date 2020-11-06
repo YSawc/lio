@@ -291,6 +291,10 @@ impl<'a> TokenIter<'a> {
         }
     }
 
+    pub fn next(&mut self) -> Token {
+        self.p.next().unwrap().to_owned()
+    }
+
     pub fn next_with_shadow(&mut self) {
         self.shadow_p = self.p.to_owned();
         self.p.next().unwrap();
@@ -298,5 +302,13 @@ impl<'a> TokenIter<'a> {
 
     pub fn copy_iter(&mut self) {
         self.shadow_p = self.p.to_owned();
+    }
+
+    pub fn peek_value(&mut self) -> TokenKind {
+        self.p.peek().unwrap().value.to_owned()
+    }
+
+    pub fn peek_shadow(&mut self) -> Token {
+        self.shadow_p.peek().unwrap().to_owned().to_owned()
     }
 }

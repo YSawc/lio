@@ -58,7 +58,7 @@ impl Program {
         let mut g: Vec<Var> = vec![];
         let mut aln: i32 = 0;
         let mut b = false;
-        while it.p.peek().unwrap().value != TokenKind::Fn && b == false {
+        while it.peek_value() != TokenKind::Fn && b == false {
             let et = it.p.to_owned();
             match NodeSt::parser(it)? {
                 n => match n.c.value {
