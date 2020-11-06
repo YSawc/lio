@@ -283,10 +283,11 @@ pub struct TokenIter<'a> {
 }
 
 impl<'a> TokenIter<'a> {
-    pub fn new(p: std::iter::Peekable<std::slice::Iter<'a, Annot<TokenKind>>>) -> Self {
+    pub fn new(vt: &'a mut Vec<Annot<TokenKind>>) -> Self {
+        let it = vt.iter().peekable();
         Self {
-            p: p.to_owned(),
-            shadow_p: p,
+            p: it.to_owned(),
+            shadow_p: it,
         }
     }
 

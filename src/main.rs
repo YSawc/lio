@@ -71,7 +71,7 @@ fn main() {
                 }
             };
 
-            let t = match map(t) {
+            let mut t = match map(t) {
                 Ok(t) => t,
                 Err(e) => {
                     // e.show_diagnostic(arg1); // FIXME
@@ -79,7 +79,7 @@ fn main() {
                     continue;
                 }
             };
-            let mut _nas = match Program::w_parser(t.to_owned()) {
+            let mut _nas = match Program::w_parser(&mut t) {
                 Ok(nas) => nas,
                 Err(e) => {
                     // e.show_diagnostic(arg1); // FIXME
@@ -114,7 +114,7 @@ fn main() {
         };
         println!("after tokenized: {:?}", t);
 
-        let t = match map(t) {
+        let mut t = match map(t) {
             Ok(t) => t,
             Err(e) => {
                 // e.show_diagnostic(arg1); // FIXME
@@ -122,7 +122,7 @@ fn main() {
                 std::process::exit(1);
             }
         };
-        let mut _nas = match Program::w_parser(t.to_owned()) {
+        let mut _nas = match Program::w_parser(&mut t) {
             Ok(nas) => nas,
             Err(e) => {
                 // e.show_diagnostic(arg1); // FIXME

@@ -32,10 +32,9 @@ impl Program {
         None
     }
 
-    pub fn w_parser(vt: Vec<Token>) -> Result<Self, ParseError> {
+    pub fn w_parser(vt: &mut Vec<Token>) -> Result<Self, ParseError> {
         let mut na: Vec<NodeArr> = vec![];
-        let it = vt.iter().peekable();
-        let mut it = TokenIter::new(it);
+        let mut it = TokenIter::new(vt);
         let g: Vec<Var> = Self::stp(&mut it)?;
 
         let (n, mut ugv) = NodeArr::w_parser(&mut it, g.to_owned())?;
