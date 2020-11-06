@@ -1,4 +1,3 @@
-use super::super::location::location::*;
 use super::super::node::node::*;
 use super::super::node_arr::node_arr::*;
 use super::super::parser::error::*;
@@ -35,7 +34,8 @@ impl Program {
 
     pub fn w_parser(vt: Vec<Token>) -> Result<Self, ParseError> {
         let mut na: Vec<NodeArr> = vec![];
-        let mut it = vt.iter().peekable();
+        let it = vt.iter().peekable();
+        let mut it = TokenIter::new(it);
         let g: Vec<Var> = Self::stp(&mut it)?;
 
         let (n, mut ugv) = NodeArr::w_parser(&mut it, g.to_owned())?;
@@ -54,16 +54,14 @@ impl Program {
         Ok(Self::new(g, na))
     }
 
-    pub fn stp(
-        mut it: &mut std::iter::Peekable<std::slice::Iter<Annot<TokenKind>>>,
-    ) -> Result<Vec<Var>, ParseError> {
+    pub fn stp(it: &mut TokenIter) -> Result<Vec<Var>, ParseError> {
         let mut uv: Vec<String> = vec![];
         let mut g: Vec<Var> = vec![];
         let mut aln: i32 = 0;
         let mut b = false;
-        while it.peek().unwrap().value != TokenKind::Fn && b == false {
-            let et = it.to_owned();
-            match NodeSt::parser(&mut it)? {
+        while it.p.peek().unwrap().value != TokenKind::Fn && b == false {
+            let et = it.p.to_owned();
+            match NodeSt::parser(it)? {
                 n => match n.c.value {
                     NodeKind::Fn => {
                         b = true;

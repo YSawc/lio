@@ -1,4 +1,3 @@
-use super::super::location::location::*;
 use super::super::node::node::*;
 use super::super::parser::error::*;
 use super::super::program::program::*;
@@ -43,32 +42,31 @@ impl NodeArr {
     }
 
     pub fn w_parser(
-        mut it: &mut std::iter::Peekable<std::slice::Iter<Annot<TokenKind>>>,
+        mut it: &mut TokenIter,
         g: Vec<Var>,
     ) -> Result<(Self, Vec<String>), ParseError> {
-        let et = it.to_owned();
-        if it.peek().unwrap().value != TokenKind::Fn {
+        it.copy_iter();
+        if it.p.peek().unwrap().value != TokenKind::Fn {
             return Err(ParseError::OperatorOutOfFnction(
-                it.next().unwrap().to_owned(),
+                it.shadow_p.next().unwrap().to_owned(),
             ));
         }
 
-        et.to_owned().next();
-        it.next();
+        it.next_with_shadow();
 
         let mut isi: bool = false;
-        if it.peek().unwrap().value == TokenKind::Int {
-            et.to_owned().next();
-            it.next();
+        if it.p.peek().unwrap().value == TokenKind::Int {
+            it.shadow_p.to_owned().next();
+            it.p.next();
             isi = true;
         }
 
-        if it.peek() == None {
+        if it.p.peek() == None {
             return Err(ParseError::NotLBrace(
-                et.to_owned().next().unwrap().to_owned(),
+                it.shadow_p.to_owned().next().unwrap().to_owned(),
             ));
         }
-        it.next();
+        it.p.next();
 
         let mut ev: Vec<Vec<Var>> = vec![];
         ev.push(g.to_owned());
@@ -118,18 +116,15 @@ impl NodeArr {
         }
     }
 
-    pub fn stp(
-        mut it: &mut std::iter::Peekable<std::slice::Iter<Annot<TokenKind>>>,
-        ev: Vec<Vec<Var>>,
-    ) -> Result<(Self, Vec<String>), ParseError> {
+    pub fn stp(it: &mut TokenIter, ev: Vec<Vec<Var>>) -> Result<(Self, Vec<String>), ParseError> {
         let mut uv: Vec<String> = vec![];
         let mut nv = vec![];
         let mut l: Vec<Var> = vec![];
         let mut r: NodeSt = NodeSt::default();
         let mut aln: i32 = 0;
         let mut b = false;
-        while it.peek() != None && b == false {
-            nv.push(match NodeSt::parser(&mut it) {
+        while it.p.peek() != None && b == false {
+            nv.push(match NodeSt::parser(it) {
                 Ok(n) => match n.c.value {
                     NodeKind::Return
                     | NodeKind::NewAssign
@@ -139,11 +134,11 @@ impl NodeArr {
                     | NodeKind::If => {
                         match n.c.value {
                             NodeKind::Return => {
-                                if it.peek().unwrap().to_owned().to_owned().value
+                                if it.p.peek().unwrap().to_owned().to_owned().value
                                     != TokenKind::RBrace
                                 {
                                     return Err(ParseError::OperatorAfterRetrun(
-                                        it.next().unwrap().to_owned(),
+                                        it.p.next().unwrap().to_owned(),
                                     ));
                                 }
                                 b = true;
@@ -260,7 +255,7 @@ impl NodeArr {
                                 }
                             }
                             NodeKind::UnderScore => {
-                                if it.peek().unwrap().to_owned().to_owned().value
+                                if it.p.peek().unwrap().to_owned().to_owned().value
                                     != TokenKind::RBrace
                                 {
                                     return Err(ParseError::UnexpectedUnderScoreOperator(
@@ -277,7 +272,7 @@ impl NodeArr {
                                 ev.push(l.to_owned());
                                 match Program::find_v(s.to_owned(), ev.to_owned()) {
                                     Some(mut v) => {
-                                        if it.peek().unwrap().to_owned().to_owned().value
+                                        if it.p.peek().unwrap().to_owned().to_owned().value
                                             == TokenKind::RBrace
                                         {
                                             b = true;
@@ -303,16 +298,16 @@ impl NodeArr {
                                     }
                                     None => {
                                         return Err(ParseError::NotDefinitionVar(
-                                            it.next().unwrap().to_owned(),
+                                            it.p.next().unwrap().to_owned(),
                                         ))
                                     }
                                 }
                             }
                             NodeKind::If => {
-                                if it.peek() == None {
+                                if it.p.peek() == None {
                                     return Err(ParseError::Eof);
                                 }
-                                if it.peek().unwrap().to_owned().to_owned().value
+                                if it.p.peek().unwrap().to_owned().to_owned().value
                                     == TokenKind::RBrace
                                 {
                                     b = true;
@@ -374,6 +369,7 @@ impl NodeArr {
                                                 match Program::find_v(s.to_owned(), ev.to_owned()) {
                                                     Some(mut v) => {
                                                         if it
+                                                            .p
                                                             .peek()
                                                             .unwrap()
                                                             .to_owned()
@@ -423,7 +419,7 @@ impl NodeArr {
                         }
                     }
                     _ => {
-                        if it.peek().unwrap().to_owned().to_owned().value == TokenKind::RBrace {
+                        if it.p.peek().unwrap().to_owned().to_owned().value == TokenKind::RBrace {
                             b = true;
                         }
 

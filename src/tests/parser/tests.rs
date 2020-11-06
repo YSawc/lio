@@ -12,8 +12,9 @@ use super::super::super::token::token::*;
 #[test]
 fn parser_test() {
     let t = Token::tokenize("fn int { 12+3; }").unwrap();
-    let mut t = t.iter().peekable();
-    let n = NodeArr::w_parser(&mut t, vec![]).unwrap().0.ret_node_st;
+    let t = t.iter().peekable();
+    let mut it = TokenIter::new(t);
+    let n = NodeArr::w_parser(&mut it, vec![]).unwrap().0.ret_node_st;
     let e = {
         NodeSt {
             c: Node::plus(Loc::new(14, 15)),
@@ -28,8 +29,9 @@ fn parser_test() {
 #[test]
 fn evaluation_final_value_test() {
     let t = Token::tokenize("fn int { 12+3 }").unwrap();
-    let mut t = t.iter().peekable();
-    let n = NodeArr::w_parser(&mut t, vec![]).unwrap().0.ret_node_st;
+    let t = t.iter().peekable();
+    let mut it = TokenIter::new(t);
+    let n = NodeArr::w_parser(&mut it, vec![]).unwrap().0.ret_node_st;
     let e = {
         NodeSt {
             c: Node::plus(Loc::new(14, 15)),
@@ -44,8 +46,9 @@ fn evaluation_final_value_test() {
 #[test]
 fn parser_assign_test() {
     let t = Token::tokenize("fn { int a = 3; a; _ }").unwrap();
-    let mut t = t.iter().peekable();
-    let n = match NodeArr::w_parser(&mut t, vec![]) {
+    let t = t.iter().peekable();
+    let mut it = TokenIter::new(t);
+    let n = match NodeArr::w_parser(&mut it, vec![]) {
         Ok(_) => true,
         Err(_) => false,
     };
@@ -55,8 +58,9 @@ fn parser_assign_test() {
 #[test]
 fn return_with_unclosed_test() {
     let t = Token::tokenize("fn int { return 3 }").unwrap();
-    let mut t = t.iter().peekable();
-    let n = match NodeArr::w_parser(&mut t, vec![]) {
+    let t = t.iter().peekable();
+    let mut it = TokenIter::new(t);
+    let n = match NodeArr::w_parser(&mut it, vec![]) {
         Ok(_) => false,
         Err(e) => match e {
             ParseError::NotClosedStmt(_) => true,
@@ -69,8 +73,9 @@ fn return_with_unclosed_test() {
 #[test]
 fn operater_after_return_test() {
     let t = Token::tokenize("fn int { return 3; 4 }").unwrap();
-    let mut t = t.iter().peekable();
-    let n = match NodeArr::w_parser(&mut t, vec![]) {
+    let t = t.iter().peekable();
+    let mut it = TokenIter::new(t);
+    let n = match NodeArr::w_parser(&mut it, vec![]) {
         Ok(_) => false,
         Err(e) => match e {
             ParseError::OperatorAfterRetrun(_) => true,
@@ -83,8 +88,9 @@ fn operater_after_return_test() {
 #[test]
 fn not_exit_when_failed_parser_test() {
     let t = Token::tokenize("fn { +3 }").unwrap();
-    let mut t = t.iter().peekable();
-    let n = match NodeArr::w_parser(&mut t, vec![]) {
+    let t = t.iter().peekable();
+    let mut it = TokenIter::new(t);
+    let n = match NodeArr::w_parser(&mut it, vec![]) {
         Ok(_) => false,
         Err(_) => true,
     };
@@ -94,8 +100,9 @@ fn not_exit_when_failed_parser_test() {
 #[test]
 fn not_number_test() {
     let t = Token::tokenize("fn { 5+ }").unwrap();
-    let mut t = t.iter().peekable();
-    let n = match NodeArr::w_parser(&mut t, vec![]) {
+    let t = t.iter().peekable();
+    let mut it = TokenIter::new(t);
+    let n = match NodeArr::w_parser(&mut it, vec![]) {
         Ok(_) => false,
         Err(e) => match e {
             ParseError::NotNumber(_) => true,
@@ -108,8 +115,9 @@ fn not_number_test() {
 #[test]
 fn unclosed_paren_test() {
     let t = Token::tokenize("fn { 5+(3+2*2 }").unwrap();
-    let mut t = t.iter().peekable();
-    let n = match NodeArr::w_parser(&mut t, vec![]) {
+    let t = t.iter().peekable();
+    let mut it = TokenIter::new(t);
+    let n = match NodeArr::w_parser(&mut it, vec![]) {
         Ok(_) => false,
         Err(e) => match e {
             ParseError::NotClosedParen(_) => true,
@@ -122,8 +130,9 @@ fn unclosed_paren_test() {
 #[test]
 fn operator_out_of_function_test() {
     let t = Token::tokenize("0; fn { 12+3; }").unwrap();
-    let mut t = t.iter().peekable();
-    let n = match NodeArr::w_parser(&mut t, vec![]) {
+    let t = t.iter().peekable();
+    let mut it = TokenIter::new(t);
+    let n = match NodeArr::w_parser(&mut it, vec![]) {
         Ok(_) => false,
         Err(e) => match e {
             ParseError::OperatorOutOfFnction(_) => true,
@@ -136,8 +145,9 @@ fn operator_out_of_function_test() {
 #[test]
 fn not_match_return_type_test() {
     let t = Token::tokenize("fn { 12+3; }").unwrap();
-    let mut t = t.iter().peekable();
-    let n = match NodeArr::w_parser(&mut t, vec![]) {
+    let t = t.iter().peekable();
+    let mut it = TokenIter::new(t);
+    let n = match NodeArr::w_parser(&mut it, vec![]) {
         Ok(_) => false,
         Err(e) => match e {
             ParseError::NotMatchReturnType(_) => true,
@@ -150,8 +160,9 @@ fn not_match_return_type_test() {
 #[test]
 fn match_void_type_test() {
     let t = Token::tokenize("fn { _ }").unwrap();
-    let mut t = t.iter().peekable();
-    let n = match NodeArr::w_parser(&mut t, vec![]) {
+    let t = t.iter().peekable();
+    let mut it = TokenIter::new(t);
+    let n = match NodeArr::w_parser(&mut it, vec![]) {
         Ok(_) => true,
         _ => false,
     };
@@ -161,8 +172,9 @@ fn match_void_type_test() {
 #[test]
 fn not_match_void_type_test() {
     let t = Token::tokenize("fn int { _ }").unwrap();
-    let mut t = t.iter().peekable();
-    let n = match NodeArr::w_parser(&mut t, vec![]) {
+    let t = t.iter().peekable();
+    let mut it = TokenIter::new(t);
+    let n = match NodeArr::w_parser(&mut it, vec![]) {
         Ok(_) => false,
         Err(e) => match e {
             ParseError::NotMatchReturnType(_) => true,
@@ -175,8 +187,9 @@ fn not_match_void_type_test() {
 #[test]
 fn unexpected_underscore_operator_test() {
     let t = Token::tokenize("fn int { _; 1 }").unwrap();
-    let mut t = t.iter().peekable();
-    let n = match NodeArr::w_parser(&mut t, vec![]) {
+    let t = t.iter().peekable();
+    let mut it = TokenIter::new(t);
+    let n = match NodeArr::w_parser(&mut it, vec![]) {
         Ok(_) => false,
         Err(e) => match e {
             ParseError::UnexpectedUnderScoreOperator(_) => true,
@@ -189,8 +202,9 @@ fn unexpected_underscore_operator_test() {
 #[test]
 fn not_opened_stmt_test() {
     let t = Token::tokenize("fn int { if (2 == 3)  5; } else { 10; } }").unwrap();
-    let mut t = t.iter().peekable();
-    let n = match NodeArr::w_parser(&mut t, vec![]) {
+    let t = t.iter().peekable();
+    let mut it = TokenIter::new(t);
+    let n = match NodeArr::w_parser(&mut it, vec![]) {
         Ok(_) => false,
         Err(e) => match e {
             ParseError::NotOpenedStmt(_) => true,
@@ -217,8 +231,9 @@ fn not_opened_stmt_test() {
 #[test]
 fn not_opened_else_stmt_test() {
     let t = Token::tokenize("fn int { if (2 == 3) { 5; } else 10; } }").unwrap();
-    let mut t = t.iter().peekable();
-    let n = match NodeArr::w_parser(&mut t, vec![]) {
+    let t = t.iter().peekable();
+    let mut it = TokenIter::new(t);
+    let n = match NodeArr::w_parser(&mut it, vec![]) {
         Ok(_) => false,
         Err(e) => match e {
             ParseError::NotOpenedStmt(_) => true,
@@ -245,8 +260,9 @@ fn not_opened_else_stmt_test() {
 #[test]
 fn eof_around_closed_else_stmt_test() {
     let t = Token::tokenize("fn int { if (2 == 3) { 5; } else { 10; }").unwrap();
-    let mut t = t.iter().peekable();
-    let n = match NodeArr::w_parser(&mut t, vec![]) {
+    let t = t.iter().peekable();
+    let mut it = TokenIter::new(t);
+    let n = match NodeArr::w_parser(&mut it, vec![]) {
         Ok(_) => false,
         Err(e) => match e {
             ParseError::Eof => true,
@@ -259,8 +275,9 @@ fn eof_around_closed_else_stmt_test() {
 #[test]
 fn unexpected_under_score_operator_test() {
     let t = Token::tokenize("fn { _; }").unwrap();
-    let mut t = t.iter().peekable();
-    let n = match NodeArr::w_parser(&mut t, vec![]) {
+    let t = t.iter().peekable();
+    let mut it = TokenIter::new(t);
+    let n = match NodeArr::w_parser(&mut it, vec![]) {
         Ok(_) => false,
         Err(e) => match e {
             ParseError::UnexpectedUnderScoreOperator(_) => true,

@@ -276,3 +276,26 @@ impl Token {
         }
     }
 }
+
+pub struct TokenIter<'a> {
+    pub p: std::iter::Peekable<std::slice::Iter<'a, Annot<TokenKind>>>,
+    pub shadow_p: std::iter::Peekable<std::slice::Iter<'a, Annot<TokenKind>>>,
+}
+
+impl<'a> TokenIter<'a> {
+    pub fn new(p: std::iter::Peekable<std::slice::Iter<'a, Annot<TokenKind>>>) -> Self {
+        Self {
+            p: p.to_owned(),
+            shadow_p: p,
+        }
+    }
+
+    pub fn next_with_shadow(&mut self) {
+        self.shadow_p = self.p.to_owned();
+        self.p.next().unwrap();
+    }
+
+    pub fn copy_iter(&mut self) {
+        self.shadow_p = self.p.to_owned();
+    }
+}
