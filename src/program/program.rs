@@ -55,15 +55,13 @@ impl Program {
 
     pub fn stp(it: &mut TokenIter) -> Result<Vec<Var>, ParseError> {
         let mut a = NodeArr::new();
-        let mut uv: Vec<String> = vec![];
         let mut aln: i32 = 0;
-        let mut b = false;
-        while it.peek_value() != TokenKind::Fn && b == false {
-            let et = it.p.to_owned();
+        while it.peek_value() != TokenKind::Fn && a.end_of_node == false {
+            it.copy_iter();
             match NodeSt::parser(it)? {
                 n => match n.c.value {
                     NodeKind::Fn => {
-                        b = true;
+                        a.set_end_of_node();
                     }
                     NodeKind::NewAssign => {
                         let mut _s = String::new();
@@ -79,11 +77,11 @@ impl Program {
                         a.set_imm_env();
                         match NodeArr::find_l(_s.to_owned(), a.l.to_owned()) {
                             Some(mut f) => {
-                                match uv.contains(&f.to_owned().s.to_owned()) {
+                                match a.used_variable.contains(&f.to_owned().s.to_owned()) {
                                     true => (),
                                     false => return Err(ParseError::UnusedVariable(f.n.c.loc)),
                                 }
-                                uv.retain(|s| s != &f.to_owned().s.to_owned());
+                                a.used_variable.retain(|s| s != &f.to_owned().s.to_owned());
                                 let mut lhs =
                                     beta(&mut n.to_owned().rhs.unwrap().to_owned(), &mut a);
                                 lhs = lhs.to_owned().simplified();
@@ -109,18 +107,14 @@ impl Program {
                                     _ => Var::new_g(_s, lhs, aln),
                                 };
                                 if v.m {
-                                    uv.push(v.to_owned().s);
+                                    a.used_variable.push(v.to_owned().s);
                                 }
                                 a.l.push(v);
                             }
                         }
                         continue;
                     }
-                    _ => {
-                        return Err(ParseError::OperatorOutOfFnction(
-                            et.to_owned().next().unwrap().to_owned(),
-                        ))
-                    }
+                    _ => return Err(ParseError::OperatorOutOfFnction(it.peek_shadow())),
                 },
             }
         }
