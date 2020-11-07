@@ -22,6 +22,7 @@ pub struct NodeArr {
     pub imm_env_v: Vec<Vec<Var>>,
     pub end_of_node: bool,
     pub used_variable: Vec<String>,
+    pub ret_n: NodeSt,
 }
 
 impl NodeArr {
@@ -46,6 +47,7 @@ impl NodeArr {
             imm_env_v: vec![],
             end_of_node: false,
             used_variable: vec![],
+            ret_n: NodeSt::default(),
         }
     }
 
@@ -65,6 +67,10 @@ impl NodeArr {
     pub fn set_imm_env(&mut self) {
         self.imm_env_v = self.env_v.to_owned();
         self.imm_env_v.push(self.l.to_owned());
+    }
+
+    pub fn set_ret_node(&mut self, v: NodeSt) {
+        self.ret_node_st = v;
     }
 }
 
@@ -143,11 +149,9 @@ impl NodeArr {
     pub fn stp(it: &mut TokenIter, ev: Vec<Vec<Var>>) -> Result<(Self, Vec<String>), ParseError> {
         let mut a = Self::new();
         a.set_env(ev);
-        let mut nv = vec![];
-        let mut r: NodeSt = NodeSt::default();
         let mut aln: i32 = 0;
         while it.p.peek() != None && a.end_of_node == false {
-            nv.push(match NodeSt::parser(it) {
+            match NodeSt::parser(it) {
                 Ok(n) => match n.c.value {
                     NodeKind::Return
                     | NodeKind::NewAssign
@@ -163,8 +167,9 @@ impl NodeArr {
 
                                 a.set_end_of_node();
                                 a.set_imm_env();
-                                r = beta(&mut n.to_owned().lhs.unwrap().to_owned(), &mut a);
-                                r.to_owned()
+                                let r = beta(&mut n.to_owned().lhs.unwrap().to_owned(), &mut a);
+                                a.set_ret_node(r.to_owned());
+                                a.node_st_vec.push(r.to_owned());
                             }
                             NodeKind::NewAssign => {
                                 let mut _s = String::new();
@@ -201,7 +206,7 @@ impl NodeArr {
                                         a.l.push(v.to_owned());
 
                                         let avar = NodeSt::ass_var(v.to_owned().aln, lhs, n.c.loc);
-                                        avar
+                                        a.node_st_vec.push(avar);
                                     }
                                     None => {
                                         let mut lhs =
@@ -218,7 +223,7 @@ impl NodeArr {
                                         a.l.push(v.to_owned());
 
                                         let avar = NodeSt::ass_var(v.to_owned().aln, lhs, n.c.loc);
-                                        avar
+                                        a.node_st_vec.push(avar);
                                     }
                                 }
                             }
@@ -252,7 +257,7 @@ impl NodeArr {
                                         a.l.retain(|s| s.s != _s.to_owned());
                                         a.l.push(ff);
                                         let rvar = NodeSt::r_var(f.to_owned().aln, lhs, n.c.loc);
-                                        rvar
+                                        a.node_st_vec.push(rvar);
                                     }
                                     _ => {
                                         return Err(ParseError::UndefinedVariable(
@@ -270,8 +275,8 @@ impl NodeArr {
                                 a.set_end_of_node();
 
                                 let n = NodeSt::under_score(n.c.loc);
-                                r = n.to_owned();
-                                n
+                                a.set_ret_node(n.to_owned());
+                                a.node_st_vec.push(n);
                             }
                             NodeKind::Ident(s) => {
                                 a.set_imm_env();
@@ -288,7 +293,7 @@ impl NodeArr {
                                         }
 
                                         if a.end_of_node {
-                                            r = v.to_owned().n.to_owned();
+                                            a.set_ret_node(v.to_owned().n.to_owned());
                                         }
 
                                         let mut _n: NodeSt = NodeSt::default();
@@ -297,7 +302,7 @@ impl NodeArr {
                                         } else {
                                             _n = NodeSt::l_var(v.aln, n.c.loc);
                                         }
-                                        _n
+                                        a.node_st_vec.push(_n);
                                     }
                                     None => return Err(ParseError::NotDefinitionVar(it.next())),
                                 }
@@ -327,15 +332,17 @@ impl NodeArr {
                                                 )?;
 
                                                 if a.end_of_node {
-                                                    r = else_if_stmts
-                                                        .to_owned()
-                                                        .last()
-                                                        .unwrap()
-                                                        .to_owned()
+                                                    a.set_ret_node(
+                                                        else_if_stmts
+                                                            .to_owned()
+                                                            .last()
+                                                            .unwrap()
+                                                            .to_owned(),
+                                                    );
                                                 }
                                                 let mut n = n.to_owned();
                                                 n.else_if_stmts = Some(Box::new(else_if_stmts));
-                                                n
+                                                a.node_st_vec.push(n);
                                             } else {
                                                 continue;
                                             }
@@ -345,12 +352,14 @@ impl NodeArr {
                                                 &mut a,
                                             )?;
                                             if a.end_of_node {
-                                                r = if_stmts.to_owned().last().unwrap().to_owned();
+                                                a.set_ret_node(
+                                                    if_stmts.to_owned().last().unwrap().to_owned(),
+                                                );
                                             }
 
                                             let mut n = n.to_owned();
                                             n.if_stmts = Some(Box::new(if_stmts));
-                                            n
+                                            a.node_st_vec.push(n);
                                         }
                                     }
                                     _ => {
@@ -379,7 +388,9 @@ impl NodeArr {
                                                         }
 
                                                         if a.end_of_node {
-                                                            r = v.to_owned().n.to_owned();
+                                                            a.set_ret_node(
+                                                                v.to_owned().n.to_owned(),
+                                                            );
                                                         }
 
                                                         let mut _n: NodeSt = NodeSt::default();
@@ -396,7 +407,7 @@ impl NodeArr {
                                                         }
                                                         let mut n = n.to_owned();
                                                         n.cond = Some(Box::new(_n));
-                                                        n
+                                                        a.node_st_vec.push(n);
                                                     }
                                                     _ => unimplemented!(),
                                                 }
@@ -415,20 +426,20 @@ impl NodeArr {
                         }
 
                         a.set_imm_env();
+
                         let n = beta(&mut n.to_owned(), &mut a);
+
                         if a.end_of_node {
-                            r = n.to_owned();
+                            a.set_ret_node(n.to_owned());
                         }
                         // println!("r: {:?}", r);
-                        n
+                        a.node_st_vec.push(n);
                     }
                 },
                 Err(e) => return Err(e),
-            });
+            };
         }
 
-        a.set_node(nv);
-        a.ret_node_st = r;
         println!("a.used_variable: {:?}", a.used_variable);
 
         for l in a.to_owned().l {
@@ -460,13 +471,10 @@ impl NodeSt {
     ) -> Result<(Vec<Self>, Vec<String>), ParseError> {
         let mut min = vn.iter().peekable();
         let mut nv = vec![];
-        let l: Vec<Var> = vec![];
 
         while min.to_owned().peek() != None {
             nv.push(match min.to_owned().peek().unwrap().c.value {
                 _ => {
-                    let mut ev = a.env_v.to_owned();
-                    ev.push(l.to_owned());
                     let n = beta(&mut min.next().unwrap().to_owned(), a);
                     n
                 }
