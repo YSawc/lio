@@ -98,20 +98,24 @@ pub fn vex(ns: &mut NodeSt, a: &mut NodeArr, map: &mut FxHashMap<String, Var>) -
                     v
                 }
             };
-            let mut _vn: NodeSt = NodeSt::default();
-            if n.gf == 1 {
-                ns.c = Node::g_var(s.to_owned(), ns.to_owned().c.loc);
-                _vn = NodeSt::g_var(s, ns.to_owned().c.loc);
-            } else {
-                ns.c = Node::l_var(n.aln, ns.to_owned().c.loc);
-                _vn = NodeSt::l_var(n.aln, ns.to_owned().c.loc);
-            }
-            if a.used_variable.contains(&n.to_owned().s.to_owned()) {
-            } else {
-                a.used_variable.push(n.s);
-            }
-            _vn.lhs = ns.lhs.to_owned();
-            _vn.rhs = ns.rhs.to_owned();
+            let mut vn = match n.gf {
+                1 => {
+                    ns.c = Node::g_var(s.to_owned(), ns.to_owned().c.loc);
+                    NodeSt::g_var(s, ns.to_owned().c.loc)
+                }
+                0 => {
+                    ns.c = Node::l_var(n.aln, ns.to_owned().c.loc);
+                    NodeSt::l_var(n.aln, ns.to_owned().c.loc)
+                }
+                _ => unreachable!(),
+            };
+
+            if !a.used_variable.contains(&n.to_owned().s.to_owned()) {
+                a.used_variable.push(n.s)
+            };
+
+            vn.lhs = ns.lhs.to_owned();
+            vn.rhs = ns.rhs.to_owned();
             return ns.to_owned();
         }
         _ => return ns.to_owned(),

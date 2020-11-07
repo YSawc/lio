@@ -296,13 +296,12 @@ impl NodeArr {
                                             a.set_ret_node(v.to_owned().n.to_owned());
                                         }
 
-                                        let mut _n: NodeSt = NodeSt::default();
-                                        if v.gf == 1 {
-                                            _n = NodeSt::g_var(s, n.c.loc);
-                                        } else {
-                                            _n = NodeSt::l_var(v.aln, n.c.loc);
-                                        }
-                                        a.node_st_vec.push(_n);
+                                        let n = match v.gf {
+                                            1 => NodeSt::g_var(s, n.c.loc),
+                                            0 => NodeSt::l_var(v.aln, n.c.loc),
+                                            _ => unreachable!(),
+                                        };
+                                        a.node_st_vec.push(n);
                                     }
                                     None => return Err(ParseError::NotDefinitionVar(it.next())),
                                 }
@@ -386,20 +385,14 @@ impl NodeArr {
                                                             );
                                                         }
 
-                                                        let mut _n: NodeSt = NodeSt::default();
-                                                        if v.gf == 1 {
-                                                            _n = NodeSt::g_var(
-                                                                s,
-                                                                n.to_owned().c.loc,
-                                                            );
-                                                        } else {
-                                                            _n = NodeSt::l_var(
-                                                                v.aln,
-                                                                n.to_owned().c.loc,
-                                                            );
-                                                        }
-                                                        let mut n = n.to_owned();
-                                                        n.cond = Some(Box::new(_n));
+                                                        let mut n = match v.gf {
+                                                            1 => {
+                                                                NodeSt::g_var(s, n.to_owned().c.loc)
+                                                            }
+                                                            0 => NodeSt::l_var(v.aln, n.c.loc),
+                                                            _ => unreachable!(),
+                                                        };
+                                                        n.cond = Some(Box::new(n.to_owned()));
                                                         a.node_st_vec.push(n);
                                                     }
                                                     _ => unimplemented!(),

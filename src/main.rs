@@ -34,71 +34,73 @@ fn main() {
             std::io::stdin().read_line(&mut s).unwrap();
             let s = s.trim();
 
-            if s == "q" {
-                break;
-            }
+            match s {
+                "q" => {
+                    break;
+                }
+                "." => {
+                    let _ = Command::new("cc")
+                        .arg("-o")
+                        .arg("workspace/tmp")
+                        .arg("workspace/tmp.s")
+                        .spawn()
+                        .expect("failed to execute process")
+                        .wait();
 
-            if s == "." {
-                let _ = Command::new("cc")
-                    .arg("-o")
-                    .arg("workspace/tmp")
-                    .arg("workspace/tmp.s")
-                    .spawn()
-                    .expect("failed to execute process")
-                    .wait();
+                    let _ = Command::new("cat")
+                        .arg("workspace/tmp.s")
+                        .spawn()
+                        .expect("failed to execute process")
+                        .wait();
 
-                let _ = Command::new("cat")
-                    .arg("workspace/tmp.s")
-                    .spawn()
-                    .expect("failed to execute process")
-                    .wait();
+                    let o = Command::new("workspace/tmp")
+                        .status()
+                        .expect("failed to execute process");
+                    println!("output: {:?}", o.code().unwrap());
+                    continue;
+                }
+                _ => {
+                    let t = match Token::tokenize(&s) {
+                        Ok(t) => t,
+                        Err(e) => {
+                            for e in e.to_owned() {
+                                // e.show_diagnostic(arg1); // FIXME
+                                show_trace(e);
+                            }
+                            std::process::exit(1);
+                        }
+                    };
 
-                let o = Command::new("workspace/tmp")
-                    .status()
-                    .expect("failed to execute process");
-                println!("output: {:?}", o.code().unwrap());
-                continue;
-            }
+                    let mut t = match map(t) {
+                        Ok(t) => t,
+                        Err(e) => {
+                            // e.show_diagnostic(arg1); // FIXME
+                            show_trace(e);
+                            continue;
+                        }
+                    };
+                    let mut _nas = match Program::w_parser(&mut t) {
+                        Ok(nas) => nas,
+                        Err(e) => {
+                            // e.show_diagnostic(arg1); // FIXME
+                            show_trace(e);
+                            continue;
+                        }
+                    };
+                    println!("{:?}", _nas);
 
-            let t = match Token::tokenize(&s) {
-                Ok(t) => t,
-                Err(e) => {
-                    for e in e.to_owned() {
-                        // e.show_diagnostic(arg1); // FIXME
-                        show_trace(e);
+                    let mut _na = vec![];
+                    if fsimplified {
+                        for n in _nas.to_owned().na {
+                            _na.push(n.simplified())
+                        }
+                        println!("after simplified: {:?}", _na);
                     }
-                    std::process::exit(1);
-                }
-            };
 
-            let mut t = match map(t) {
-                Ok(t) => t,
-                Err(e) => {
-                    // e.show_diagnostic(arg1); // FIXME
-                    show_trace(e);
-                    continue;
+                    let mut min = _na.iter();
+                    let _nst = gen_x86_64(min.next().unwrap().to_owned());
                 }
-            };
-            let mut _nas = match Program::w_parser(&mut t) {
-                Ok(nas) => nas,
-                Err(e) => {
-                    // e.show_diagnostic(arg1); // FIXME
-                    show_trace(e);
-                    continue;
-                }
-            };
-            println!("{:?}", _nas);
-
-            let mut _na = vec![];
-            if fsimplified {
-                for n in _nas.to_owned().na {
-                    _na.push(n.simplified())
-                }
-                println!("after simplified: {:?}", _na);
             }
-
-            let mut min = _na.iter();
-            let _nst = gen_x86_64(min.next().unwrap().to_owned());
         }
     } else {
         println!("INPUT: {}", arg1);
