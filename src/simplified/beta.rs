@@ -1,10 +1,11 @@
 use super::super::node::node::*;
+use super::super::node_arr::node_arr::*;
 use super::super::var::var::*;
 use rustc_hash::FxHashMap;
 
-pub fn beta(ns: &mut NodeSt, ev: Vec<Vec<Var>>, uv: &mut Vec<String>) -> NodeSt {
+pub fn beta(ns: &mut NodeSt, a: &mut NodeArr) -> NodeSt {
     let mut map: FxHashMap<String, Var> = FxHashMap::default();
-    vex(ns, ev, uv, &mut map)
+    vex(ns, a, &mut map)
 }
 
 pub fn find_map(s: String, m: &mut FxHashMap<String, Var>) -> Option<Var> {

@@ -1,4 +1,5 @@
 use super::super::node::node::*;
+use super::super::node_arr::node_arr::*;
 use super::super::program::program::*;
 use super::super::simplified::beta::*;
 use rustc_hash::FxHashMap;
@@ -64,17 +65,11 @@ impl Var {
     }
 }
 
-pub fn vex(
-    ns: &mut NodeSt,
-    ev: Vec<Vec<Var>>,
-    uv: &mut Vec<String>,
-    map: &mut FxHashMap<String, Var>,
-) -> NodeSt {
+pub fn vex(ns: &mut NodeSt, a: &mut NodeArr, map: &mut FxHashMap<String, Var>) -> NodeSt {
     if ns.lhs != None {
         let l = Some(Box::new(vex(
             &mut ns.lhs.as_ref().unwrap().to_owned().as_ref().to_owned(),
-            ev.to_owned(),
-            uv,
+            a,
             map,
         )));
         if ns.lhs != l {
@@ -85,8 +80,7 @@ pub fn vex(
     if ns.rhs != None {
         let r = Some(Box::new(vex(
             &mut ns.rhs.as_ref().unwrap().to_owned().as_ref().to_owned(),
-            ev.to_owned(),
-            uv,
+            a,
             map,
         )));
         if ns.rhs != r {
@@ -99,7 +93,7 @@ pub fn vex(
             let n = match find_map(s.to_owned(), map) {
                 Some(v) => v.to_owned(),
                 None => {
-                    let v = Program::find_v(s.to_owned(), ev.to_owned()).unwrap();
+                    let v = Program::find_v(s.to_owned(), a.imm_env_v.to_owned()).unwrap();
                     map.insert(s.to_owned(), v.to_owned());
                     v
                 }
@@ -112,9 +106,9 @@ pub fn vex(
                 ns.c = Node::l_var(n.aln, ns.to_owned().c.loc);
                 _vn = NodeSt::l_var(n.aln, ns.to_owned().c.loc);
             }
-            if uv.contains(&n.to_owned().s.to_owned()) {
+            if a.used_variable.contains(&n.to_owned().s.to_owned()) {
             } else {
-                uv.push(n.s);
+                a.used_variable.push(n.s);
             }
             _vn.lhs = ns.lhs.to_owned();
             _vn.rhs = ns.rhs.to_owned();

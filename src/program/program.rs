@@ -54,8 +54,8 @@ impl Program {
     }
 
     pub fn stp(it: &mut TokenIter) -> Result<Vec<Var>, ParseError> {
+        let mut a = NodeArr::new();
         let mut uv: Vec<String> = vec![];
-        let mut g: Vec<Var> = vec![];
         let mut aln: i32 = 0;
         let mut b = false;
         while it.peek_value() != TokenKind::Fn && b == false {
@@ -76,9 +76,8 @@ impl Program {
                                 };
                             }
                         }
-                        let mut ev = vec![];
-                        ev.push(g.to_owned());
-                        match NodeArr::find_l(_s.to_owned(), g.to_owned()) {
+                        a.set_imm_env();
+                        match NodeArr::find_l(_s.to_owned(), a.l.to_owned()) {
                             Some(mut f) => {
                                 match uv.contains(&f.to_owned().s.to_owned()) {
                                     true => (),
@@ -86,16 +85,16 @@ impl Program {
                                 }
                                 uv.retain(|s| s != &f.to_owned().s.to_owned());
                                 let mut lhs =
-                                    beta(&mut n.to_owned().rhs.unwrap().to_owned(), ev, &mut uv);
+                                    beta(&mut n.to_owned().rhs.unwrap().to_owned(), &mut a);
                                 lhs = lhs.to_owned().simplified();
                                 f.n = lhs;
                                 let ff = f.to_owned();
-                                g.retain(|s| s.s != _s.to_owned());
-                                g.push(ff);
+                                a.l.retain(|s| s.s != _s.to_owned());
+                                a.l.push(ff);
                             }
                             _ => {
                                 let mut lhs =
-                                    beta(&mut n.to_owned().rhs.unwrap().to_owned(), ev, &mut uv);
+                                    beta(&mut n.to_owned().rhs.unwrap().to_owned(), &mut a);
                                 lhs = lhs.to_owned().simplified();
 
                                 match lhs.c.value {
@@ -112,7 +111,7 @@ impl Program {
                                 if v.m {
                                     uv.push(v.to_owned().s);
                                 }
-                                g.push(v);
+                                a.l.push(v);
                             }
                         }
                         continue;
@@ -125,7 +124,7 @@ impl Program {
                 },
             }
         }
-        println!("g: {:?}", g);
-        return Ok(g);
+        println!("a.l (gloval variable): {:?}", a.l);
+        return Ok(a.l);
     }
 }
