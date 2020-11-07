@@ -322,7 +322,7 @@ impl NodeArr {
                                     NodeKind::Num(num) => {
                                         if num == 0 {
                                             if n.to_owned().else_if_stmts != None {
-                                                let (else_if_stmts, _) = NodeSt::statement_parser(
+                                                let (else_if_stmts_a, _) = Self::statement_parser(
                                                     n.to_owned()
                                                         .else_if_stmts
                                                         .unwrap()
@@ -332,33 +332,26 @@ impl NodeArr {
                                                 )?;
 
                                                 if a.end_of_node {
-                                                    a.set_ret_node(
-                                                        else_if_stmts
-                                                            .to_owned()
-                                                            .last()
-                                                            .unwrap()
-                                                            .to_owned(),
-                                                    );
+                                                    a.set_ret_node(else_if_stmts_a.ret_node_st);
                                                 }
                                                 let mut n = n.to_owned();
-                                                n.else_if_stmts = Some(Box::new(else_if_stmts));
+                                                n.else_if_stmts =
+                                                    Some(Box::new(else_if_stmts_a.node_st_vec));
                                                 a.node_st_vec.push(n);
                                             } else {
                                                 continue;
                                             }
                                         } else {
-                                            let (if_stmts, _) = NodeSt::statement_parser(
+                                            let (if_stmts_a, _) = Self::statement_parser(
                                                 n.to_owned().if_stmts.unwrap().as_ref().to_owned(),
                                                 &mut a,
                                             )?;
                                             if a.end_of_node {
-                                                a.set_ret_node(
-                                                    if_stmts.to_owned().last().unwrap().to_owned(),
-                                                );
+                                                a.set_ret_node(if_stmts_a.ret_node_st);
                                             }
 
                                             let mut n = n.to_owned();
-                                            n.if_stmts = Some(Box::new(if_stmts));
+                                            n.if_stmts = Some(Box::new(if_stmts_a.node_st_vec));
                                             a.node_st_vec.push(n);
                                         }
                                     }
@@ -464,23 +457,26 @@ impl NodeArr {
     }
 }
 
-impl NodeSt {
+impl NodeArr {
     pub fn statement_parser(
         vn: Vec<NodeSt>,
-        a: &mut NodeArr,
-    ) -> Result<(Vec<Self>, Vec<String>), ParseError> {
+        p_a: &mut Self,
+    ) -> Result<(Self, Vec<String>), ParseError> {
+        let mut a = Self::new();
+
         let mut min = vn.iter().peekable();
-        let mut nv = vec![];
 
         while min.to_owned().peek() != None {
-            nv.push(match min.to_owned().peek().unwrap().c.value {
+            match min.to_owned().peek().unwrap().c.value {
                 _ => {
-                    let n = beta(&mut min.next().unwrap().to_owned(), a);
-                    n
+                    let n = beta(&mut min.next().unwrap().to_owned(), p_a);
+                    a.node_st_vec.push(n);
                 }
-            });
+            };
         }
 
-        Ok((nv, a.used_variable.to_owned()))
+        a.set_ret_node(a.node_st_vec.last().unwrap().to_owned());
+
+        Ok((a, p_a.used_variable.to_owned()))
     }
 }
