@@ -97,14 +97,10 @@ impl NodeArr {
             }
         };
 
-        if it.p.peek() == None {
-            return Err(ParseError::NotLBrace(it.peek_shadow()));
-        }
-        it.p.next();
-
         let mut ev: Vec<Vec<Var>> = vec![];
         ev.push(g.to_owned());
-        let (mut l, ugv) = Self::stp(&mut it, ev)?;
+
+        let (mut l, ugv) = Self::parse_statement(&mut it, ev)?;
 
         if isi {
             l.ty = RetTy::Int32;
@@ -143,7 +139,7 @@ impl NodeArr {
             it,
         )?;
 
-        let (a, _) = Self::stp(it, ev)?;
+        let (a, ugv) = Self::parse_internal_statement(it, ev)?;
 
         expect_token(
             TokenKind::RBrace,
@@ -151,10 +147,13 @@ impl NodeArr {
             it,
         )?;
 
-        Ok((a, vec![]))
+        Ok((a, ugv))
     }
 
-    pub fn stp(it: &mut TokenIter, ev: Vec<Vec<Var>>) -> Result<(Self, Vec<String>), ParseError> {
+    pub fn parse_internal_statement(
+        it: &mut TokenIter,
+        ev: Vec<Vec<Var>>,
+    ) -> Result<(Self, Vec<String>), ParseError> {
         let mut a = Self::new();
         a.set_env(ev);
         let mut aln: i32 = 0;
