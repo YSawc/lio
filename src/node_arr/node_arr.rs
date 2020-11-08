@@ -1,6 +1,5 @@
 use super::super::node::node::*;
 use super::super::parser::error::*;
-use super::super::parser::parser::*;
 use super::super::program::program::*;
 use super::super::simplified::beta::*;
 use super::super::token::token::*;
@@ -133,18 +132,16 @@ impl NodeArr {
         it: &mut TokenIter,
         ev: Vec<Vec<Var>>,
     ) -> Result<(Self, Vec<String>), ParseError> {
-        expect_token(
+        it.expect_token(
             TokenKind::LBrace,
-            ParseError::NotOpenedStmt(it.p.peek().unwrap().to_owned().to_owned()),
-            it,
+            ParseError::NotOpenedStmt(it.p.to_owned().peek().unwrap().to_owned().to_owned()),
         )?;
 
         let (a, ugv) = Self::parse_internal_statement(it, ev)?;
 
-        expect_token(
+        it.expect_token(
             TokenKind::RBrace,
-            ParseError::NotOpenedStmt(it.p.peek().unwrap().to_owned().to_owned()),
-            it,
+            ParseError::NotOpenedStmt(it.p.to_owned().peek().unwrap().to_owned().to_owned()),
         )?;
 
         Ok((a, ugv))

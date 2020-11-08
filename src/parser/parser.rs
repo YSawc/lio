@@ -74,10 +74,11 @@ impl NodeSt {
                                 it.shadow_p.next().unwrap().to_owned(),
                             ));
                         }
-                        expect_token(
+                        it.expect_token(
                             TokenKind::SemiColon,
-                            ParseError::NotClosedStmt(it.p.peek().unwrap().to_owned().to_owned()),
-                            it,
+                            ParseError::NotClosedStmt(
+                                it.p.to_owned().peek().unwrap().to_owned().to_owned(),
+                            ),
                         )?;
                         return Ok(lhs);
                     }
@@ -87,19 +88,19 @@ impl NodeSt {
                     } => {
                         it.p.next().unwrap();
                         let i = Node::int(loc.to_owned());
-                        let (s, _) = expect_ident(
-                            ParseError::NotIdent(it.p.peek().unwrap().to_owned().to_owned()),
-                            it,
-                        )?;
+                        let (s, _) = it.expect_ident(ParseError::NotIdent(
+                            it.p.to_owned().peek().unwrap().to_owned().to_owned(),
+                        ))?;
                         let l = Self::new_ident(
                             s.to_owned(),
                             it.p.peek().unwrap().to_owned().to_owned(),
                         );
                         let l = Self::new_unary(i, l);
-                        expect_token(
+                        it.expect_token(
                             TokenKind::Assign,
-                            ParseError::NotAssign(it.p.peek().unwrap().to_owned().to_owned()),
-                            it,
+                            ParseError::NotAssign(
+                                it.p.to_owned().peek().unwrap().to_owned().to_owned(),
+                            ),
                         )?;
                         let op = Node::new_assign(loc.to_owned());
                         let r = Self::cmp(it)?;
@@ -109,10 +110,11 @@ impl NodeSt {
                                 it.p.peek().unwrap().to_owned().to_owned(),
                             ));
                         }
-                        expect_token(
+                        it.expect_token(
                             TokenKind::SemiColon,
-                            ParseError::NotClosedStmt(it.p.peek().unwrap().to_owned().to_owned()),
-                            it,
+                            ParseError::NotClosedStmt(
+                                it.p.to_owned().peek().unwrap().to_owned().to_owned(),
+                            ),
                         )?;
                         return Ok(lhs);
                     }
@@ -122,17 +124,19 @@ impl NodeSt {
                     } => {
                         it.p.next().unwrap();
                         let op = Node::mif(loc.to_owned());
-                        expect_token(
+                        it.expect_token(
                             TokenKind::LParen,
-                            ParseError::NotOpenedParen(it.p.peek().unwrap().to_owned().to_owned()),
-                            it,
+                            ParseError::NotOpenedParen(
+                                it.p.to_owned().peek().unwrap().to_owned().to_owned(),
+                            ),
                         )?;
 
                         let cond = Self::cmp(it)?;
-                        expect_token(
+                        it.expect_token(
                             TokenKind::RParen,
-                            ParseError::NotClosedStmt(it.p.peek().unwrap().to_owned().to_owned()),
-                            it,
+                            ParseError::NotClosedStmt(
+                                it.p.to_owned().peek().unwrap().to_owned().to_owned(),
+                            ),
                         )?;
                         let lhs = Self::new_if(op, cond.to_owned());
                         return Ok(lhs);
@@ -151,12 +155,11 @@ impl NodeSt {
                             ));
                         }
 
-                        unexpect_token(
+                        it.unexpect_token(
                             TokenKind::SemiColon,
                             ParseError::UnexpectedUnderScoreOperator(
-                                it.p.peek().unwrap().to_owned().to_owned().loc,
+                                it.p.to_owned().peek().unwrap().to_owned().to_owned().loc,
                             ),
-                            it,
                         )?;
 
                         return Ok(op);
@@ -303,10 +306,11 @@ impl NodeSt {
                 if it.p.peek() == None {
                     return Err(ParseError::Eof);
                 }
-                expect_token(
+                it.expect_token(
                     TokenKind::RParen,
-                    ParseError::NotClosedParen(it.p.peek().unwrap().to_owned().to_owned()),
-                    it,
+                    ParseError::NotClosedParen(
+                        it.p.to_owned().peek().unwrap().to_owned().to_owned(),
+                    ),
                 )?;
                 Ok(rhs)
             }
@@ -354,32 +358,30 @@ impl NodeSt {
     }
 }
 
-fn expect_ident(err: ParseError, it: &mut TokenIter) -> Result<(String, Loc), ParseError> {
-    match it.p.peek().unwrap() {
-        Token {
-            value: TokenKind::Ident(s),
-            ..
-        } => Ok((s.to_string(), it.p.next().unwrap().loc.to_owned())),
-        _ => Err(err),
+impl<'a> TokenIter<'a> {
+    pub fn expect_ident(&mut self, err: ParseError) -> Result<(String, Loc), ParseError> {
+        match self.p.peek().unwrap() {
+            Token {
+                value: TokenKind::Ident(s),
+                ..
+            } => Ok((s.to_string(), self.p.next().unwrap().loc.to_owned())),
+            _ => Err(err),
+        }
     }
-}
 
-pub fn expect_token(ty: TokenKind, err: ParseError, it: &mut TokenIter) -> Result<Loc, ParseError> {
-    if it.p.peek().unwrap().value == ty {
-        Ok(it.p.next().unwrap().loc.to_owned())
-    } else {
-        Err(err)
+    pub fn expect_token(&mut self, ty: TokenKind, err: ParseError) -> Result<Loc, ParseError> {
+        if self.p.peek().unwrap().value == ty {
+            Ok(self.p.next().unwrap().loc.to_owned())
+        } else {
+            Err(err)
+        }
     }
-}
 
-pub fn unexpect_token(
-    ty: TokenKind,
-    err: ParseError,
-    it: &mut TokenIter,
-) -> Result<(), ParseError> {
-    if it.p.peek().unwrap().value == ty {
-        Err(err)
-    } else {
-        Ok(())
+    pub fn unexpect_token(&mut self, ty: TokenKind, err: ParseError) -> Result<(), ParseError> {
+        if self.p.peek().unwrap().value == ty {
+            Err(err)
+        } else {
+            Ok(())
+        }
     }
 }
