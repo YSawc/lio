@@ -158,6 +158,7 @@ assert_llvm 34 'fn int { int _u = 8; int a = 2; 4+2*a*_u-2 }'
 assert_llvm 1 'fn int { int i = 1; if (i) { 0 } else { 0 } i }'
 assert_llvm 0 'fn { if (2 == 3) { 1; 2; } else { 3; 4; } _ }'
 assert_llvm 0 'fn { int i = 9; if (i) { 1; 2; } else { 3*4; 5; } _ }'
+assert_llvm 0 'fn { int i = 9; if (i) { i; 2; } else { 3*4; 5; } _ }'
 
 echo "------------------------------"
 echo "All llvm test passed!\n"

@@ -12,11 +12,10 @@ impl NodeSt {
         }
     }
 
-    pub fn new_if(c: Node, cond: NodeSt, vstmt: Vec<NodeSt>) -> Self {
+    pub fn new_if(c: Node, cond: NodeSt) -> Self {
         Self {
             c,
             cond: Some(Box::new(cond)),
-            if_stmts: Some(Box::new(vstmt)),
             ..Default::default()
         }
     }
@@ -128,62 +127,15 @@ impl NodeSt {
                             ParseError::NotOpenedParen(it.p.peek().unwrap().to_owned().to_owned()),
                             it,
                         )?;
+
                         let cond = Self::cmp(it)?;
                         expect_token(
                             TokenKind::RParen,
                             ParseError::NotClosedStmt(it.p.peek().unwrap().to_owned().to_owned()),
                             it,
                         )?;
-                        expect_token(
-                            TokenKind::LBrace,
-                            ParseError::NotOpenedStmt(it.p.peek().unwrap().to_owned().to_owned()),
-                            it,
-                        )?;
-
-                        let mut if_stmts: Vec<NodeSt> = vec![];
-                        while it.p.peek().unwrap().value != TokenKind::RBrace {
-                            if_stmts.push(Self::stmt(it)?);
-                        }
-
-                        let mut lhs = Self::new_if(op, cond.to_owned(), if_stmts);
-
-                        expect_token(
-                            TokenKind::RBrace,
-                            ParseError::NotClosedStmt(it.p.peek().unwrap().to_owned().to_owned()),
-                            it,
-                        )?;
-                        match it.p.peek().unwrap() {
-                            Token {
-                                value: TokenKind::Else,
-                                ..
-                            } => {
-                                it.p.next().unwrap();
-                                expect_token(
-                                    TokenKind::LBrace,
-                                    ParseError::NotOpenedStmt(
-                                        it.p.peek().unwrap().to_owned().to_owned(),
-                                    ),
-                                    it,
-                                )?;
-
-                                let mut else_if_stmts: Vec<NodeSt> = vec![];
-                                while it.p.peek().unwrap().value != TokenKind::RBrace {
-                                    else_if_stmts.push(Self::stmt(it)?);
-                                }
-
-                                lhs.else_if_stmts = Some(Box::new(else_if_stmts));
-
-                                expect_token(
-                                    TokenKind::RBrace,
-                                    ParseError::NotClosedStmt(
-                                        it.p.peek().unwrap().to_owned().to_owned(),
-                                    ),
-                                    it,
-                                )?;
-                                return Ok(lhs);
-                            }
-                            _ => return Ok(lhs),
-                        }
+                        let lhs = Self::new_if(op, cond.to_owned());
+                        return Ok(lhs);
                     }
                     Token {
                         value: TokenKind::UnderScore,
@@ -412,7 +364,7 @@ fn expect_ident(err: ParseError, it: &mut TokenIter) -> Result<(String, Loc), Pa
     }
 }
 
-fn expect_token(ty: TokenKind, err: ParseError, it: &mut TokenIter) -> Result<Loc, ParseError> {
+pub fn expect_token(ty: TokenKind, err: ParseError, it: &mut TokenIter) -> Result<Loc, ParseError> {
     if it.p.peek().unwrap().value == ty {
         Ok(it.p.next().unwrap().loc.to_owned())
     } else {
@@ -420,7 +372,11 @@ fn expect_token(ty: TokenKind, err: ParseError, it: &mut TokenIter) -> Result<Lo
     }
 }
 
-fn unexpect_token(ty: TokenKind, err: ParseError, it: &mut TokenIter) -> Result<(), ParseError> {
+pub fn unexpect_token(
+    ty: TokenKind,
+    err: ParseError,
+    it: &mut TokenIter,
+) -> Result<(), ParseError> {
     if it.p.peek().unwrap().value == ty {
         Err(err)
     } else {

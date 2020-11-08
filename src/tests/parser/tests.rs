@@ -242,19 +242,19 @@ fn not_opened_else_stmt_test() {
 //     assert!(n)
 // }
 
-#[test]
-fn eof_around_closed_else_stmt_test() {
-    let mut t = Token::tokenize("fn int { if (2 == 3) { 5; } else { 10; }").unwrap();
-    let mut it = TokenIter::new(&mut t);
-    let n = match NodeArr::w_parser(&mut it, vec![]) {
-        Ok(_) => false,
-        Err(e) => match e {
-            ParseError::Eof => true,
-            _ => false,
-        },
-    };
-    assert!(n)
-}
+// #[test]
+// fn eof_around_closed_else_stmt_test() {
+//     let mut t = Token::tokenize("fn int { if (2 == 3) { 5; } else { 10; }").unwrap();
+//     let mut it = TokenIter::new(&mut t);
+//     let n = match NodeArr::w_parser(&mut it, vec![]) {
+//         Ok(_) => false,
+//         Err(e) => match e {
+//             ParseError::Eof => true,
+//             _ => false,
+//         },
+//     };
+//     assert!(n)
+// }
 
 #[test]
 fn unexpected_under_score_operator_test() {

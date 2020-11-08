@@ -1,5 +1,6 @@
 use super::super::node::node::*;
 use super::super::parser::error::*;
+use super::super::parser::parser::*;
 use super::super::program::program::*;
 use super::super::simplified::beta::*;
 use super::super::token::token::*;
@@ -86,12 +87,15 @@ impl NodeArr {
 
         it.next_with_shadow();
 
-        let mut isi: bool = false;
-        if it.peek_value() == TokenKind::Int {
-            it.shadow_p.to_owned().next();
-            it.p.next();
-            isi = true;
-        }
+        let isi = {
+            match it.peek_value() {
+                TokenKind::Int => {
+                    it.next_with_shadow();
+                    true
+                }
+                _ => false,
+            }
+        };
 
         if it.p.peek() == None {
             return Err(ParseError::NotLBrace(it.peek_shadow()));
@@ -144,6 +148,35 @@ impl NodeArr {
                 }
             }
         }
+    }
+
+    pub fn parse_statement(
+        it: &mut TokenIter,
+        ev: Vec<Vec<Var>>,
+    ) -> Result<(Self, Vec<String>), ParseError> {
+        let mut a = Self::new();
+        a.set_env(ev);
+
+        expect_token(
+            TokenKind::LBrace,
+            ParseError::NotOpenedStmt(it.p.peek().unwrap().to_owned().to_owned()),
+            it,
+        )?;
+
+        while it.peek_value() != TokenKind::RBrace {
+            match NodeSt::parser(it)? {
+                n => match n.c.value {
+                    _ => {
+                        a.set_imm_env();
+                        let n = beta(&mut n.to_owned(), &mut a);
+                        a.node_st_vec.push(n.to_owned());
+                    }
+                },
+            }
+        }
+        it.p.next().unwrap();
+
+        Ok((a, vec![]))
     }
 
     pub fn stp(it: &mut TokenIter, ev: Vec<Vec<Var>>) -> Result<(Self, Vec<String>), ParseError> {
@@ -310,6 +343,7 @@ impl NodeArr {
                                 if it.p.peek() == None {
                                     return Err(ParseError::Eof);
                                 }
+
                                 if it.peek_value() == TokenKind::RBrace {
                                     a.set_end_of_node()
                                 }
@@ -317,42 +351,34 @@ impl NodeArr {
                                 a.set_imm_env();
                                 let mut c = beta(&mut n.to_owned().cond.unwrap(), &mut a);
                                 c = c.simplified();
+
+                                let if_stmts_a =
+                                    Self::parse_statement(it, a.imm_env_v.to_owned())?.0;
+
+                                let mut _else_if_stmts: NodeArr = NodeArr::new();
+                                match it.p.peek().unwrap().value {
+                                    TokenKind::Else => {
+                                        it.next();
+                                        _else_if_stmts =
+                                            Self::parse_statement(it, a.imm_env_v.to_owned())?.0;
+                                    }
+                                    _ => (),
+                                };
+
                                 match c.c.value {
                                     NodeKind::Num(num) => {
                                         if num == 0 {
-                                            if n.to_owned().else_if_stmts != None {
-                                                let (else_if_stmts_a, _) = Self::statement_parser(
-                                                    n.to_owned()
-                                                        .else_if_stmts
-                                                        .unwrap()
-                                                        .as_ref()
-                                                        .to_owned(),
-                                                    &mut a,
-                                                )?;
-
-                                                if a.end_of_node {
-                                                    a.set_ret_node(else_if_stmts_a.ret_node_st);
-                                                }
-                                                let mut n = n.to_owned();
-                                                n.else_if_stmts =
-                                                    Some(Box::new(else_if_stmts_a.node_st_vec));
-                                                a.node_st_vec.push(n);
+                                            if _else_if_stmts.node_st_vec != vec![] {
+                                                a.node_st_vec.append(
+                                                    &mut _else_if_stmts.node_st_vec.to_owned(),
+                                                );
                                             } else {
                                                 continue;
                                             }
-                                        } else {
-                                            let (if_stmts_a, _) = Self::statement_parser(
-                                                n.to_owned().if_stmts.unwrap().as_ref().to_owned(),
-                                                &mut a,
-                                            )?;
-                                            if a.end_of_node {
-                                                a.set_ret_node(if_stmts_a.ret_node_st);
-                                            }
-
-                                            let mut n = n.to_owned();
-                                            n.if_stmts = Some(Box::new(if_stmts_a.node_st_vec));
-                                            a.node_st_vec.push(n);
                                         }
+
+                                        a.node_st_vec
+                                            .append(&mut if_stmts_a.node_st_vec.to_owned());
                                     }
                                     _ => {
                                         a.set_imm_env();
@@ -414,12 +440,11 @@ impl NodeArr {
                         a.set_imm_env();
 
                         let n = beta(&mut n.to_owned(), &mut a);
+                        a.node_st_vec.push(n.to_owned());
 
                         if a.end_of_node {
                             a.set_ret_node(n.to_owned());
                         }
-                        // println!("r: {:?}", r);
-                        a.node_st_vec.push(n);
                     }
                 },
                 Err(e) => return Err(e),
@@ -447,29 +472,5 @@ impl NodeArr {
             }
         }
         Ok((a, ugv))
-    }
-}
-
-impl NodeArr {
-    pub fn statement_parser(
-        vn: Vec<NodeSt>,
-        p_a: &mut Self,
-    ) -> Result<(Self, Vec<String>), ParseError> {
-        let mut a = Self::new();
-
-        let mut min = vn.iter().peekable();
-
-        while min.to_owned().peek() != None {
-            match min.to_owned().peek().unwrap().c.value {
-                _ => {
-                    let n = beta(&mut min.next().unwrap().to_owned(), p_a);
-                    a.node_st_vec.push(n);
-                }
-            };
-        }
-
-        a.set_ret_node(a.node_st_vec.last().unwrap().to_owned());
-
-        Ok((a, p_a.used_variable.to_owned()))
     }
 }
