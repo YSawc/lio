@@ -38,6 +38,7 @@ sudo bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"`
   - [x] [local](https://github.com/YSawc/lio/commit/da07a3dc4c1985c2116da6e4e94554c51d51e30c)
   - [x] [not checkes for under score variable](https://github.com/YSawc/lio/commit/0c95ef3d9c57e8578d584aaef5dc42fca986a3c9)
 - [x] [checker for return type](https://github.com/YSawc/lio/commit/cb7864e64982aeb98adda36f606e96cb451b0784)
+- [x] [checker return same types for statements](https://github.com/YSawc/lio/commit/5a23a108d809bf110e7ad18df9791b4fb606fc82)
 - [x] multiple if label [1](https://github.com/YSawc/lio/commit/3b0f2ec7e102c8cea78baa0c24f715f59339632c), [2](https://github.com/YSawc/lio/commit/52bd10a754e341e00d6080c917420807db17ddd8), [3](https://github.com/YSawc/lio/commit/3b0f2ec7e102c8cea78baa0c24f715f59339632c)
 - [ ] multiple error notification
   - [x] [tokenize](https://github.com/YSawc/lio/commit/d09ae5afe26fd3daf1dcddd3dd333224cffe247c)
