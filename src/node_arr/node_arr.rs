@@ -54,7 +54,7 @@ impl NodeArr {
 
     pub fn set_node(&mut self, v: Vec<NodeSt>) {
         self.node_st_vec = v.to_owned();
-        self.ret_node_st = v.to_owned().last().unwrap().to_owned();
+        self.ret_node_st = v.last().unwrap().to_owned();
     }
 
     pub fn set_end_of_node(&mut self) {
@@ -113,37 +113,20 @@ impl NodeArr {
         }
 
         if isi {
-            match l.to_owned().to_owned().ret_node_st.c.value {
-                NodeKind::Num(_)
-                | NodeKind::Add
-                | NodeKind::Sub
-                | NodeKind::Mul
-                | NodeKind::Div
-                | NodeKind::E
-                | NodeKind::NE
-                | NodeKind::L
-                | NodeKind::LE
-                | NodeKind::G
-                | NodeKind::GE
-                | NodeKind::NewAssignG
-                | NodeKind::NewAssignL
-                | NodeKind::NewAssign
-                | NodeKind::Assign
-                | NodeKind::Ident(_)
-                | NodeKind::GVar(_)
-                | NodeKind::LVar(_) => return Ok((l, ugv)),
-                _ => {
+            match NodeSt::isi(l.to_owned().ret_node_st) {
+                true => return Ok((l, ugv)),
+                false => {
                     return Err(ParseError::NotMatchReturnType(
-                        l.to_owned().to_owned().ret_node_st.c.loc,
+                        l.to_owned().ret_node_st.c.loc,
                     ))
                 }
             }
         } else {
-            match l.to_owned().to_owned().ret_node_st.c.value {
+            match l.ret_node_st.c.value {
                 NodeKind::UnderScore => return Ok((l, ugv)),
                 _ => {
                     return Err(ParseError::NotMatchReturnType(
-                        l.to_owned().to_owned().ret_node_st.c.loc,
+                        l.to_owned().ret_node_st.c.loc,
                     ))
                 }
             }
