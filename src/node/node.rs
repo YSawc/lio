@@ -188,4 +188,28 @@ impl NodeSt {
             _ => unimplemented!(),
         }
     }
+
+    pub fn isi(self) -> bool {
+        match self.c.value {
+            NodeKind::Num(_)
+            | NodeKind::Add
+            | NodeKind::Sub
+            | NodeKind::Mul
+            | NodeKind::Div
+            | NodeKind::E
+            | NodeKind::NE
+            | NodeKind::L
+            | NodeKind::LE
+            | NodeKind::G
+            | NodeKind::GE
+            | NodeKind::NewAssignG
+            | NodeKind::NewAssignL
+            | NodeKind::NewAssign
+            | NodeKind::Assign
+            | NodeKind::Ident(_)
+            | NodeKind::GVar(_)
+            | NodeKind::LVar(_) => true,
+            _ => false,
+        }
+    }
 }

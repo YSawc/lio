@@ -111,6 +111,12 @@ impl fmt::Display for ParseError {
                 "{}: Expected under socre as void return, but used as operator.",
                 loc
             ),
+            ParseError::NotMatchTypeAnotherOneOfStatement(loc) => write!(
+                f,
+                "{}: Expected match return type of each statement but not match.",
+                loc
+            ),
+
             ParseError::Eof => write!(f, "Expected token, but not detected."),
         }
     }

@@ -269,3 +269,64 @@ fn unexpected_under_score_operator_test() {
     };
     assert!(n)
 }
+
+#[test]
+fn type_match_another_one_of_statement_1_test() {
+    let mut t = Token::tokenize("fn { int i = 9; if (i) { i; _ } else { 3*4; _ } _ }").unwrap();
+    let mut it = TokenIter::new(&mut t);
+    let n = match NodeArr::w_parser(&mut it, vec![]) {
+        Ok(_) => true,
+        Err(_) => false,
+    };
+    assert!(n)
+}
+
+// #[test]
+// fn type_match_another_one_of_statement_2_test() {
+//     let mut t = Token::tokenize("fn { int i = 9; if (i) { i; 0; } else { 3*4; _ } _ }").unwrap();
+//     let mut it = TokenIter::new(&mut t);
+//     let n = match NodeArr::w_parser(&mut it, vec![]) {
+//         Ok(_) => true,
+//         Err(_) => false
+//     };
+//     assert!(n)
+// }
+
+#[test]
+fn type_match_another_one_of_statement_3_test() {
+    let mut t = Token::tokenize("fn { int i = 9; if (i) { i; 0 } else { 3*4; 3 } _ }").unwrap();
+    let mut it = TokenIter::new(&mut t);
+    let n = match NodeArr::w_parser(&mut it, vec![]) {
+        Ok(_) => true,
+        Err(_) => false,
+    };
+    assert!(n)
+}
+
+#[test]
+fn type_not_match_another_one_of_statement_1_test() {
+    let mut t = Token::tokenize("fn { int i = 9; if (i) { i; _ } else { 3*4; 2; } _ }").unwrap();
+    let mut it = TokenIter::new(&mut t);
+    let n = match NodeArr::w_parser(&mut it, vec![]) {
+        Ok(_) => false,
+        Err(e) => match e {
+            ParseError::NotMatchTypeAnotherOneOfStatement(_) => true,
+            _ => false,
+        },
+    };
+    assert!(n)
+}
+
+// #[test]
+// fn type_not_match_another_one_of_statement_2_test() {
+//     let mut t = Token::tokenize("fn { int i = 9; if (i) { i; 0 } else { 3*4; 2; } _ }").unwrap();
+//     let mut it = TokenIter::new(&mut t);
+//     let n = match NodeArr::w_parser(&mut it, vec![]) {
+//         Ok(_) => false,
+//         Err(e) => match e {
+//             ParseError::NotMatchTypeAnotherOneOfStatement(_) => true,
+//             _ => false,
+//         },
+//     };
+//     assert!(n)
+// }

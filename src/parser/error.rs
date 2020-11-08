@@ -22,6 +22,7 @@ pub enum ParseError {
     UnusedVariable(Loc),
     NotMatchReturnType(Loc),
     UnexpectedUnderScoreOperator(Loc),
+    NotMatchTypeAnotherOneOfStatement(Loc),
     // UnexpectedToken(Token),
     // NotExpression(Token),
     // UnclosedOpenParen(Token),

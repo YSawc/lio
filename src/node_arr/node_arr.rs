@@ -154,27 +154,19 @@ impl NodeArr {
         it: &mut TokenIter,
         ev: Vec<Vec<Var>>,
     ) -> Result<(Self, Vec<String>), ParseError> {
-        let mut a = Self::new();
-        a.set_env(ev);
-
         expect_token(
             TokenKind::LBrace,
             ParseError::NotOpenedStmt(it.p.peek().unwrap().to_owned().to_owned()),
             it,
         )?;
 
-        while it.peek_value() != TokenKind::RBrace {
-            match NodeSt::parser(it)? {
-                n => match n.c.value {
-                    _ => {
-                        a.set_imm_env();
-                        let n = beta(&mut n.to_owned(), &mut a);
-                        a.node_st_vec.push(n.to_owned());
-                    }
-                },
-            }
-        }
-        it.p.next().unwrap();
+        let (a, _) = Self::stp(it, ev)?;
+
+        expect_token(
+            TokenKind::RBrace,
+            ParseError::NotOpenedStmt(it.p.peek().unwrap().to_owned().to_owned()),
+            it,
+        )?;
 
         Ok((a, vec![]))
     }
@@ -352,8 +344,7 @@ impl NodeArr {
                                 let mut c = beta(&mut n.to_owned().cond.unwrap(), &mut a);
                                 c = c.simplified();
 
-                                let if_stmts_a =
-                                    Self::parse_statement(it, a.imm_env_v.to_owned())?.0;
+                                let if_stmts = Self::parse_statement(it, a.imm_env_v.to_owned())?.0;
 
                                 let mut _else_if_stmts: NodeArr = NodeArr::new();
                                 match it.p.peek().unwrap().value {
@@ -364,6 +355,15 @@ impl NodeArr {
                                     }
                                     _ => (),
                                 };
+
+                                let if_stmts_isi = NodeSt::isi(if_stmts.ret_node_st);
+                                let else_if_stmts_isi = NodeSt::isi(_else_if_stmts.ret_node_st);
+
+                                if if_stmts_isi != else_if_stmts_isi {
+                                    return Err(ParseError::NotMatchTypeAnotherOneOfStatement(
+                                        it.p.peek().unwrap().loc.to_owned(),
+                                    ));
+                                }
 
                                 match c.c.value {
                                     NodeKind::Num(num) => {
@@ -377,8 +377,7 @@ impl NodeArr {
                                             }
                                         }
 
-                                        a.node_st_vec
-                                            .append(&mut if_stmts_a.node_st_vec.to_owned());
+                                        a.node_st_vec.append(&mut if_stmts.node_st_vec.to_owned());
                                     }
                                     _ => {
                                         a.set_imm_env();
