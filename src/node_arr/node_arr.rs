@@ -301,9 +301,8 @@ impl NodeArr {
                                         }
 
                                         let n = match v.gf {
-                                            1 => NodeSt::g_var(s, n.c.loc),
-                                            0 => NodeSt::l_var(v.aln, n.c.loc),
-                                            _ => unreachable!(),
+                                            true => NodeSt::g_var(s, n.c.loc),
+                                            false => NodeSt::l_var(v.aln, n.c.loc),
                                         };
                                         a.node_st_vec.push(n);
                                     }
@@ -390,11 +389,10 @@ impl NodeArr {
                                                         }
 
                                                         let mut n = match v.gf {
-                                                            1 => {
+                                                            true => {
                                                                 NodeSt::g_var(s, n.to_owned().c.loc)
                                                             }
-                                                            0 => NodeSt::l_var(v.aln, n.c.loc),
-                                                            _ => unreachable!(),
+                                                            false => NodeSt::l_var(v.aln, n.c.loc),
                                                         };
                                                         n.cond = Some(Box::new(n.to_owned()));
                                                         a.node_st_vec.push(n);

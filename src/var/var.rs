@@ -10,7 +10,7 @@ pub struct Var {
     pub n: NodeSt,
     pub m: bool,
     pub aln: i32,
-    pub gf: i8,
+    pub gf: bool,
 }
 
 impl Var {
@@ -20,7 +20,7 @@ impl Var {
             n,
             m: false,
             aln,
-            gf: 0,
+            gf: false,
         }
     }
 
@@ -30,7 +30,7 @@ impl Var {
             n,
             m: false,
             aln,
-            gf: 1,
+            gf: true,
         }
     }
 
@@ -40,7 +40,7 @@ impl Var {
             n: NodeSt::default(),
             m: false,
             aln: 0,
-            gf: 0,
+            gf: false,
         }
     }
 
@@ -50,7 +50,7 @@ impl Var {
             n,
             m: true,
             aln,
-            gf: 1,
+            gf: true,
         }
     }
 
@@ -60,7 +60,7 @@ impl Var {
             n,
             m: true,
             aln,
-            gf: 0,
+            gf: false,
         }
     }
 }
@@ -99,15 +99,14 @@ pub fn vex(ns: &mut NodeSt, a: &mut NodeArr, map: &mut FxHashMap<String, Var>) -
                 }
             };
             let mut vn = match n.gf {
-                1 => {
+                true => {
                     ns.c = Node::g_var(s.to_owned(), ns.to_owned().c.loc);
                     NodeSt::g_var(s, ns.to_owned().c.loc)
                 }
-                0 => {
+                false => {
                     ns.c = Node::l_var(n.aln, ns.to_owned().c.loc);
                     NodeSt::l_var(n.aln, ns.to_owned().c.loc)
                 }
-                _ => unreachable!(),
             };
 
             if !a.used_variable.contains(&n.to_owned().s.to_owned()) {
