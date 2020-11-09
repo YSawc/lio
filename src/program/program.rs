@@ -83,7 +83,7 @@ impl Program {
                                 }
                                 a.used_variable.retain(|s| s != &f.to_owned().s.to_owned());
                                 let mut lhs =
-                                    beta(&mut n.to_owned().rhs.unwrap().to_owned(), &mut a);
+                                    beta(&mut n.to_owned().rhs.unwrap().to_owned(), &mut a)?;
                                 lhs = lhs.to_owned().simplified();
                                 f.n = lhs;
                                 let ff = f.to_owned();
@@ -92,7 +92,7 @@ impl Program {
                             }
                             _ => {
                                 let mut lhs =
-                                    beta(&mut n.to_owned().rhs.unwrap().to_owned(), &mut a);
+                                    beta(&mut n.to_owned().rhs.unwrap().to_owned(), &mut a)?;
                                 lhs = lhs.to_owned().simplified();
 
                                 match lhs.c.value {

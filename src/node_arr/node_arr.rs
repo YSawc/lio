@@ -161,7 +161,6 @@ impl NodeArr {
                     | NodeKind::NewAssign
                     | NodeKind::Assign
                     | NodeKind::UnderScore
-                    | NodeKind::Ident(_)
                     | NodeKind::If => {
                         // println!("n.c.value: {:?}", n.c.value);
                         match n.c.value {
@@ -172,7 +171,7 @@ impl NodeArr {
 
                                 a.set_end_of_node();
                                 a.set_imm_env();
-                                let r = beta(&mut n.to_owned().lhs.unwrap().to_owned(), &mut a);
+                                let r = beta(&mut n.to_owned().lhs.unwrap().to_owned(), &mut a)?;
                                 a.set_ret_node(r.to_owned());
                                 a.node_st_vec.push(r.to_owned());
                             }
@@ -197,8 +196,10 @@ impl NodeArr {
                                             }
                                         }
                                         a.used_variable.retain(|s| s != &f.to_owned().s.to_owned());
-                                        let mut lhs =
-                                            beta(&mut n.to_owned().rhs.unwrap().to_owned(), &mut a);
+                                        let mut lhs = beta(
+                                            &mut n.to_owned().rhs.unwrap().to_owned(),
+                                            &mut a,
+                                        )?;
                                         lhs = lhs.simplified();
 
                                         let v = match _s.as_bytes()[0] {
@@ -214,8 +215,10 @@ impl NodeArr {
                                         a.node_st_vec.push(avar);
                                     }
                                     None => {
-                                        let mut lhs =
-                                            beta(&mut n.to_owned().rhs.unwrap().to_owned(), &mut a);
+                                        let mut lhs = beta(
+                                            &mut n.to_owned().rhs.unwrap().to_owned(),
+                                            &mut a,
+                                        )?;
                                         lhs = lhs.simplified();
                                         aln += 1;
                                         let v = match _s.as_bytes()[0] {
@@ -254,8 +257,10 @@ impl NodeArr {
                                                 return Err(ParseError::UnusedVariable(f.n.c.loc))
                                             }
                                         }
-                                        let mut lhs =
-                                            beta(&mut n.to_owned().rhs.unwrap().to_owned(), &mut a);
+                                        let mut lhs = beta(
+                                            &mut n.to_owned().rhs.unwrap().to_owned(),
+                                            &mut a,
+                                        )?;
                                         lhs = lhs.simplified();
                                         f.n = n.to_owned();
                                         let ff = f.to_owned();
@@ -287,39 +292,6 @@ impl NodeArr {
                                 a.set_ret_node(n.to_owned());
                                 a.node_st_vec.push(n);
                             }
-                            NodeKind::Ident(s) => {
-                                a.set_imm_env();
-                                match Program::find_v(s.to_owned(), a.imm_env_v.to_owned()) {
-                                    Some(mut v) => {
-                                        if !a.used_variable.contains(&v.to_owned().s.to_owned()) {
-                                            a.used_variable.push(v.to_owned().s.to_owned());
-                                            v.aln = aln;
-                                            aln += 1;
-                                        }
-
-                                        let n = match v.gf {
-                                            true => NodeSt::g_var(s, n.c.loc),
-                                            false => NodeSt::l_var(v.aln, n.c.loc),
-                                        };
-                                        a.node_st_vec.push(n.to_owned());
-
-                                        match it.check_evaluate_type() {
-                                            true => {
-                                                a.set_end_of_node();
-                                                a.set_ret_node(n.to_owned());
-                                            }
-                                            false => match it.check_evaluate_void() {
-                                                true => {
-                                                    a.set_end_of_node();
-                                                    a.set_ret_node(NodeSt::default());
-                                                }
-                                                false => (),
-                                            },
-                                        }
-                                    }
-                                    None => return Err(ParseError::NotDefinitionVar(it.next())),
-                                }
-                            }
                             NodeKind::If => {
                                 if it.p.peek() == None {
                                     return Err(ParseError::Eof);
@@ -330,7 +302,7 @@ impl NodeArr {
                                 }
 
                                 a.set_imm_env();
-                                let mut c = beta(&mut n.to_owned().cond.unwrap(), &mut a);
+                                let mut c = beta(&mut n.to_owned().cond.unwrap(), &mut a)?;
                                 c = c.simplified();
 
                                 let if_stmts = Self::parse_statement(it, a.imm_env_v.to_owned())?.0;
@@ -370,7 +342,7 @@ impl NodeArr {
                                     }
                                     _ => {
                                         a.set_imm_env();
-                                        let n = beta(&mut n.to_owned(), &mut a);
+                                        let n = beta(&mut n.to_owned(), &mut a)?;
                                         match n.to_owned().cond.unwrap().c.value {
                                             NodeKind::Ident(s) => {
                                                 a.set_imm_env();
@@ -421,7 +393,7 @@ impl NodeArr {
                     }
                     _ => {
                         a.set_imm_env();
-                        let n = beta(&mut n.to_owned(), &mut a);
+                        let n = beta(&mut n.to_owned(), &mut a)?;
                         a.node_st_vec.push(n.to_owned());
 
                         match it.check_evaluate_type() {

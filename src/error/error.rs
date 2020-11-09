@@ -72,11 +72,11 @@ impl Error {
                     | ParseError::OperatorAfterRetrun(loc, ..)
                     | ParseError::NotIdent(loc, ..)
                     | ParseError::NotAssign(loc, ..)
-                    | ParseError::NotDefinitionVar(loc, ..)
                     | ParseError::NotLBrace(loc, ..)
                     | ParseError::NotRBrace(loc, ..)
                     | ParseError::OperatorOutOfFnction(loc, ..) => loc.loc.clone(),
-                    ParseError::NotACompileTimeConstant(loc)
+                    ParseError::NotDefinitionVar(loc)
+                    | ParseError::NotACompileTimeConstant(loc)
                     | ParseError::UndefinedVariable(loc)
                     | ParseError::UnusedVariable(loc)
                     | ParseError::NotMatchReturnType(loc)

@@ -84,11 +84,6 @@ impl fmt::Display for ParseError {
             ParseError::NotAssign(tok) => {
                 write!(f, "{}: Expected assign but got {}.", tok.loc, tok.value)
             }
-            ParseError::NotDefinitionVar(tok) => write!(
-                f,
-                "{}: Expected definition var but not detected. Failed ident is {}",
-                tok.loc, tok.value
-            ),
             ParseError::NotLBrace(tok) => {
                 write!(f, "{}: Expected LBrace but god {}", tok.loc, tok.value)
             }
@@ -100,6 +95,9 @@ impl fmt::Display for ParseError {
                 "{}: Expected operator inner function but god {}",
                 tok.loc, tok.value
             ),
+            ParseError::NotDefinitionVar(loc) => {
+                write!(f, "{}: Expected definition var but not detected.", loc)
+            }
             ParseError::NotACompileTimeConstant(loc) => {
                 write!(f, "{}: Not a compile time constant!", loc)
             }

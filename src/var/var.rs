@@ -1,5 +1,6 @@
 use super::super::node::node::*;
 use super::super::node_arr::node_arr::*;
+use super::super::parser::error::*;
 use super::super::program::program::*;
 use super::super::simplified::beta::*;
 use rustc_hash::FxHashMap;
@@ -65,13 +66,17 @@ impl Var {
     }
 }
 
-pub fn vex(ns: &mut NodeSt, a: &mut NodeArr, map: &mut FxHashMap<String, Var>) -> NodeSt {
+pub fn vex(
+    ns: &mut NodeSt,
+    a: &mut NodeArr,
+    map: &mut FxHashMap<String, Var>,
+) -> Result<NodeSt, ParseError> {
     if ns.lhs != None {
         let l = Some(Box::new(vex(
             &mut ns.lhs.as_ref().unwrap().to_owned().as_ref().to_owned(),
             a,
             map,
-        )));
+        )?));
         if ns.lhs != l {
             ns.lhs = l;
         };
@@ -82,7 +87,7 @@ pub fn vex(ns: &mut NodeSt, a: &mut NodeArr, map: &mut FxHashMap<String, Var>) -
             &mut ns.rhs.as_ref().unwrap().to_owned().as_ref().to_owned(),
             a,
             map,
-        )));
+        )?));
         if ns.rhs != r {
             ns.rhs = r;
         };
@@ -93,7 +98,10 @@ pub fn vex(ns: &mut NodeSt, a: &mut NodeArr, map: &mut FxHashMap<String, Var>) -
             let n = match find_map(s.to_owned(), map) {
                 Some(v) => v.to_owned(),
                 None => {
-                    let v = Program::find_v(s.to_owned(), a.imm_env_v.to_owned()).unwrap();
+                    let v = match Program::find_v(s.to_owned(), a.imm_env_v.to_owned()) {
+                        Some(v) => v,
+                        None => return Err(ParseError::NotDefinitionVar(ns.c.loc.to_owned())),
+                    };
                     map.insert(s.to_owned(), v.to_owned());
                     v
                 }
@@ -115,8 +123,8 @@ pub fn vex(ns: &mut NodeSt, a: &mut NodeArr, map: &mut FxHashMap<String, Var>) -
 
             vn.lhs = ns.lhs.to_owned();
             vn.rhs = ns.rhs.to_owned();
-            return ns.to_owned();
+            return Ok(ns.to_owned());
         }
-        _ => return ns.to_owned(),
+        _ => return Ok(ns.to_owned()),
     };
 }
