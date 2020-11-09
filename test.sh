@@ -76,6 +76,7 @@ assert_llvm 0 'fn { int i = 9; if (i) { 1; 2; } else { 3*4; 5; } _ }'
 assert_llvm 0 'fn { int i = 9; if (i) { i; 2 } else { 3*4; 5 } _ }'
 assert_llvm 0 'fn { int i = 9; if (i) { i; _ } else { 3*4; _ } _ }'
 assert_llvm 0 'fn { int i = 9; if (i) { i; 2; _ } else { 3*4; _ } _ }'
+assert_llvm 0 'fn { int i = 9; if (i) { i; 2; 3; } else { 3*4; _ } _ }'
 
 echo "------------------------------"
 echo "All llvm test passed!\n"
