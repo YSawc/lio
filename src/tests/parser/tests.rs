@@ -200,19 +200,19 @@ fn not_opened_stmt_test() {
     assert!(n)
 }
 
-// #[test]
-// fn not_closed_if_stmt_test() {
-//     let t = Token::tokenize("fn int { if (2 == 3) { 5; else { 10; } }").unwrap();
-//     let mut t = t.iter().peekable();
-//     let n = match NodeArr::w_parser(&mut t, vec![]) {
-//         Ok(_) => false,
-//         Err(e) => match e {
-//             ParseError::Eof => true,
-//             _ => false,
-//         },
-//     };
-//     assert!(n)
-// }
+#[test]
+fn parse_not_number_in_if_statement_test() {
+    let mut t = Token::tokenize("fn int { if (2 == 3) { 5; else { 10; } }").unwrap();
+    let mut it = TokenIter::new(&mut t);
+    let n = match NodeArr::w_parser(&mut it, vec![]) {
+        Ok(_) => false,
+        Err(e) => match e {
+            ParseError::NotNumber(_) => true,
+            _ => false,
+        },
+    };
+    assert!(n)
+}
 
 #[test]
 fn not_opened_else_stmt_test() {
@@ -230,9 +230,9 @@ fn not_opened_else_stmt_test() {
 
 // #[test]
 // fn not_closed_else_stmt_test() {
-//     let t = Token::tokenize("fn int { if (2 == 3) { 5; } else { 10;  0}").unwrap();
-//     let mut t = t.iter().peekable();
-//     let n = match NodeArr::w_parser(&mut t, vec![]) {
+//     let mut t = Token::tokenize("fn int { if (2 == 3) { 5; } else { 10;  0}").unwrap();
+//     let mut it = TokenIter::new(&mut t);
+//     let n = match NodeArr::w_parser(&mut it, vec![]) {
 //         Ok(_) => false,
 //         Err(e) => match e {
 //             ParseError::NotClosedStmt(_) => true,
@@ -311,6 +311,34 @@ fn type_not_match_another_one_of_statement_1_test() {
         Ok(_) => false,
         Err(e) => match e {
             ParseError::NotMatchTypeAnotherOneOfStatement(_) => true,
+            _ => false,
+        },
+    };
+    assert!(n)
+}
+
+#[test]
+fn checker_for_not_definition_variable_in_single_evaluation_value_test() {
+    let mut t = Token::tokenize("fn int { int aa = 9; b }").unwrap();
+    let mut it = TokenIter::new(&mut t);
+    let n = match NodeArr::w_parser(&mut it, vec![]) {
+        Ok(_) => false,
+        Err(e) => match e {
+            ParseError::NotDefinitionVar(_) => true,
+            _ => false,
+        },
+    };
+    assert!(n)
+}
+
+#[test]
+fn checker_for_not_definition_variable_in_multiple_evaluation_values_test() {
+    let mut t = Token::tokenize("fn int{ int aa = 9; b*3 }").unwrap();
+    let mut it = TokenIter::new(&mut t);
+    let n = match NodeArr::w_parser(&mut it, vec![]) {
+        Ok(_) => false,
+        Err(e) => match e {
+            ParseError::NotDefinitionVar(_) => true,
             _ => false,
         },
     };
