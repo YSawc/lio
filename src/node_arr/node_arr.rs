@@ -260,8 +260,26 @@ impl NodeArr {
                                         let ff = f.to_owned();
                                         a.l.retain(|s| s.s != _s.to_owned());
                                         a.l.push(ff);
-                                        let rvar = NodeSt::r_var(f.to_owned().aln, lhs, n.c.loc);
+                                        let rvar = NodeSt::r_var(
+                                            f.to_owned().aln,
+                                            lhs,
+                                            n.c.loc.to_owned(),
+                                        );
                                         a.node_st_vec.push(rvar);
+
+                                        match it.check_evaluate_type() {
+                                            true => {
+                                                a.set_end_of_node();
+                                                a.set_ret_node(n.to_owned());
+                                            }
+                                            false => match it.check_evaluate_void() {
+                                                true => {
+                                                    a.set_end_of_node();
+                                                    a.set_ret_node(NodeSt::default());
+                                                }
+                                                false => (),
+                                            },
+                                        }
                                     }
                                     _ => {
                                         return Err(ParseError::UndefinedVariable(
@@ -286,25 +304,31 @@ impl NodeArr {
                                 a.set_imm_env();
                                 match Program::find_v(s.to_owned(), a.imm_env_v.to_owned()) {
                                     Some(mut v) => {
-                                        if it.peek_value() == TokenKind::RBrace {
-                                            a.set_end_of_node();
-                                        }
-
                                         if !a.used_variable.contains(&v.to_owned().s.to_owned()) {
                                             a.used_variable.push(v.to_owned().s.to_owned());
                                             v.aln = aln;
                                             aln += 1;
                                         }
 
-                                        if a.end_of_node {
-                                            a.set_ret_node(v.to_owned().n.to_owned());
-                                        }
-
                                         let n = match v.gf {
                                             true => NodeSt::g_var(s, n.c.loc),
                                             false => NodeSt::l_var(v.aln, n.c.loc),
                                         };
-                                        a.node_st_vec.push(n);
+                                        a.node_st_vec.push(n.to_owned());
+
+                                        match it.check_evaluate_type() {
+                                            true => {
+                                                a.set_end_of_node();
+                                                a.set_ret_node(n.to_owned());
+                                            }
+                                            false => match it.check_evaluate_void() {
+                                                true => {
+                                                    a.set_end_of_node();
+                                                    a.set_ret_node(NodeSt::default());
+                                                }
+                                                false => (),
+                                            },
+                                        }
                                     }
                                     None => return Err(ParseError::NotDefinitionVar(it.next())),
                                 }
@@ -409,17 +433,22 @@ impl NodeArr {
                         }
                     }
                     _ => {
-                        if it.peek_value() == TokenKind::RBrace {
-                            a.set_end_of_node()
-                        }
-
                         a.set_imm_env();
-
                         let n = beta(&mut n.to_owned(), &mut a);
                         a.node_st_vec.push(n.to_owned());
 
-                        if a.end_of_node {
-                            a.set_ret_node(n.to_owned());
+                        match it.check_evaluate_type() {
+                            true => {
+                                a.set_end_of_node();
+                                a.set_ret_node(n.to_owned());
+                            }
+                            false => match it.check_evaluate_void() {
+                                true => {
+                                    a.set_end_of_node();
+                                    a.set_ret_node(NodeSt::default());
+                                }
+                                false => (),
+                            },
                         }
                     }
                 },

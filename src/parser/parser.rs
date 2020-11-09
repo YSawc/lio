@@ -174,11 +174,8 @@ impl NodeSt {
                         Token {
                             value: TokenKind::SemiColon,
                             ..
-                        } => {
-                            it.p.next();
-                            return Ok(lhs);
                         }
-                        Token {
+                        | Token {
                             value: TokenKind::RBrace,
                             ..
                         } => {
@@ -382,6 +379,27 @@ impl<'a> TokenIter<'a> {
             Err(err)
         } else {
             Ok(())
+        }
+    }
+
+    pub fn check_evaluate_type(&mut self) -> bool {
+        match self.peek_value() {
+            TokenKind::RBrace => true,
+            _ => false,
+        }
+    }
+
+    pub fn check_evaluate_void(&mut self) -> bool {
+        match self.peek_value() {
+            TokenKind::SemiColon => {
+                self.next_with_shadow();
+                if self.peek_value() == TokenKind::RBrace {
+                    return true;
+                }
+                false
+            }
+            TokenKind::RBrace => true,
+            _ => false,
         }
     }
 }

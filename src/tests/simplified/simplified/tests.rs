@@ -9,7 +9,7 @@ use super::super::super::super::token::token::*;
 
 #[test]
 fn simplified_test() {
-    let mut t = Token::tokenize("fn int { 2*(2-1)+5; }").unwrap();
+    let mut t = Token::tokenize("fn int { 2*(2-1)+5 }").unwrap();
     let mut it = TokenIter::new(&mut t);
     let n = NodeArr::w_parser(&mut it, vec![]).unwrap().0;
     let n = n.simplified().ret_node_st;
@@ -19,7 +19,7 @@ fn simplified_test() {
 
 #[test]
 fn simplified_with_minus_test() {
-    let mut t = Token::tokenize("fn int { 2*(2-4)+5; }").unwrap();
+    let mut t = Token::tokenize("fn int { 2*(2-4)+5 }").unwrap();
     let mut it = TokenIter::new(&mut t);
     let n = NodeArr::w_parser(&mut it, vec![]).unwrap().0;
     let n = n.simplified().ret_node_st;
@@ -29,7 +29,7 @@ fn simplified_with_minus_test() {
 
 #[test]
 fn simplified_with_variable_test() {
-    let mut t = Token::tokenize("fn int { int a = 1; 2*3-a; }").unwrap();
+    let mut t = Token::tokenize("fn int { int a = 1; 2*3-a }").unwrap();
     let mut it = TokenIter::new(&mut t);
     let n = NodeArr::w_parser(&mut it, vec![]).unwrap().0;
     let n = n.simplified().ret_node_st;

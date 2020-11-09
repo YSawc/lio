@@ -311,4 +311,8 @@ impl<'a> TokenIter<'a> {
     pub fn peek_shadow(&mut self) -> Token {
         self.shadow_p.peek().unwrap().to_owned().to_owned()
     }
+
+    pub fn back_to_shadow(&mut self) {
+        self.p = self.shadow_p.to_owned();
+    }
 }

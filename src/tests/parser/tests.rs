@@ -11,7 +11,7 @@ use super::super::super::token::token::*;
 
 #[test]
 fn parser_test() {
-    let mut t = Token::tokenize("fn int { 12+3; }").unwrap();
+    let mut t = Token::tokenize("fn int { 12+3 }").unwrap();
     let mut it = TokenIter::new(&mut t);
     let n = NodeArr::w_parser(&mut it, vec![]).unwrap().0.ret_node_st;
     let e = {
@@ -281,16 +281,16 @@ fn type_match_another_one_of_statement_1_test() {
     assert!(n)
 }
 
-// #[test]
-// fn type_match_another_one_of_statement_2_test() {
-//     let mut t = Token::tokenize("fn { int i = 9; if (i) { i; 0; } else { 3*4; _ } _ }").unwrap();
-//     let mut it = TokenIter::new(&mut t);
-//     let n = match NodeArr::w_parser(&mut it, vec![]) {
-//         Ok(_) => true,
-//         Err(_) => false
-//     };
-//     assert!(n)
-// }
+#[test]
+fn type_match_another_one_of_statement_2_test() {
+    let mut t = Token::tokenize("fn { int i = 9; if (i) { i; 0; } else { 3*4; _ } _ }").unwrap();
+    let mut it = TokenIter::new(&mut t);
+    let n = match NodeArr::w_parser(&mut it, vec![]) {
+        Ok(_) => true,
+        Err(_) => false,
+    };
+    assert!(n)
+}
 
 #[test]
 fn type_match_another_one_of_statement_3_test() {
@@ -305,7 +305,7 @@ fn type_match_another_one_of_statement_3_test() {
 
 #[test]
 fn type_not_match_another_one_of_statement_1_test() {
-    let mut t = Token::tokenize("fn { int i = 9; if (i) { i; _ } else { 3*4; 2; } _ }").unwrap();
+    let mut t = Token::tokenize("fn { int i = 9; if (i) { i; 0 } else { 3*4; 2; } _ }").unwrap();
     let mut it = TokenIter::new(&mut t);
     let n = match NodeArr::w_parser(&mut it, vec![]) {
         Ok(_) => false,
@@ -316,17 +316,3 @@ fn type_not_match_another_one_of_statement_1_test() {
     };
     assert!(n)
 }
-
-// #[test]
-// fn type_not_match_another_one_of_statement_2_test() {
-//     let mut t = Token::tokenize("fn { int i = 9; if (i) { i; 0 } else { 3*4; 2; } _ }").unwrap();
-//     let mut it = TokenIter::new(&mut t);
-//     let n = match NodeArr::w_parser(&mut it, vec![]) {
-//         Ok(_) => false,
-//         Err(e) => match e {
-//             ParseError::NotMatchTypeAnotherOneOfStatement(_) => true,
-//             _ => false,
-//         },
-//     };
-//     assert!(n)
-// }
