@@ -163,6 +163,7 @@ impl NodeArr {
                     | NodeKind::UnderScore
                     | NodeKind::Ident(_)
                     | NodeKind::If => {
+                        // println!("n.c.value: {:?}", n.c.value);
                         match n.c.value {
                             NodeKind::Return => {
                                 if it.peek_value() != TokenKind::RBrace {
@@ -266,20 +267,6 @@ impl NodeArr {
                                             n.c.loc.to_owned(),
                                         );
                                         a.node_st_vec.push(rvar);
-
-                                        match it.check_evaluate_type() {
-                                            true => {
-                                                a.set_end_of_node();
-                                                a.set_ret_node(n.to_owned());
-                                            }
-                                            false => match it.check_evaluate_void() {
-                                                true => {
-                                                    a.set_end_of_node();
-                                                    a.set_ret_node(NodeSt::default());
-                                                }
-                                                false => (),
-                                            },
-                                        }
                                     }
                                     _ => {
                                         return Err(ParseError::UndefinedVariable(

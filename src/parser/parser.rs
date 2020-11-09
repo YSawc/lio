@@ -167,25 +167,7 @@ impl NodeSt {
                     _ => unreachable!(),
                 }
             }
-            _ => {
-                let lhs = Self::cmp(it)?;
-                match it.p.peek().unwrap().value {
-                    TokenKind::SemiColon | TokenKind::RBrace => match it.p.peek().unwrap() {
-                        Token {
-                            value: TokenKind::SemiColon,
-                            ..
-                        }
-                        | Token {
-                            value: TokenKind::RBrace,
-                            ..
-                        } => {
-                            return Ok(lhs);
-                        }
-                        _ => unreachable!(),
-                    },
-                    _ => return Err(ParseError::NotClosedStmt(it.p.next().unwrap().to_owned())),
-                }
-            }
+            _ => return Self::cmp(it),
         }
     }
 
@@ -335,10 +317,17 @@ impl NodeSt {
                         value: TokenKind::Assign,
                         loc,
                     } => {
-                        it.p.next().unwrap();
+                        it.p.next();
                         let op = Node::assign(loc.to_owned());
                         let rhs = Self::expr(it)?;
                         let lhs = Self::new_nds(op, lhs, rhs);
+
+                        it.expect_token(
+                            TokenKind::SemiColon,
+                            ParseError::NotClosedParen(
+                                it.p.to_owned().peek().unwrap().to_owned().to_owned(),
+                            ),
+                        )?;
                         return Ok(lhs);
                     }
                     _ => {
