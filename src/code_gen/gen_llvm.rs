@@ -164,10 +164,10 @@ impl Femitter {
                 self.emitter(f, ns.to_owned().cond.unwrap().as_ref().to_owned());
                 write!(f, "  %{} = icmp ne i32 %{}, 0\n", self.rc, self.rc - 1).unwrap();
 
-                let if_stmts: Vec<NodeSt> = *ns.to_owned().if_stmts.to_owned().unwrap();
-                let mut iif_stmts = if_stmts.iter().peekable();
-                let else_if_stmts: Vec<NodeSt> = *ns.to_owned().else_if_stmts.to_owned().unwrap();
-                let mut ielse_if_stmts = else_if_stmts.iter().peekable();
+                let if_stmts: NodeArr = *ns.to_owned().if_stmts.to_owned().unwrap();
+                let mut iif_stmts = if_stmts.node_st_vec.iter().peekable();
+                let else_if_stmts: NodeArr = *ns.to_owned().else_if_stmts.to_owned().unwrap();
+                let mut ielse_if_stmts = else_if_stmts.node_st_vec.iter().peekable();
 
                 while iif_stmts.peek() != None {
                     self.calc_label(iif_stmts.next().unwrap().to_owned())
@@ -186,7 +186,7 @@ impl Femitter {
                 write!(f, "\n{}:\n", self.rc + 1).unwrap();
                 self.rc += 2;
 
-                let mut iif_stmts = if_stmts.iter().peekable();
+                let mut iif_stmts = if_stmts.node_st_vec.iter().peekable();
                 while iif_stmts.peek() != None {
                     self.emitter(f, iif_stmts.next().unwrap().to_owned())
                 }
@@ -201,7 +201,7 @@ impl Femitter {
                 write!(f, "  br label %{}", melse_stmt_lah).unwrap();
                 write!(f, "\n{}:\n", stmt_lah).unwrap();
 
-                let mut ielse_if_stmts = else_if_stmts.iter().peekable();
+                let mut ielse_if_stmts = else_if_stmts.node_st_vec.iter().peekable();
                 while ielse_if_stmts.peek() != None {
                     self.emitter(f, ielse_if_stmts.next().unwrap().to_owned())
                 }

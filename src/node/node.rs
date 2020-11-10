@@ -1,4 +1,5 @@
 use super::super::location::location::*;
+use super::super::node_arr::node_arr::*;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum NodeKind {
@@ -49,8 +50,8 @@ pub struct NodeSt {
     pub lhs: Option<Box<NodeSt>>,
     pub rhs: Option<Box<NodeSt>>,
     pub cond: Option<Box<NodeSt>>,
-    pub if_stmts: Option<Box<Vec<NodeSt>>>,
-    pub else_if_stmts: Option<Box<Vec<NodeSt>>>,
+    pub if_stmts: Option<Box<NodeArr>>,
+    pub else_if_stmts: Option<Box<NodeArr>>,
 }
 
 impl Node {

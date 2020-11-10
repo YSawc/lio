@@ -302,8 +302,6 @@ impl NodeArr {
                                 }
 
                                 a.set_imm_env();
-                                let mut c = beta(&mut n.to_owned().cond.unwrap(), &mut a)?;
-                                c = c.simplified();
 
                                 let if_stmts = Self::parse_statement(it, a.imm_env_v.to_owned())?.0;
 
@@ -317,8 +315,9 @@ impl NodeArr {
                                     _ => (),
                                 };
 
-                                let if_stmts_isi = NodeSt::isi(if_stmts.ret_node_st);
-                                let else_if_stmts_isi = NodeSt::isi(_else_if_stmts.ret_node_st);
+                                let if_stmts_isi = NodeSt::isi(if_stmts.ret_node_st.to_owned());
+                                let else_if_stmts_isi =
+                                    NodeSt::isi(_else_if_stmts.ret_node_st.to_owned());
 
                                 if if_stmts_isi != else_if_stmts_isi {
                                     return Err(ParseError::NotMatchTypeAnotherOneOfStatement(
@@ -326,64 +325,95 @@ impl NodeArr {
                                     ));
                                 }
 
-                                match c.c.value {
-                                    NodeKind::Num(num) => {
-                                        if num == 0 {
-                                            if _else_if_stmts.node_st_vec != vec![] {
-                                                a.node_st_vec.append(
-                                                    &mut _else_if_stmts.node_st_vec.to_owned(),
-                                                );
-                                            } else {
-                                                continue;
-                                            }
-                                        }
-
-                                        a.node_st_vec.append(&mut if_stmts.node_st_vec.to_owned());
+                                use std::env;
+                                let args: Vec<String> = env::args().collect();
+                                let mut calc_if_label = false;
+                                if args.len() > 3 {
+                                    if args[3] == "calc_if_label" {
+                                        calc_if_label = true;
                                     }
-                                    _ => {
-                                        a.set_imm_env();
-                                        let n = beta(&mut n.to_owned(), &mut a)?;
-                                        match n.to_owned().cond.unwrap().c.value {
-                                            NodeKind::Ident(s) => {
+                                }
+
+                                match calc_if_label {
+                                    false => {
+                                        let mut n = n.to_owned();
+                                        n.if_stmts = Some(Box::new(if_stmts.to_owned()));
+                                        n.else_if_stmts = Some(Box::new(_else_if_stmts.to_owned()));
+                                        a.node_st_vec.push(n);
+                                    }
+                                    true => {
+                                        let mut c = beta(&mut n.to_owned().cond.unwrap(), &mut a)?;
+                                        c = c.simplified();
+
+                                        match c.c.value {
+                                            NodeKind::Num(num) => {
+                                                if num == 0 {
+                                                    if _else_if_stmts.node_st_vec != vec![] {
+                                                        a.node_st_vec.append(
+                                                            &mut _else_if_stmts
+                                                                .node_st_vec
+                                                                .to_owned(),
+                                                        );
+                                                    } else {
+                                                        continue;
+                                                    }
+                                                }
+
+                                                a.node_st_vec
+                                                    .append(&mut if_stmts.node_st_vec.to_owned());
+                                            }
+                                            _ => {
                                                 a.set_imm_env();
-                                                match Program::find_v(
-                                                    s.to_owned(),
-                                                    a.imm_env_v.to_owned(),
-                                                ) {
-                                                    Some(mut v) => {
-                                                        if it.peek_value() == TokenKind::RBrace {
-                                                            a.set_end_of_node()
-                                                        }
+                                                let n = beta(&mut n.to_owned(), &mut a)?;
+                                                match n.to_owned().cond.unwrap().c.value {
+                                                    NodeKind::Ident(s) => {
+                                                        a.set_imm_env();
+                                                        match Program::find_v(
+                                                            s.to_owned(),
+                                                            a.imm_env_v.to_owned(),
+                                                        ) {
+                                                            Some(mut v) => {
+                                                                if it.peek_value()
+                                                                    == TokenKind::RBrace
+                                                                {
+                                                                    a.set_end_of_node()
+                                                                }
 
-                                                        if !a
-                                                            .used_variable
-                                                            .contains(&v.to_owned().s.to_owned())
-                                                        {
-                                                            a.used_variable
-                                                                .push(v.to_owned().s.to_owned());
-                                                            v.aln = aln;
-                                                            aln += 1;
-                                                        }
+                                                                if !a.used_variable.contains(
+                                                                    &v.to_owned().s.to_owned(),
+                                                                ) {
+                                                                    a.used_variable.push(
+                                                                        v.to_owned().s.to_owned(),
+                                                                    );
+                                                                    v.aln = aln;
+                                                                    aln += 1;
+                                                                }
 
-                                                        if a.end_of_node {
-                                                            a.set_ret_node(
-                                                                v.to_owned().n.to_owned(),
-                                                            );
-                                                        }
+                                                                if a.end_of_node {
+                                                                    a.set_ret_node(
+                                                                        v.to_owned().n.to_owned(),
+                                                                    );
+                                                                }
 
-                                                        let mut n = match v.gf {
-                                                            true => {
-                                                                NodeSt::g_var(s, n.to_owned().c.loc)
+                                                                let mut n = match v.gf {
+                                                                    true => NodeSt::g_var(
+                                                                        s,
+                                                                        n.to_owned().c.loc,
+                                                                    ),
+                                                                    false => NodeSt::l_var(
+                                                                        v.aln, n.c.loc,
+                                                                    ),
+                                                                };
+                                                                n.cond =
+                                                                    Some(Box::new(n.to_owned()));
+                                                                a.node_st_vec.push(n);
                                                             }
-                                                            false => NodeSt::l_var(v.aln, n.c.loc),
-                                                        };
-                                                        n.cond = Some(Box::new(n.to_owned()));
-                                                        a.node_st_vec.push(n);
+                                                            _ => unimplemented!(),
+                                                        }
                                                     }
                                                     _ => unimplemented!(),
                                                 }
                                             }
-                                            _ => unimplemented!(),
                                         }
                                     }
                                 }
