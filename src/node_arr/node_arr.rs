@@ -325,6 +325,9 @@ impl NodeArr {
                                     ));
                                 }
 
+                                a.set_imm_env();
+                                let mut c = beta(&mut n.cond.to_owned().unwrap(), &mut a)?;
+
                                 use std::env;
                                 let args: Vec<String> = env::args().collect();
                                 let mut calc_if_label = false;
@@ -339,12 +342,11 @@ impl NodeArr {
                                         let mut n = n.to_owned();
                                         n.if_stmts = Some(Box::new(if_stmts.to_owned()));
                                         n.else_if_stmts = Some(Box::new(_else_if_stmts.to_owned()));
+                                        n.cond = Some(Box::new(c));
                                         a.node_st_vec.push(n);
                                     }
                                     true => {
-                                        let mut c = beta(&mut n.to_owned().cond.unwrap(), &mut a)?;
                                         c = c.simplified();
-
                                         match c.c.value {
                                             NodeKind::Num(num) => {
                                                 if num == 0 {
@@ -411,7 +413,16 @@ impl NodeArr {
                                                             _ => unimplemented!(),
                                                         }
                                                     }
-                                                    _ => unimplemented!(),
+                                                    _ => {
+                                                        let mut n = n.to_owned();
+                                                        n.if_stmts =
+                                                            Some(Box::new(if_stmts.to_owned()));
+                                                        n.else_if_stmts = Some(Box::new(
+                                                            _else_if_stmts.to_owned(),
+                                                        ));
+                                                        n.cond = Some(Box::new(c));
+                                                        a.node_st_vec.push(n);
+                                                    }
                                                 }
                                             }
                                         }

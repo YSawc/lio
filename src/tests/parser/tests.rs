@@ -272,7 +272,7 @@ fn unexpected_under_score_operator_test() {
 
 #[test]
 fn type_match_another_one_of_statement_1_test() {
-    let mut t = Token::tokenize("fn { int _i = 9; if (0) { _i; _ } else { 3*4; _ } _ }").unwrap();
+    let mut t = Token::tokenize("fn { int i = 9; if (i) { i; _ } else { 3*4; _ } _ }").unwrap();
     let mut it = TokenIter::new(&mut t);
     let n = match NodeArr::w_parser(&mut it, vec![]) {
         Ok(_) => true,
@@ -283,7 +283,7 @@ fn type_match_another_one_of_statement_1_test() {
 
 #[test]
 fn type_match_another_one_of_statement_2_test() {
-    let mut t = Token::tokenize("fn { int _i = 9; if (1) { _i; 0; } else { 3*4; _ } _ }").unwrap();
+    let mut t = Token::tokenize("fn { int i = 9; if (i) { 2; 0; } else { 3*4; _ } _ }").unwrap();
     let mut it = TokenIter::new(&mut t);
     let n = match NodeArr::w_parser(&mut it, vec![]) {
         Ok(_) => true,
@@ -294,7 +294,7 @@ fn type_match_another_one_of_statement_2_test() {
 
 #[test]
 fn type_match_another_one_of_statement_3_test() {
-    let mut t = Token::tokenize("fn { int _i = 9; if (1<2) { _i; 0 } else { 3*4; 3 } _ }").unwrap();
+    let mut t = Token::tokenize("fn { int i = 9; if (i) { i; 0 } else { 3*4; 3 } _ }").unwrap();
     let mut it = TokenIter::new(&mut t);
     let n = match NodeArr::w_parser(&mut it, vec![]) {
         Ok(_) => true,
