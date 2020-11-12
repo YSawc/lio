@@ -196,44 +196,25 @@ impl NodeArr {
                                             }
                                         }
                                         a.used_variable.retain(|s| s != &f.to_owned().s.to_owned());
-                                        let mut lhs = beta(
-                                            &mut n.to_owned().rhs.unwrap().to_owned(),
-                                            &mut a,
-                                        )?;
-                                        lhs = lhs.simplified();
-
-                                        let v = match _s.as_bytes()[0] {
-                                            b'_' => Var::mnew(_s, n.to_owned(), aln),
-                                            _ => Var::new_l(_s, n.to_owned(), aln),
-                                        };
-                                        if v.to_owned().m {
-                                            a.used_variable.push(v.to_owned().s);
-                                        }
-                                        a.l.push(v.to_owned());
-
-                                        let avar = NodeSt::ass_var(v.to_owned().aln, lhs, n.c.loc);
-                                        a.node_st_vec.push(avar);
                                     }
                                     None => {
-                                        let mut lhs = beta(
-                                            &mut n.to_owned().rhs.unwrap().to_owned(),
-                                            &mut a,
-                                        )?;
-                                        lhs = lhs.simplified();
                                         aln += 1;
-                                        let v = match _s.as_bytes()[0] {
-                                            b'_' => Var::mnew(_s, n.to_owned(), aln),
-                                            _ => Var::new_l(_s, n.to_owned(), aln),
-                                        };
-                                        if v.to_owned().m {
-                                            a.used_variable.push(v.to_owned().s);
-                                        }
-                                        a.l.push(v.to_owned());
-
-                                        let avar = NodeSt::ass_var(v.to_owned().aln, lhs, n.c.loc);
-                                        a.node_st_vec.push(avar);
                                     }
                                 }
+                                let mut lhs =
+                                    beta(&mut n.to_owned().rhs.unwrap().to_owned(), &mut a)?;
+                                lhs = lhs.simplified();
+                                let v = match _s.as_bytes()[0] {
+                                    b'_' => Var::mnew(_s, n.to_owned(), aln),
+                                    _ => Var::new_l(_s, n.to_owned(), aln),
+                                };
+                                if v.to_owned().m {
+                                    a.used_variable.push(v.to_owned().s);
+                                }
+                                a.l.push(v.to_owned());
+
+                                let avar = NodeSt::ass_var(v.to_owned().aln, lhs, n.c.loc);
+                                a.node_st_vec.push(avar);
                             }
                             NodeKind::Assign => {
                                 let mut _s = String::new();
