@@ -297,10 +297,6 @@ impl NodeArr {
                                     return Err(ParseError::Eof);
                                 }
 
-                                if it.peek_value() == TokenKind::RBrace {
-                                    a.set_end_of_node()
-                                }
-
                                 a.set_imm_env();
 
                                 let if_stmts = Self::parse_statement(it, a.imm_env_v.to_owned())?.0;
@@ -323,6 +319,10 @@ impl NodeArr {
                                     return Err(ParseError::NotMatchTypeAnotherOneOfStatement(
                                         it.p.peek().unwrap().loc.to_owned(),
                                     ));
+                                }
+
+                                if it.peek_value() == TokenKind::RBrace {
+                                    a.set_end_of_node()
                                 }
 
                                 a.set_imm_env();
@@ -366,64 +366,13 @@ impl NodeArr {
                                             }
                                             _ => {
                                                 a.set_imm_env();
-                                                let n = beta(&mut n.to_owned(), &mut a)?;
-                                                match n.to_owned().cond.unwrap().c.value {
-                                                    NodeKind::Ident(s) => {
-                                                        a.set_imm_env();
-                                                        match Program::find_v(
-                                                            s.to_owned(),
-                                                            a.imm_env_v.to_owned(),
-                                                        ) {
-                                                            Some(mut v) => {
-                                                                if it.peek_value()
-                                                                    == TokenKind::RBrace
-                                                                {
-                                                                    a.set_end_of_node()
-                                                                }
+                                                let mut n = beta(&mut n.to_owned(), &mut a)?;
 
-                                                                if !a.used_variable.contains(
-                                                                    &v.to_owned().s.to_owned(),
-                                                                ) {
-                                                                    a.used_variable.push(
-                                                                        v.to_owned().s.to_owned(),
-                                                                    );
-                                                                    v.aln = aln;
-                                                                    aln += 1;
-                                                                }
-
-                                                                if a.end_of_node {
-                                                                    a.set_ret_node(
-                                                                        v.to_owned().n.to_owned(),
-                                                                    );
-                                                                }
-
-                                                                let mut n = match v.gf {
-                                                                    true => NodeSt::g_var(
-                                                                        s,
-                                                                        n.to_owned().c.loc,
-                                                                    ),
-                                                                    false => NodeSt::l_var(
-                                                                        v.aln, n.c.loc,
-                                                                    ),
-                                                                };
-                                                                n.cond =
-                                                                    Some(Box::new(n.to_owned()));
-                                                                a.node_st_vec.push(n);
-                                                            }
-                                                            _ => unimplemented!(),
-                                                        }
-                                                    }
-                                                    _ => {
-                                                        let mut n = n.to_owned();
-                                                        n.if_stmts =
-                                                            Some(Box::new(if_stmts.to_owned()));
-                                                        n.else_if_stmts = Some(Box::new(
-                                                            _else_if_stmts.to_owned(),
-                                                        ));
-                                                        n.cond = Some(Box::new(c));
-                                                        a.node_st_vec.push(n);
-                                                    }
-                                                }
+                                                n.if_stmts = Some(Box::new(if_stmts.to_owned()));
+                                                n.else_if_stmts =
+                                                    Some(Box::new(_else_if_stmts.to_owned()));
+                                                n.cond = Some(Box::new(c));
+                                                a.node_st_vec.push(n);
                                             }
                                         }
                                     }
