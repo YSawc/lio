@@ -114,7 +114,9 @@ impl fmt::Display for ParseError {
                 "{}: Expected match return type of each statement but not match.",
                 loc
             ),
-
+            ParseError::NotImmediate(loc) => {
+                write!(f, "{}: Expected immediate statement but not match.", loc)
+            }
             ParseError::Eof => write!(f, "Expected token, but not detected."),
         }
     }

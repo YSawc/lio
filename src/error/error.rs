@@ -81,7 +81,8 @@ impl Error {
                     | ParseError::UnusedVariable(loc)
                     | ParseError::NotMatchReturnType(loc)
                     | ParseError::UnexpectedUnderScoreOperator(loc)
-                    | ParseError::NotMatchTypeAnotherOneOfStatement(loc) => loc.clone(),
+                    | ParseError::NotMatchTypeAnotherOneOfStatement(loc)
+                    | ParseError::NotImmediate(loc) => loc.clone(),
                     ParseError::Eof => Loc::new(input.len() as u8, input.len() as u8 + 1),
                 };
                 (e, loc)

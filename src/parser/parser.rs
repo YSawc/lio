@@ -103,19 +103,7 @@ impl NodeSt {
                             ),
                         )?;
                         let op = Node::new_assign(loc.to_owned());
-                        let r = Self::cmp(it)?;
-                        let lhs = Self::new_nds(op, l, r);
-                        if it.p.peek() == None {
-                            return Err(ParseError::NotClosedStmt(
-                                it.p.peek().unwrap().to_owned().to_owned(),
-                            ));
-                        }
-                        it.expect_token(
-                            TokenKind::SemiColon,
-                            ParseError::NotClosedStmt(
-                                it.p.to_owned().peek().unwrap().to_owned().to_owned(),
-                            ),
-                        )?;
+                        let lhs = Self::new_unary(op, l);
                         return Ok(lhs);
                     }
                     Token {

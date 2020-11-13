@@ -72,6 +72,10 @@ impl NodeArr {
     pub fn set_ret_node(&mut self, v: NodeSt) {
         self.ret_node_st = v;
     }
+
+    pub fn pop_node(&mut self) -> NodeSt {
+        self.node_st_vec.pop().unwrap()
+    }
 }
 
 impl NodeArr {
@@ -201,9 +205,12 @@ impl NodeArr {
                                         aln += 1;
                                     }
                                 }
-                                let mut lhs =
-                                    beta(&mut n.to_owned().rhs.unwrap().to_owned(), &mut a)?;
-                                lhs = lhs.simplified();
+
+                                a.set_imm_env();
+                                let mut rhs = NodeSt::parse_close_imm(it)?;
+                                let mut rhs = beta(&mut rhs, &mut a)?;
+                                rhs = rhs.simplified();
+
                                 let v = match _s.as_bytes()[0] {
                                     b'_' => Var::mnew(_s, n.to_owned(), aln),
                                     _ => Var::new_l(_s, n.to_owned(), aln),
@@ -213,7 +220,7 @@ impl NodeArr {
                                 }
                                 a.l.push(v.to_owned());
 
-                                let avar = NodeSt::ass_var(v.to_owned().aln, lhs, n.c.loc);
+                                let avar = NodeSt::ass_var(v.to_owned().aln, rhs, n.c.loc);
                                 a.node_st_vec.push(avar);
                             }
                             NodeKind::Assign => {
@@ -407,5 +414,33 @@ impl NodeArr {
             }
         }
         Ok((a, ugv))
+    }
+}
+
+impl NodeSt {
+    pub fn parse_imm(it: &mut TokenIter) -> Result<Self, ParseError> {
+        match NodeSt::parser(it) {
+            Ok(n) => match n.c.value {
+                NodeKind::Return
+                | NodeKind::NewAssign
+                | NodeKind::Assign
+                | NodeKind::UnderScore
+                | NodeKind::If => Err(ParseError::NotImmediate(
+                    it.shadow_p.peek().unwrap().loc.to_owned(),
+                )),
+                _ => Ok(n),
+            },
+            Err(e) => return Err(e),
+        }
+    }
+
+    pub fn parse_close_imm(it: &mut TokenIter) -> Result<Self, ParseError> {
+        let n = Self::parse_imm(it)?;
+        it.expect_token(
+            TokenKind::SemiColon,
+            ParseError::NotClosedStmt(it.p.to_owned().peek().unwrap().to_owned().to_owned()),
+        )?;
+
+        Ok(n)
     }
 }

@@ -82,29 +82,31 @@ impl Program {
                                     false => return Err(ParseError::UnusedVariable(f.n.c.loc)),
                                 }
                                 a.used_variable.retain(|s| s != &f.to_owned().s.to_owned());
-                                let mut lhs =
-                                    beta(&mut n.to_owned().rhs.unwrap().to_owned(), &mut a)?;
-                                lhs = lhs.to_owned().simplified();
-                                f.n = lhs;
+
+                                let mut rhs = NodeSt::parse_close_imm(it)?;
+                                let mut rhs = beta(&mut rhs, &mut a)?;
+                                rhs = rhs.simplified();
+
+                                f.n = rhs;
                                 let ff = f.to_owned();
                                 a.l.retain(|s| s.s != _s.to_owned());
                                 a.l.push(ff);
                             }
                             _ => {
-                                let mut lhs =
-                                    beta(&mut n.to_owned().rhs.unwrap().to_owned(), &mut a)?;
-                                lhs = lhs.to_owned().simplified();
+                                let mut rhs = NodeSt::parse_close_imm(it)?;
+                                let mut rhs = beta(&mut rhs, &mut a)?;
+                                rhs = rhs.simplified();
 
-                                match lhs.c.value {
+                                match rhs.c.value {
                                     NodeKind::Num(_) => (),
                                     _ => {
-                                        return Err(ParseError::NotACompileTimeConstant(lhs.c.loc))
+                                        return Err(ParseError::NotACompileTimeConstant(rhs.c.loc))
                                     }
                                 }
                                 aln += 1;
                                 let v = match _s.as_bytes()[0] {
-                                    b'_' => Var::gmnew(_s, lhs, aln),
-                                    _ => Var::new_g(_s, lhs, aln),
+                                    b'_' => Var::gmnew(_s, rhs, aln),
+                                    _ => Var::new_g(_s, rhs, aln),
                                 };
                                 if v.m {
                                     a.used_variable.push(v.to_owned().s);
