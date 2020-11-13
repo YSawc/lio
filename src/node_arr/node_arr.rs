@@ -207,7 +207,7 @@ impl NodeArr {
                                 }
 
                                 a.set_imm_env();
-                                let mut rhs = NodeSt::parse_close_imm(it)?;
+                                let mut rhs = a.parse_close_imm(it)?;
                                 let mut rhs = beta(&mut rhs, &mut a)?;
                                 rhs = rhs.simplified();
 
@@ -246,7 +246,7 @@ impl NodeArr {
                                             }
                                         }
                                         a.set_imm_env();
-                                        let mut rhs = NodeSt::parse_close_imm(it)?;
+                                        let mut rhs = a.parse_close_imm(it)?;
                                         let mut rhs = beta(&mut rhs, &mut a)?;
                                         rhs = rhs.simplified();
 
@@ -281,90 +281,7 @@ impl NodeArr {
                                 a.node_st_vec.push(n);
                             }
                             NodeKind::If => {
-                                if it.p.peek() == None {
-                                    return Err(ParseError::Eof);
-                                }
-
-                                a.set_imm_env();
-
-                                let if_stmts = Self::parse_statement(it, a.imm_env_v.to_owned())?.0;
-
-                                let mut _else_if_stmts: NodeArr = NodeArr::new();
-                                match it.p.peek().unwrap().value {
-                                    TokenKind::Else => {
-                                        it.next();
-                                        _else_if_stmts =
-                                            Self::parse_statement(it, a.imm_env_v.to_owned())?.0;
-                                    }
-                                    _ => (),
-                                };
-
-                                let if_stmts_isi = NodeSt::isi(if_stmts.ret_node_st.to_owned());
-                                let else_if_stmts_isi =
-                                    NodeSt::isi(_else_if_stmts.ret_node_st.to_owned());
-
-                                if if_stmts_isi != else_if_stmts_isi {
-                                    return Err(ParseError::NotMatchTypeAnotherOneOfStatement(
-                                        it.p.peek().unwrap().loc.to_owned(),
-                                    ));
-                                }
-
-                                if it.peek_value() == TokenKind::RBrace {
-                                    a.set_end_of_node()
-                                }
-
-                                a.set_imm_env();
-                                let mut c = beta(&mut n.cond.to_owned().unwrap(), &mut a)?;
-
-                                use std::env;
-                                let args: Vec<String> = env::args().collect();
-                                let mut calc_if_label = false;
-                                if args.len() > 3 {
-                                    if args[3] == "calc_if_label" {
-                                        calc_if_label = true;
-                                    }
-                                }
-
-                                match calc_if_label {
-                                    false => {
-                                        let mut n = n.to_owned();
-                                        n.if_stmts = Some(Box::new(if_stmts.to_owned()));
-                                        n.else_if_stmts = Some(Box::new(_else_if_stmts.to_owned()));
-                                        n.cond = Some(Box::new(c));
-                                        a.node_st_vec.push(n);
-                                    }
-                                    true => {
-                                        c = c.simplified();
-                                        match c.c.value {
-                                            NodeKind::Num(num) => {
-                                                if num == 0 {
-                                                    if _else_if_stmts.node_st_vec != vec![] {
-                                                        a.node_st_vec.append(
-                                                            &mut _else_if_stmts
-                                                                .node_st_vec
-                                                                .to_owned(),
-                                                        );
-                                                    } else {
-                                                        continue;
-                                                    }
-                                                }
-
-                                                a.node_st_vec
-                                                    .append(&mut if_stmts.node_st_vec.to_owned());
-                                            }
-                                            _ => {
-                                                a.set_imm_env();
-                                                let mut n = beta(&mut n.to_owned(), &mut a)?;
-
-                                                n.if_stmts = Some(Box::new(if_stmts.to_owned()));
-                                                n.else_if_stmts =
-                                                    Some(Box::new(_else_if_stmts.to_owned()));
-                                                n.cond = Some(Box::new(c));
-                                                a.node_st_vec.push(n);
-                                            }
-                                        }
-                                    }
-                                }
+                                a.parse_if(it, n)?;
                             }
                             _ => unreachable!(),
                         }
@@ -417,30 +334,134 @@ impl NodeArr {
     }
 }
 
-impl NodeSt {
-    pub fn parse_imm(it: &mut TokenIter) -> Result<Self, ParseError> {
+impl NodeArr {
+    pub fn parse_if(&mut self, it: &mut TokenIter, n: NodeSt) -> Result<(), ParseError> {
+        if it.p.peek() == None {
+            return Err(ParseError::Eof);
+        }
+
+        self.set_imm_env();
+
+        let if_stmts = Self::parse_statement(it, self.imm_env_v.to_owned())?.0;
+
+        let mut _else_if_stmts: NodeArr = NodeArr::new();
+        match it.p.peek().unwrap().value {
+            TokenKind::Else => {
+                it.next();
+                _else_if_stmts = Self::parse_statement(it, self.imm_env_v.to_owned())?.0;
+            }
+            _ => (),
+        };
+
+        let if_stmts_isi = NodeSt::isi(if_stmts.ret_node_st.to_owned());
+        let else_if_stmts_isi = NodeSt::isi(_else_if_stmts.ret_node_st.to_owned());
+
+        if if_stmts_isi != else_if_stmts_isi {
+            return Err(ParseError::NotMatchTypeAnotherOneOfStatement(
+                it.p.peek().unwrap().loc.to_owned(),
+            ));
+        }
+
+        if it.peek_value() == TokenKind::RBrace {
+            self.set_end_of_node()
+        }
+
+        self.set_imm_env();
+        let mut c = beta(&mut n.cond.to_owned().unwrap(), self)?;
+
+        use std::env;
+        let args: Vec<String> = env::args().collect();
+        let mut calc_if_label = false;
+        if args.len() > 3 {
+            if args[3] == "calc_if_label" {
+                calc_if_label = true;
+            }
+        }
+
+        match calc_if_label {
+            false => {
+                let mut n = n.to_owned();
+                n.if_stmts = Some(Box::new(if_stmts.to_owned()));
+                n.else_if_stmts = Some(Box::new(_else_if_stmts.to_owned()));
+                n.cond = Some(Box::new(c));
+                self.node_st_vec.push(n);
+                Ok(())
+            }
+            true => {
+                c = c.simplified();
+                match c.c.value {
+                    NodeKind::Num(num) => {
+                        if num == 0 {
+                            if _else_if_stmts.node_st_vec != vec![] {
+                                self.node_st_vec
+                                    .append(&mut _else_if_stmts.node_st_vec.to_owned());
+                            } else {
+                                return Ok(());
+                            }
+                        }
+
+                        self.node_st_vec
+                            .append(&mut if_stmts.node_st_vec.to_owned());
+                        Ok(())
+                    }
+                    _ => {
+                        self.set_imm_env();
+                        let mut n = beta(&mut n.to_owned(), self)?;
+
+                        n.if_stmts = Some(Box::new(if_stmts.to_owned()));
+                        n.else_if_stmts = Some(Box::new(_else_if_stmts.to_owned()));
+                        n.cond = Some(Box::new(c));
+                        self.node_st_vec.push(n);
+                        Ok(())
+                    }
+                }
+            }
+        }
+    }
+}
+
+impl NodeArr {
+    pub fn parse_imm(&mut self, it: &mut TokenIter) -> Result<NodeSt, ParseError> {
         match NodeSt::parser(it) {
             Ok(n) => match n.c.value {
                 NodeKind::Return
                 | NodeKind::NewAssign
                 | NodeKind::Assign
-                | NodeKind::UnderScore
-                | NodeKind::If => Err(ParseError::NotImmediate(
+                | NodeKind::UnderScore => Err(ParseError::NotImmediate(
                     it.shadow_p.peek().unwrap().loc.to_owned(),
                 )),
-                _ => Ok(n),
+                NodeKind::If => {
+                    self.parse_if(it, n.to_owned())?;
+                    match NodeSt::isi(
+                        self.node_st_vec
+                            .last()
+                            .unwrap()
+                            .if_stmts
+                            .to_owned()
+                            .unwrap()
+                            .ret_node_st,
+                    ) {
+                        true => Ok(n),
+                        false => Err(ParseError::NotImmediate(
+                            it.shadow_p.peek().unwrap().loc.to_owned(),
+                        )),
+                    }
+                }
+                _ => {
+                    it.expect_token(
+                        TokenKind::SemiColon,
+                        ParseError::NotClosedStmt(
+                            it.p.to_owned().peek().unwrap().to_owned().to_owned(),
+                        ),
+                    )?;
+                    Ok(n)
+                }
             },
             Err(e) => return Err(e),
         }
     }
 
-    pub fn parse_close_imm(it: &mut TokenIter) -> Result<Self, ParseError> {
-        let n = Self::parse_imm(it)?;
-        it.expect_token(
-            TokenKind::SemiColon,
-            ParseError::NotClosedStmt(it.p.to_owned().peek().unwrap().to_owned().to_owned()),
-        )?;
-
-        Ok(n)
+    pub fn parse_close_imm(&mut self, it: &mut TokenIter) -> Result<NodeSt, ParseError> {
+        Ok(self.parse_imm(it)?)
     }
 }

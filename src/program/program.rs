@@ -83,7 +83,7 @@ impl Program {
                                 }
                                 a.used_variable.retain(|s| s != &f.to_owned().s.to_owned());
 
-                                let mut rhs = NodeSt::parse_close_imm(it)?;
+                                let mut rhs = a.parse_close_imm(it)?;
                                 let mut rhs = beta(&mut rhs, &mut a)?;
                                 rhs = rhs.simplified();
 
@@ -93,7 +93,7 @@ impl Program {
                                 a.l.push(ff);
                             }
                             _ => {
-                                let mut rhs = NodeSt::parse_close_imm(it)?;
+                                let mut rhs = a.parse_close_imm(it)?;
                                 let mut rhs = beta(&mut rhs, &mut a)?;
                                 rhs = rhs.simplified();
 
