@@ -344,3 +344,17 @@ fn checker_for_not_definition_variable_in_multiple_evaluation_values_test() {
     };
     assert!(n)
 }
+
+#[test]
+fn check_immediate_test() {
+    let mut t = Token::tokenize("fn { int aa = return 9; _ }").unwrap();
+    let mut it = TokenIter::new(&mut t);
+    let n = match NodeArr::w_parser(&mut it, vec![]) {
+        Ok(_) => false,
+        Err(e) => match e {
+            ParseError::NotImmediate(_) => true,
+            _ => false,
+        },
+    };
+    assert!(n)
+}
