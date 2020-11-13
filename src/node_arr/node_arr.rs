@@ -245,18 +245,18 @@ impl NodeArr {
                                                 return Err(ParseError::UnusedVariable(f.n.c.loc))
                                             }
                                         }
-                                        let mut lhs = beta(
-                                            &mut n.to_owned().rhs.unwrap().to_owned(),
-                                            &mut a,
-                                        )?;
-                                        lhs = lhs.simplified();
-                                        f.n = n.to_owned();
+                                        a.set_imm_env();
+                                        let mut rhs = NodeSt::parse_close_imm(it)?;
+                                        let mut rhs = beta(&mut rhs, &mut a)?;
+                                        rhs = rhs.simplified();
+
+                                        f.n = rhs.to_owned();
                                         let ff = f.to_owned();
                                         a.l.retain(|s| s.s != _s.to_owned());
                                         a.l.push(ff);
                                         let rvar = NodeSt::r_var(
                                             f.to_owned().aln,
-                                            lhs,
+                                            rhs,
                                             n.c.loc.to_owned(),
                                         );
                                         a.node_st_vec.push(rvar);

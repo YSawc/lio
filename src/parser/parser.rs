@@ -296,7 +296,7 @@ impl NodeSt {
                 ..
             } => {
                 let t = it.p.to_owned();
-                let lhs = Self::new_ident(s.to_owned(), it.p.next().unwrap().to_owned());
+                let l = Self::new_ident(s.to_owned(), it.p.next().unwrap().to_owned());
                 if it.p.len() < 2 {
                     it.p = t.to_owned();
                 }
@@ -307,15 +307,7 @@ impl NodeSt {
                     } => {
                         it.p.next();
                         let op = Node::assign(loc.to_owned());
-                        let rhs = Self::expr(it)?;
-                        let lhs = Self::new_nds(op, lhs, rhs);
-
-                        it.expect_token(
-                            TokenKind::SemiColon,
-                            ParseError::NotClosedParen(
-                                it.p.to_owned().peek().unwrap().to_owned().to_owned(),
-                            ),
-                        )?;
+                        let lhs = Self::new_unary(op, l);
                         return Ok(lhs);
                     }
                     _ => {
