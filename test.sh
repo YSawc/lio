@@ -88,6 +88,8 @@ assert_llvm 0 'int g = 3; fn { int i = 9; if (i<3*g) { i; 2; 3; } else { 3*4; _ 
 assert_llvm 0 'int g = 3; fn { int i = 9; if (i<3*g) { i; 2; 3; } else { 3*4; _ } _ }'
 assert_llvm 10 'fn int { int a = 3; a; a=15; a = if (1) { 2; 10 } else { 3*4; 5 } a }'
 assert_llvm 20 'fn int { int a = 3; a; a=15; a = if (1) { 2; 10 } else { 3*4; 5 } a*2 }'
+assert_llvm 27 'int g = 3; fn int { int _i = 9; _i = if (_i == 3*g) { _i*3 } else { g*_i*2 } _i }'
+assert_llvm 54 'int g = 3; fn int { int _i = 9; _i = if (_i<3*g) { _i*3 } else { g*_i*2 } _i }'
 
 echo "------------------------------"
 echo "All llvm test passed!\n"

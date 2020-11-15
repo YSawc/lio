@@ -44,6 +44,8 @@ sudo bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"`
   - [x] [tokenize](https://github.com/YSawc/lio/commit/d09ae5afe26fd3daf1dcddd3dd333224cffe247c)
   - [ ] parser
   - [ ] whole of program
+- [ ] assign with block statements
+  - [x] [if-else statement](https://github.com/YSawc/lio/commit/d242bcebcd65fcbcbb4bbf1104d4021fd5c43326)
 - [ ] command selector in several mathine architecture
 - [ ] lifetime
 - [ ] allocation register
