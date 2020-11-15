@@ -11,6 +11,7 @@ pub struct Femitter {
     pub vr: Vec<u8>,
     pub hm: FxHashMap<i32, u8>,
     pub lah: u8,
+    pub assign_i: u8,
 }
 
 impl Femitter {
@@ -20,6 +21,7 @@ impl Femitter {
             vr: vec![],
             hm: FxHashMap::default(),
             lah: 0,
+            assign_i: 0,
         }
     }
 }
@@ -133,13 +135,30 @@ impl Femitter {
             }
             NodeKind::ReAssignVar(i) => {
                 self.emitter(f, ns.to_owned().rhs.unwrap().as_ref().to_owned());
-                write!(
-                    f,
-                    "  store i32 %{}, i32* %{}, align 4\n",
-                    self.rc - 1,
-                    self.hm.get(&i).unwrap()
-                )
-                .unwrap();
+                if ns.to_owned().rhs.unwrap().as_ref().to_owned().c.value == NodeKind::If {
+                    write!(
+                        f,
+                        "  %{} = load i32, i32* %{}, align 4\n",
+                        self.rc, self.assign_i,
+                    )
+                    .unwrap();
+                    write!(
+                        f,
+                        "  store i32 %{}, i32* %{}, align 4\n",
+                        self.rc,
+                        self.hm.get(&i).unwrap()
+                    )
+                    .unwrap();
+                    self.rc += 1;
+                } else {
+                    write!(
+                        f,
+                        "  store i32 %{}, i32* %{}, align 4\n",
+                        self.rc - 1,
+                        self.hm.get(&i).unwrap()
+                    )
+                    .unwrap();
+                }
                 return ();
             }
             NodeKind::GVar(s) => {
@@ -161,13 +180,22 @@ impl Femitter {
                 return ();
             }
             NodeKind::If => {
-                self.emitter(f, ns.to_owned().cond.unwrap().as_ref().to_owned());
-                write!(f, "  %{} = icmp ne i32 %{}, 0\n", self.rc, self.rc - 1).unwrap();
-
                 let if_stmts: NodeArr = *ns.to_owned().if_stmts.to_owned().unwrap();
                 let mut iif_stmts = if_stmts.node_st_vec.iter().peekable();
                 let else_if_stmts: NodeArr = *ns.to_owned().else_if_stmts.to_owned().unwrap();
                 let mut ielse_if_stmts = else_if_stmts.node_st_vec.iter().peekable();
+
+                let retf = if if_stmts.ret_node_st != NodeSt::default() {
+                    write!(f, "  %{} = alloca i32, align 4\n", self.rc).unwrap();
+                    self.assign_i = self.rc;
+                    self.rc += 1;
+                    true
+                } else {
+                    false
+                };
+
+                self.emitter(f, ns.to_owned().cond.unwrap().as_ref().to_owned());
+                write!(f, "  %{} = icmp ne i32 %{}, 0\n", self.rc, self.rc - 1).unwrap();
 
                 while iif_stmts.peek() != None {
                     self.calc_label(iif_stmts.next().unwrap().to_owned())
@@ -196,8 +224,19 @@ impl Femitter {
                 }
 
                 let melse_stmt_lah = self.rc + self.lah + 1;
+                if retf {
+                    write!(
+                        f,
+                        "  store i32 %{}, i32* %{}, align 4\n",
+                        self.rc - 1,
+                        self.assign_i
+                    )
+                    .unwrap();
+                }
+
                 self.rc += 1;
                 self.lah = 0;
+
                 write!(f, "  br label %{}", melse_stmt_lah).unwrap();
                 write!(f, "\n{}:\n", stmt_lah).unwrap();
 
@@ -206,7 +245,18 @@ impl Femitter {
                     self.emitter(f, ielse_if_stmts.next().unwrap().to_owned())
                 }
 
+                if retf {
+                    write!(
+                        f,
+                        "  store i32 %{}, i32* %{}, align 4\n",
+                        self.rc - 1,
+                        self.assign_i
+                    )
+                    .unwrap();
+                }
+
                 self.rc += 1;
+
                 write!(f, "  br label %{}", melse_stmt_lah).unwrap();
                 write!(f, "\n{}:\n", melse_stmt_lah).unwrap();
                 return ();

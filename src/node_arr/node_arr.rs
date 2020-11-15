@@ -206,10 +206,7 @@ impl NodeArr {
                                     }
                                 }
 
-                                a.set_imm_env();
-                                let mut rhs = a.parse_close_imm(it)?;
-                                let mut rhs = beta(&mut rhs, &mut a)?;
-                                rhs = rhs.simplified();
+                                let rhs = a.parse_close_imm(it)?;
 
                                 let v = match _s.as_bytes()[0] {
                                     b'_' => Var::mnew(_s, n.to_owned(), aln),
@@ -246,9 +243,7 @@ impl NodeArr {
                                             }
                                         }
                                         a.set_imm_env();
-                                        let mut rhs = a.parse_close_imm(it)?;
-                                        let mut rhs = beta(&mut rhs, &mut a)?;
-                                        rhs = rhs.simplified();
+                                        let rhs = a.parse_close_imm(it)?;
 
                                         f.n = rhs.to_owned();
                                         let ff = f.to_owned();
@@ -441,13 +436,18 @@ impl NodeArr {
                             .unwrap()
                             .ret_node_st,
                     ) {
-                        true => Ok(n),
+                        true => Ok(self.pop_node()),
                         false => Err(ParseError::NotImmediate(
                             it.shadow_p.peek().unwrap().loc.to_owned(),
                         )),
                     }
                 }
                 _ => {
+                    self.set_imm_env();
+                    let mut n = n;
+                    n = beta(&mut n, self)?;
+                    n = n.simplified();
+
                     it.expect_token(
                         TokenKind::SemiColon,
                         ParseError::NotClosedStmt(
