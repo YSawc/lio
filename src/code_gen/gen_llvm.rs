@@ -124,62 +124,25 @@ impl Femitter {
                 self.hm.insert(i, self.rc);
 
                 write!(f, "  %{} = alloca i32, align 4\n", self.rc).unwrap();
-
-                if ns.to_owned().rhs.unwrap().as_ref().to_owned().c.value == NodeKind::If {
-                    write!(
-                        f,
-                        "  %{} = load i32, i32* %{}, align 4\n",
-                        self.rc + 1,
-                        self.assign_i,
-                    )
-                    .unwrap();
-                    write!(
-                        f,
-                        "  store i32 %{}, i32* %{}, align 4\n",
-                        self.rc + 1,
-                        self.rc
-                    )
-                    .unwrap();
-                    self.rc += 2;
-                    return ();
-                } else {
-                    write!(
-                        f,
-                        "  store i32 %{}, i32* %{}, align 4\n",
-                        self.rc - 1,
-                        self.rc
-                    )
-                    .unwrap();
-                    self.rc += 1;
-                    return ();
-                }
+                write!(
+                    f,
+                    "  store i32 %{}, i32* %{}, align 4\n",
+                    self.rc - 1,
+                    self.rc
+                )
+                .unwrap();
+                self.rc += 1;
+                return ();
             }
             NodeKind::ReAssignVar(i) => {
                 self.emitter(f, ns.to_owned().rhs.unwrap().as_ref().to_owned());
-                if ns.to_owned().rhs.unwrap().as_ref().to_owned().c.value == NodeKind::If {
-                    write!(
-                        f,
-                        "  %{} = load i32, i32* %{}, align 4\n",
-                        self.rc, self.assign_i,
-                    )
-                    .unwrap();
-                    write!(
-                        f,
-                        "  store i32 %{}, i32* %{}, align 4\n",
-                        self.rc,
-                        self.hm.get(&i).unwrap()
-                    )
-                    .unwrap();
-                    self.rc += 1;
-                } else {
-                    write!(
-                        f,
-                        "  store i32 %{}, i32* %{}, align 4\n",
-                        self.rc - 1,
-                        self.hm.get(&i).unwrap()
-                    )
-                    .unwrap();
-                }
+                write!(
+                    f,
+                    "  store i32 %{}, i32* %{}, align 4\n",
+                    self.rc - 1,
+                    self.hm.get(&i).unwrap()
+                )
+                .unwrap();
                 return ();
             }
             NodeKind::GVar(s) => {
@@ -208,12 +171,15 @@ impl Femitter {
 
                 let retf = if if_stmts.ret_node_st != NodeSt::default() {
                     write!(f, "  %{} = alloca i32, align 4\n", self.rc).unwrap();
-                    self.assign_i = self.rc;
-                    self.rc += 1;
                     true
                 } else {
                     false
                 };
+
+                if retf {
+                    self.assign_i = self.rc;
+                    self.rc += 1;
+                }
 
                 self.emitter(f, ns.to_owned().cond.unwrap().as_ref().to_owned());
                 write!(f, "  %{} = icmp ne i32 %{}, 0\n", self.rc, self.rc - 1).unwrap();
@@ -278,8 +244,20 @@ impl Femitter {
 
                 self.rc += 1;
 
-                write!(f, "  br label %{}", melse_stmt_lah).unwrap();
+                write!(f, "  br label %{}\n", melse_stmt_lah).unwrap();
+
                 write!(f, "\n{}:\n", melse_stmt_lah).unwrap();
+
+                if retf {
+                    write!(
+                        f,
+                        "  %{} = load i32, i32* %{}, align 4\n",
+                        self.rc, self.assign_i
+                    )
+                    .unwrap();
+                    self.rc += 1;
+                }
+
                 return ();
             }
             _ => (),
@@ -395,10 +373,6 @@ impl Femitter {
             }
             NodeKind::LVar(_) => {
                 self.lah += 1;
-                return ();
-            }
-            NodeKind::If => {
-                self.lah += 4;
                 return ();
             }
             _ => (),
