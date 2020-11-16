@@ -122,16 +122,37 @@ impl Femitter {
             NodeKind::NewVar(i) => {
                 self.emitter(f, ns.to_owned().rhs.unwrap().as_ref().to_owned());
                 self.hm.insert(i, self.rc);
+
                 write!(f, "  %{} = alloca i32, align 4\n", self.rc).unwrap();
-                write!(
-                    f,
-                    "  store i32 %{}, i32* %{}, align 4\n",
-                    self.rc - 1,
-                    self.rc
-                )
-                .unwrap();
-                self.rc += 1;
-                return ();
+
+                if ns.to_owned().rhs.unwrap().as_ref().to_owned().c.value == NodeKind::If {
+                    write!(
+                        f,
+                        "  %{} = load i32, i32* %{}, align 4\n",
+                        self.rc + 1,
+                        self.assign_i,
+                    )
+                    .unwrap();
+                    write!(
+                        f,
+                        "  store i32 %{}, i32* %{}, align 4\n",
+                        self.rc + 1,
+                        self.rc
+                    )
+                    .unwrap();
+                    self.rc += 2;
+                    return ();
+                } else {
+                    write!(
+                        f,
+                        "  store i32 %{}, i32* %{}, align 4\n",
+                        self.rc - 1,
+                        self.rc
+                    )
+                    .unwrap();
+                    self.rc += 1;
+                    return ();
+                }
             }
             NodeKind::ReAssignVar(i) => {
                 self.emitter(f, ns.to_owned().rhs.unwrap().as_ref().to_owned());
