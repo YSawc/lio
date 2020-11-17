@@ -45,8 +45,11 @@ sudo bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"`
   - [ ] parser
   - [ ] whole of program
 - [ ] assign with block statements
+  - [ ] single block statement
+  - [ ] while statement
   - [x] [if-else statement](https://github.com/YSawc/lio/commit/d242bcebcd65fcbcbb4bbf1104d4021fd5c43326)
-- [ ] command selector in several mathine architecture
+- [ ] inheritance value
+  - [ ] single block statement
+  - [ ] while statement
+  - [x] [if-else statement](https://github.com/YSawc/lio/commit/7782886caa70e076a3d48a1a71f772846a83628e)
 - [ ] lifetime
-- [ ] allocation register
-- [ ] canonical tree
