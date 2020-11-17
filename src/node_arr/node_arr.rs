@@ -387,11 +387,20 @@ impl NodeArr {
                 match c.c.value {
                     NodeKind::Num(num) => {
                         if num == 0 {
-                            if _else_if_stmts.node_st_vec != vec![] {
-                                self.node_st_vec
-                                    .append(&mut _else_if_stmts.node_st_vec.to_owned());
-                            } else {
-                                return Ok(());
+                            if self.end_of_node {
+                                if else_if_stmts_isi {
+                                    self.ret_node_st = _else_if_stmts.ret_node_st
+                                }
+                            }
+
+                            self.node_st_vec
+                                .append(&mut _else_if_stmts.node_st_vec.to_owned());
+                            return Ok(());
+                        }
+
+                        if self.end_of_node {
+                            if if_stmts_isi {
+                                self.ret_node_st = if_stmts.ret_node_st.to_owned();
                             }
                         }
 

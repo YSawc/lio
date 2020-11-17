@@ -46,9 +46,8 @@ assert_llvm 36 'fn int { int a = 3; int b = 4; b*a*3 }'
 assert_llvm 54 'fn int { int a = 3; int b = a*2; b*a*3 }'
 assert_llvm 15 'fn int { int r = 1; int l = 5; l + map 2 4 + + r }' simplified
 assert_llvm 120 'fn int { map 1 5 * }'
-# assert_llvm 10 'fn int { if (2 == 3) { 5; } else { 10; } }'
-# assert_llvm 31 'fn int { if (2 == 3) { 5+3; } else { 10+21; } }' simplified
-# assert_llvm 8 'fn int { if (2 < 3) { 5+3; } else { 10; } }'
+assert_llvm 0 'fn { if (2 == 3) { 5+3; } else { 10+21; } _ }' calc_if_label
+assert_llvm 0 'fn { if (2 < 3) { 5+3; } else { 10; } _ }' calc_if_label
 assert_llvm 2 'fn int { int a = 3; a; a = 2; a }'
 assert_llvm 5 'fn int { int a = 5; int b = a; a = 2; b }'
 assert_llvm 1 'fn int { 1 }'
@@ -92,6 +91,8 @@ assert_llvm 27 'int g = 3; fn int { int _i = 9; _i = if (_i == 3*g) { _i*3 } els
 assert_llvm 54 'int g = 3; fn int { int _i = 9; _i = if (_i<3*g) { _i*3 } else { g*_i*2 } _i }'
 assert_llvm 3 'int g = 3; fn int { int i = if (5<g) { 5 } else { g } i }'
 assert_llvm 5 'int g = 3; fn int { int i = if (5>=g) { 5 } else { g } i }'
+assert_llvm 5 'fn int { if (0) { 2; 10 } else { 3*4; 5 } }' calc_if_label
+assert_llvm 10 'fn int { if (1) { 2; 10 } else { 3*4; 5 } }' calc_if_label
 
 echo "------------------------------"
 echo "All llvm test passed!\n"

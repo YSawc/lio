@@ -203,10 +203,6 @@ impl NodeSt {
             | NodeKind::LE
             | NodeKind::G
             | NodeKind::GE
-            | NodeKind::NewAssignG
-            | NodeKind::NewAssignL
-            | NodeKind::NewAssign
-            | NodeKind::Assign
             | NodeKind::Ident(_)
             | NodeKind::GVar(_)
             | NodeKind::LVar(_) => true,
