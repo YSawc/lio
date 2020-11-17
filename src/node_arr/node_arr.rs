@@ -1,3 +1,4 @@
+use super::super::location::location::*;
 use super::super::node::node::*;
 use super::super::parser::error::*;
 use super::super::program::program::*;
@@ -388,8 +389,9 @@ impl NodeArr {
                     NodeKind::Num(num) => {
                         if num == 0 {
                             if self.end_of_node {
-                                if else_if_stmts_isi {
-                                    self.ret_node_st = _else_if_stmts.ret_node_st
+                                self.ret_node_st = match else_if_stmts_isi {
+                                    true => _else_if_stmts.ret_node_st,
+                                    false => NodeSt::under_score(Loc::default()),
                                 }
                             }
 
@@ -399,8 +401,9 @@ impl NodeArr {
                         }
 
                         if self.end_of_node {
-                            if if_stmts_isi {
-                                self.ret_node_st = if_stmts.ret_node_st.to_owned();
+                            self.ret_node_st = match if_stmts_isi {
+                                true => if_stmts.ret_node_st,
+                                false => NodeSt::under_score(Loc::default()),
                             }
                         }
 
