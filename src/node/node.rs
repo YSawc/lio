@@ -207,6 +207,9 @@ impl NodeSt {
             | NodeKind::Ident(_)
             | NodeKind::GVar(_)
             | NodeKind::LVar(_) => true,
+            | NodeKind::If => {
+                self.if_stmts.unwrap().ret_node_st.isi()
+            },
             _ => false,
         }
     }

@@ -211,7 +211,6 @@ impl NodeArr {
                                     }
                                 }
 
-
                                 let v = match _s.as_bytes()[0] {
                                     b'_' => Var::mnew(_s, n.to_owned(), aln),
                                     _ => Var::new_l(_s, n.to_owned(), aln),
@@ -384,7 +383,15 @@ impl NodeArr {
                 n.if_stmts = Some(Box::new(if_stmts.to_owned()));
                 n.else_if_stmts = Some(Box::new(_else_if_stmts.to_owned()));
                 n.cond = Some(Box::new(c));
-                self.node_st_vec.push(n);
+                self.node_st_vec.push(n.to_owned());
+
+                if self.end_of_node {
+                    self.ret_node_st = match if_stmts_isi {
+                        true => n,
+                        false => NodeSt::under_score(Loc::default()),
+                    }
+                }
+
                 Ok(())
             }
             true => {
@@ -422,7 +429,15 @@ impl NodeArr {
                         n.if_stmts = Some(Box::new(if_stmts.to_owned()));
                         n.else_if_stmts = Some(Box::new(_else_if_stmts.to_owned()));
                         n.cond = Some(Box::new(c));
-                        self.node_st_vec.push(n);
+                        self.node_st_vec.push(n.to_owned());
+
+                        if self.end_of_node {
+                            self.ret_node_st = match if_stmts_isi {
+                                true => n,
+                                false => NodeSt::under_score(Loc::default()),
+                            }
+                        }
+
                         Ok(())
                     }
                 }

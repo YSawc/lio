@@ -74,20 +74,22 @@ assert_llvm 0 'fn { int _u = 8; _ }'
 assert_llvm 16 'fn int { int _u = 8; int a = 2; a*_u }'
 assert_llvm 34 'fn int { int _u = 8; int a = 2; 4+2*a*_u-2 }'
 assert_llvm 4 'fn int { if (3) { 0 } else { 0 } 4 }'
-assert_llvm 0 'fn { if (2 == 3) { 1; 2; } else { 3; 4; } _ }' calc_if_label
-assert_llvm 0 'fn { if (2 == 3) { 1; 2; } else { 3; 4; } _ }'
-assert_llvm 0 'fn { int i = 9; if (i) { 1; 2; } else { 3*4; 5; } _ }' calc_if_label
-assert_llvm 0 'fn { int i = 9; if (i) { 1; 2; } else { 3*4; 5; } _ }'
-assert_llvm 0 'fn { int i = 9; if (i) { i; 2 } else { 3*4; 5 } _ }' calc_if_label
-assert_llvm 0 'fn { int i = 9; if (i) { i; 2 } else { 3*4; 5 } _ }'
-assert_llvm 0 'fn { int i = 9; if (i) { i; _ } else { 3*4; _ } _ }' calc_if_label
-assert_llvm 0 'fn { int i = 9; if (i) { i; _ } else { 3*4; _ } _ }'
-assert_llvm 0 'fn { int i = 9; if (i) { i; 2; _ } else { 3*4; _ } _ }' calc_if_label
-assert_llvm 0 'fn { int i = 9; if (i) { i; 2; _ } else { 3*4; _ } _ }'
-assert_llvm 0 'fn { int i = 9; if (i) { i; 2; 3; } else { 3*4; _ } _ }' calc_if_label
-assert_llvm 0 'fn { int i = 9; if (i) { i; 2; 3; } else { 3*4; _ } _ }'
-assert_llvm 0 'int g = 3; fn { int i = 9; if (i<3*g) { i; 2; 3; } else { 3*4; _ } _ }' calc_if_label
-assert_llvm 0 'int g = 3; fn { int i = 9; if (i<3*g) { i; 2; 3; } else { 3*4; _ } _ }'
+assert_llvm 4 'fn int { if (2 == 3) { 1; 2 } else { 3; 4 } }' calc_if_label
+assert_llvm 4 'fn int { if (2 == 3) { 1; 2 } else { 3; 4 } }'
+assert_llvm 0 'fn { if (2 == 3) { 1; _ } else { 3; _ } }' calc_if_label
+assert_llvm 0 'fn { if (2 == 3) { 1; _ } else { 3; _ } }'
+assert_llvm 0 'fn { int i = 9; if (i) { 1; 2; } else { 3*4; 5; } }' calc_if_label
+assert_llvm 0 'fn { int i = 9; if (i) { 1; 2; } else { 3*4; 5; } }'
+assert_llvm 2 'fn int { int i = 9; if (i) { i; 2 } else { 3*4; 5 } }' calc_if_label
+assert_llvm 2 'fn int { int i = 9; if (i) { i; 2 } else { 3*4; 5 } }'
+assert_llvm 0 'fn { int i = 9; if (i) { i; _ } else { 3*4; _ } }' calc_if_label
+assert_llvm 0 'fn { int i = 9; if (i) { i; _ } else { 3*4; _ } }'
+assert_llvm 0 'fn { int i = 9; if (i) { i; 2; _ } else { 3*4; _ } }' calc_if_label
+assert_llvm 0 'fn { int i = 9; if (i) { i; 2; _ } else { 3*4; _ } }'
+assert_llvm 0 'fn { int i = 9; if (i) { i; 2; 3; } else { 3*4; _ } }' calc_if_label
+assert_llvm 0 'fn { int i = 9; if (i) { i; 2; 3; } else { 3*4; _ } }'
+assert_llvm 0 'int g = 3; fn { int i = 9; if (i<3*g) { i; 2; 3; } else { 3*4; _ } }' calc_if_label
+assert_llvm 0 'int g = 3; fn { int i = 9; if (i<3*g) { i; 2; 3; } else { 3*4; _ } }'
 assert_llvm 10 'fn int { int a = 3; a; a=15; a = if (1) { 2; 10 } else { 3*4; 5 } a }'
 assert_llvm 20 'fn int { int a = 3; a; a=15; a = if (1) { 2; 10 } else { 3*4; 5 } a*2 }'
 assert_llvm 27 'int g = 3; fn int { int _i = 9; _i = if (_i == 3*g) { _i*3 } else { g*_i*2 } _i }'
