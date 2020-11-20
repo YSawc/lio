@@ -191,6 +191,7 @@ impl NodeSt {
     }
 
     pub fn isi(self) -> bool {
+        // println!("self.c: {:?}", self.c);
         match self.c.value {
             NodeKind::Num(_)
             | NodeKind::Add

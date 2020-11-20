@@ -237,7 +237,7 @@ impl NodeArr {
                                 a.set_imm_env();
                                 match Program::find_v(_s.to_owned(), a.imm_env_v.to_owned()) {
                                     Some(mut f) => {
-                                        // println!("uv: {:?}", uv);
+                                        // println!("a.used_variable: {:?}", a.used_variable);
                                         match a.used_variable.contains(&f.to_owned().s.to_owned()) {
                                             true => (),
                                             false => {

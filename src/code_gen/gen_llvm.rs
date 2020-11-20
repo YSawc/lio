@@ -362,6 +362,7 @@ impl Femitter {
             }
             NodeKind::NewVar(_) => {
                 self.lah += 1;
+                self.calc_label(ns.to_owned().rhs.unwrap().as_ref().to_owned());
                 return ();
             }
             NodeKind::ReAssignVar(_) => {
