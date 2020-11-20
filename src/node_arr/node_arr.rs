@@ -192,6 +192,9 @@ impl NodeArr {
                                     }
                                 }
                                 a.set_imm_env();
+
+                                let rhs = a.parse_close_imm(it)?;
+
                                 match Program::find_v(_s.to_owned(), a.imm_env_v.to_owned()) {
                                     Some(f) => {
                                         match a.used_variable.contains(&f.to_owned().s.to_owned()) {
@@ -208,7 +211,6 @@ impl NodeArr {
                                     }
                                 }
 
-                                let rhs = a.parse_close_imm(it)?;
 
                                 let v = match _s.as_bytes()[0] {
                                     b'_' => Var::mnew(_s, n.to_owned(), aln),
@@ -238,13 +240,15 @@ impl NodeArr {
                                 match Program::find_v(_s.to_owned(), a.imm_env_v.to_owned()) {
                                     Some(mut f) => {
                                         // println!("a.used_variable: {:?}", a.used_variable);
+
+                                        let rhs = a.parse_close_imm(it)?;
+
                                         match a.used_variable.contains(&f.to_owned().s.to_owned()) {
                                             true => (),
                                             false => {
                                                 return Err(ParseError::UnusedVariable(f.n.c.loc))
                                             }
                                         }
-                                        let rhs = a.parse_close_imm(it)?;
 
                                         f.n = rhs.to_owned();
                                         let ff = f.to_owned();
