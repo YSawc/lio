@@ -92,15 +92,15 @@ assert_llvm 0 'int g = 3; fn { int i = 9; if (i<3*g) { i; 2; 3; } else { 3*4; _ 
 assert_llvm 0 'int g = 3; fn { int i = 9; if (i<3*g) { i; 2; 3; } else { 3*4; _ } }'
 assert_llvm 10 'fn int { int a = 3; a; a=15; a = if (1) { 2; 10 } else { 3*4; 5 } a }'
 assert_llvm 20 'fn int { int a = 3; a; a=15; a = if (1) { 2; 10 } else { 3*4; 5 } a*2 }'
-assert_llvm 27 'int g = 3; fn int { int _i = 9; _i = if (_i == 3*g) { _i*3 } else { g*_i*2 } _i }'
-assert_llvm 54 'int g = 3; fn int { int _i = 9; _i = if (_i<3*g) { _i*3 } else { g*_i*2 } _i }'
+assert_llvm 27 'int g = 3; fn int { int i = 9; i = if (i == 3*g) { i*3 } else { g*i*2 } i }'
+assert_llvm 54 'int g = 3; fn int { int i = 9; i = if (i<3*g) { i*3 } else { g*i*2 } i }'
 assert_llvm 3 'int g = 3; fn int { int i = if (5<g) { 5 } else { g } i }'
 assert_llvm 5 'int g = 3; fn int { int i = if (5>=g) { 5 } else { g } i }'
 assert_llvm 5 'fn int { if (0) { 2; 10 } else { 3*4; 5 } }' calc_if_label
 assert_llvm 10 'fn int { if (1) { 2; 10 } else { 3*4; 5 } }' calc_if_label
 assert_llvm 0 'fn { if (0) { 2; 10; } else { 3*4; 5; } }' calc_if_label
 assert_llvm 0 'fn { if (1) { 2; 10; } else { 3*4; 5; } }' calc_if_label
-assert_llvm 24 'fn int { int i = 4; i; int j = if (3) { int j = 6*i; j } else { 9 } j }'
+assert_llvm 24 'fn int { int i = 4; int j = if (3) { int j = 6*i; j } else { 9 } j }'
 
 echo "------------------------------"
 echo "All llvm test passed!\n"

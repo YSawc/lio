@@ -104,7 +104,7 @@ impl NodeArr {
         let mut ev: Vec<Vec<Var>> = vec![];
         ev.push(g.to_owned());
 
-        let (mut l, ugv) = Self::parse_statement(&mut it, ev)?;
+        let (mut l, uev) = Self::parse_statement(&mut it, ev)?;
 
         if isi {
             l.ty = RetTy::Int32;
@@ -114,7 +114,7 @@ impl NodeArr {
 
         if isi {
             match NodeSt::isi(l.to_owned().ret_node_st) {
-                true => return Ok((l, ugv)),
+                true => return Ok((l, uev)),
                 false => {
                     return Err(ParseError::NotMatchReturnType(
                         l.to_owned().ret_node_st.c.loc,
@@ -123,7 +123,7 @@ impl NodeArr {
             }
         } else {
             match l.ret_node_st.c.value {
-                NodeKind::UnderScore => return Ok((l, ugv)),
+                NodeKind::UnderScore => return Ok((l, uev)),
                 _ => {
                     return Err(ParseError::NotMatchReturnType(
                         l.to_owned().ret_node_st.c.loc,
@@ -142,14 +142,14 @@ impl NodeArr {
             ParseError::NotOpenedStmt(it.p.to_owned().peek().unwrap().to_owned().to_owned()),
         )?;
 
-        let (a, ugv) = Self::parse_internal_statement(it, ev)?;
+        let (a, uev) = Self::parse_internal_statement(it, ev)?;
 
         it.expect_token(
             TokenKind::RBrace,
             ParseError::NotOpenedStmt(it.p.to_owned().peek().unwrap().to_owned().to_owned()),
         )?;
 
-        Ok((a, ugv))
+        Ok((a, uev))
     }
 
     pub fn parse_internal_statement(
@@ -341,16 +341,17 @@ impl NodeArr {
 
         self.set_imm_env();
 
-        let if_stmts = Self::parse_statement(it, self.imm_env_v.to_owned())?.0;
+        let (if_stmts, uev) = Self::parse_statement(it, self.imm_env_v.to_owned())?;
+        self.update_used_variable(uev);
 
-        let mut _else_if_stmts: NodeArr = NodeArr::new();
-        match it.p.peek().unwrap().value {
+        let (_else_if_stmts, uev) = match it.p.peek().unwrap().value {
             TokenKind::Else => {
                 it.next();
-                _else_if_stmts = Self::parse_statement(it, self.imm_env_v.to_owned())?.0;
+                Self::parse_statement(it, self.imm_env_v.to_owned())?
             }
-            _ => (),
+            _ => unimplemented!(),
         };
+        self.update_used_variable(uev);
 
         let if_stmts_isi = NodeSt::isi(if_stmts.ret_node_st.to_owned());
         let else_if_stmts_isi = NodeSt::isi(_else_if_stmts.ret_node_st.to_owned());
@@ -494,5 +495,15 @@ impl NodeArr {
 
     pub fn parse_close_imm(&mut self, it: &mut TokenIter) -> Result<NodeSt, ParseError> {
         Ok(self.parse_imm(it)?)
+    }
+}
+
+impl NodeArr {
+    pub fn update_used_variable(&mut self, uvs: Vec<String>) {
+        for v in uvs {
+            if !self.used_variable.contains(&v) {
+                self.used_variable.push(v)
+            }
+        }
     }
 }
