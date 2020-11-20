@@ -102,164 +102,173 @@ impl Femitter {
     pub fn emitter(&mut self, f: &mut fs::File, ns: NodeSt) {
         // println!("ns.c.value: {:?}", ns.c.value);
         match ns.c.value {
-            NodeKind::Num(n) => {
-                write!(f, "  %{} = alloca i32, align 4\n", self.rc).unwrap();
-                write!(f, "  store i32 {}, i32* %{}, align 4\n", n, self.rc).unwrap();
-                write!(
-                    f,
-                    "  %{} = load i32, i32* %{}, align 4\n",
-                    self.rc + 1,
-                    self.rc
-                )
-                .unwrap();
-                self.vr.push(self.rc + 1);
-                self.rc += 2;
-                return ();
-            }
-            NodeKind::UnderScore => {
-                return ();
-            }
-            NodeKind::NewVar(i) => {
-                self.emitter(f, ns.to_owned().rhs.unwrap().as_ref().to_owned());
-                self.hm.insert(i, self.rc);
-
-                write!(f, "  %{} = alloca i32, align 4\n", self.rc).unwrap();
-                write!(
-                    f,
-                    "  store i32 %{}, i32* %{}, align 4\n",
-                    self.rc - 1,
-                    self.rc
-                )
-                .unwrap();
-                self.rc += 1;
-                return ();
-            }
-            NodeKind::ReAssignVar(i) => {
-                self.emitter(f, ns.to_owned().rhs.unwrap().as_ref().to_owned());
-                write!(
-                    f,
-                    "  store i32 %{}, i32* %{}, align 4\n",
-                    self.rc - 1,
-                    self.hm.get(&i).unwrap()
-                )
-                .unwrap();
-                return ();
-            }
-            NodeKind::GVar(s) => {
-                write!(f, "  %{} = load i32, i32* @{}, align 4\n", self.rc, s).unwrap();
-                self.vr.push(self.rc);
-                self.rc += 1;
-                return ();
-            }
-            NodeKind::LVar(i) => {
-                write!(
-                    f,
-                    "  %{} = load i32, i32* %{}, align 4\n",
-                    self.rc,
-                    self.hm.get(&i).unwrap()
-                )
-                .unwrap();
-                self.vr.push(self.rc);
-                self.rc += 1;
-                return ();
-            }
-            NodeKind::If => {
-                let if_stmts: NodeArr = *ns.to_owned().if_stmts.to_owned().unwrap();
-                let mut iif_stmts = if_stmts.node_st_vec.iter().peekable();
-                let else_if_stmts: NodeArr = *ns.to_owned().else_if_stmts.to_owned().unwrap();
-                let mut ielse_if_stmts = else_if_stmts.node_st_vec.iter().peekable();
-
-                let retf = if if_stmts.ret_node_st != NodeSt::default() {
+            NodeKind::Num(_)
+            | NodeKind::UnderScore
+            | NodeKind::NewVar(_)
+            | NodeKind::ReAssignVar(_)
+            | NodeKind::GVar(_)
+            | NodeKind::LVar(_)
+            | NodeKind::If => match ns.c.value {
+                NodeKind::Num(n) => {
                     write!(f, "  %{} = alloca i32, align 4\n", self.rc).unwrap();
-                    true
-                } else {
-                    false
-                };
-
-                if retf {
-                    self.assign_i = self.rc;
-                    self.rc += 1;
-                }
-
-                self.emitter(f, ns.to_owned().cond.unwrap().as_ref().to_owned());
-                write!(f, "  %{} = icmp ne i32 %{}, 0\n", self.rc, self.rc - 1).unwrap();
-
-                while iif_stmts.peek() != None {
-                    self.calc_label(iif_stmts.next().unwrap().to_owned())
-                }
-
-                let stmt_lah = self.rc + self.lah + 2;
-                self.lah = 0;
-                write!(
-                    f,
-                    "  br i1 %{}, label %{}, label %{}\n",
-                    self.rc,
-                    self.rc + 1,
-                    stmt_lah
-                )
-                .unwrap();
-                write!(f, "\n{}:\n", self.rc + 1).unwrap();
-                self.rc += 2;
-
-                let mut iif_stmts = if_stmts.node_st_vec.iter().peekable();
-                while iif_stmts.peek() != None {
-                    self.emitter(f, iif_stmts.next().unwrap().to_owned())
-                }
-
-                while ielse_if_stmts.peek() != None {
-                    self.calc_label(ielse_if_stmts.next().unwrap().to_owned())
-                }
-
-                let melse_stmt_lah = self.rc + self.lah + 1;
-                if retf {
-                    write!(
-                        f,
-                        "  store i32 %{}, i32* %{}, align 4\n",
-                        self.rc - 1,
-                        self.assign_i
-                    )
-                    .unwrap();
-                }
-
-                self.rc += 1;
-                self.lah = 0;
-
-                write!(f, "  br label %{}", melse_stmt_lah).unwrap();
-                write!(f, "\n{}:\n", stmt_lah).unwrap();
-
-                let mut ielse_if_stmts = else_if_stmts.node_st_vec.iter().peekable();
-                while ielse_if_stmts.peek() != None {
-                    self.emitter(f, ielse_if_stmts.next().unwrap().to_owned())
-                }
-
-                if retf {
-                    write!(
-                        f,
-                        "  store i32 %{}, i32* %{}, align 4\n",
-                        self.rc - 1,
-                        self.assign_i
-                    )
-                    .unwrap();
-                }
-
-                self.rc += 1;
-
-                write!(f, "  br label %{}\n", melse_stmt_lah).unwrap();
-
-                write!(f, "\n{}:\n", melse_stmt_lah).unwrap();
-
-                if retf {
+                    write!(f, "  store i32 {}, i32* %{}, align 4\n", n, self.rc).unwrap();
                     write!(
                         f,
                         "  %{} = load i32, i32* %{}, align 4\n",
-                        self.rc, self.assign_i
+                        self.rc + 1,
+                        self.rc
+                    )
+                    .unwrap();
+                    self.vr.push(self.rc + 1);
+                    self.rc += 2;
+                    return ();
+                }
+                NodeKind::UnderScore => {
+                    return ();
+                }
+                NodeKind::NewVar(i) => {
+                    self.emitter(f, ns.to_owned().rhs.unwrap().as_ref().to_owned());
+                    self.hm.insert(i, self.rc);
+
+                    write!(f, "  %{} = alloca i32, align 4\n", self.rc).unwrap();
+                    write!(
+                        f,
+                        "  store i32 %{}, i32* %{}, align 4\n",
+                        self.rc - 1,
+                        self.rc
                     )
                     .unwrap();
                     self.rc += 1;
+                    return ();
                 }
+                NodeKind::ReAssignVar(i) => {
+                    self.emitter(f, ns.to_owned().rhs.unwrap().as_ref().to_owned());
+                    write!(
+                        f,
+                        "  store i32 %{}, i32* %{}, align 4\n",
+                        self.rc - 1,
+                        self.hm.get(&i).unwrap()
+                    )
+                    .unwrap();
+                    return ();
+                }
+                NodeKind::GVar(s) => {
+                    write!(f, "  %{} = load i32, i32* @{}, align 4\n", self.rc, s).unwrap();
+                    self.vr.push(self.rc);
+                    self.rc += 1;
+                    return ();
+                }
+                NodeKind::LVar(i) => {
+                    write!(
+                        f,
+                        "  %{} = load i32, i32* %{}, align 4\n",
+                        self.rc,
+                        self.hm.get(&i).unwrap()
+                    )
+                    .unwrap();
+                    self.vr.push(self.rc);
+                    self.rc += 1;
+                    return ();
+                }
+                NodeKind::If => {
+                    let if_stmts: NodeArr = *ns.to_owned().if_stmts.to_owned().unwrap();
+                    let mut iif_stmts = if_stmts.node_st_vec.iter().peekable();
+                    let else_if_stmts: NodeArr = *ns.to_owned().else_if_stmts.to_owned().unwrap();
+                    let mut ielse_if_stmts = else_if_stmts.node_st_vec.iter().peekable();
 
-                return ();
-            }
+                    let retf = if if_stmts.ret_node_st != NodeSt::default() {
+                        write!(f, "  %{} = alloca i32, align 4\n", self.rc).unwrap();
+                        true
+                    } else {
+                        false
+                    };
+
+                    if retf {
+                        self.assign_i = self.rc;
+                        self.rc += 1;
+                    }
+
+                    self.emitter(f, ns.to_owned().cond.unwrap().as_ref().to_owned());
+                    write!(f, "  %{} = icmp ne i32 %{}, 0\n", self.rc, self.rc - 1).unwrap();
+
+                    while iif_stmts.peek() != None {
+                        self.calc_label(iif_stmts.next().unwrap().to_owned())
+                    }
+
+                    let stmt_lah = self.rc + self.lah + 2;
+                    self.lah = 0;
+                    write!(
+                        f,
+                        "  br i1 %{}, label %{}, label %{}\n",
+                        self.rc,
+                        self.rc + 1,
+                        stmt_lah
+                    )
+                    .unwrap();
+                    write!(f, "\n{}:\n", self.rc + 1).unwrap();
+                    self.rc += 2;
+
+                    let mut iif_stmts = if_stmts.node_st_vec.iter().peekable();
+                    while iif_stmts.peek() != None {
+                        self.emitter(f, iif_stmts.next().unwrap().to_owned())
+                    }
+
+                    while ielse_if_stmts.peek() != None {
+                        self.calc_label(ielse_if_stmts.next().unwrap().to_owned())
+                    }
+
+                    let melse_stmt_lah = self.rc + self.lah + 1;
+                    if retf {
+                        write!(
+                            f,
+                            "  store i32 %{}, i32* %{}, align 4\n",
+                            self.rc - 1,
+                            self.assign_i
+                        )
+                        .unwrap();
+                    }
+
+                    self.rc += 1;
+                    self.lah = 0;
+
+                    write!(f, "  br label %{}", melse_stmt_lah).unwrap();
+                    write!(f, "\n{}:\n", stmt_lah).unwrap();
+
+                    let mut ielse_if_stmts = else_if_stmts.node_st_vec.iter().peekable();
+                    while ielse_if_stmts.peek() != None {
+                        self.emitter(f, ielse_if_stmts.next().unwrap().to_owned())
+                    }
+
+                    if retf {
+                        write!(
+                            f,
+                            "  store i32 %{}, i32* %{}, align 4\n",
+                            self.rc - 1,
+                            self.assign_i
+                        )
+                        .unwrap();
+                    }
+
+                    self.rc += 1;
+
+                    write!(f, "  br label %{}\n", melse_stmt_lah).unwrap();
+
+                    write!(f, "\n{}:\n", melse_stmt_lah).unwrap();
+
+                    if retf {
+                        write!(
+                            f,
+                            "  %{} = load i32, i32* %{}, align 4\n",
+                            self.rc, self.assign_i
+                        )
+                        .unwrap();
+                        self.rc += 1;
+                    }
+
+                    return ();
+                }
+                _ => unreachable!(),
+            },
             _ => (),
         }
 
@@ -270,82 +279,101 @@ impl Femitter {
         let lr = self.vr.pop().unwrap();
 
         match ns.c.value {
-            NodeKind::Add => {
-                write!(f, "  %{} = add nsw i32 %{}, %{}\n", self.rc, lr, rr).unwrap();
-                self.vr.push(self.rc);
-                self.rc += 1;
-            }
-            NodeKind::Sub => {
-                write!(f, "  %{} = sub nsw i32 %{}, %{}\n", self.rc, lr, rr).unwrap();
-                self.vr.push(self.rc);
-                self.rc += 1;
-            }
-            NodeKind::Mul => {
-                write!(f, "  %{} = mul nsw i32 %{}, %{}\n", self.rc, lr, rr).unwrap();
-                self.vr.push(self.rc);
-                self.rc += 1;
-            }
-            NodeKind::Div => {
-                write!(f, "  %{} = sdiv i32 %{}, %{}\n", self.rc, lr, rr).unwrap();
-                self.vr.push(self.rc);
-                self.rc += 1;
-            }
-            NodeKind::Sur => {
-                write!(f, "  %{} = srem i32 %{}, %{}\n", self.rc, lr, rr).unwrap();
-                self.vr.push(self.rc);
-                self.rc += 1;
-            }
-            NodeKind::E
+            NodeKind::Add
+            | NodeKind::Sub
+            | NodeKind::Mul
+            | NodeKind::Div
+            | NodeKind::Sur
+            | NodeKind::E
             | NodeKind::NE
             | NodeKind::L
             | NodeKind::LE
             | NodeKind::G
-            | NodeKind::GE => {
-                match ns.c.value {
-                    NodeKind::E => {
-                        write!(f, "  %{} = icmp eq i32 %{}, %{}\n", self.rc, lr, rr).unwrap();
-                        write!(f, "  %{} = zext i1 %{} to i32\n", self.rc + 1, self.rc).unwrap();
-                    }
-                    NodeKind::NE => {
-                        write!(f, "  %{} = icmp ne i32 %{}, %{}\n", self.rc, lr, rr).unwrap();
-                        write!(f, "  %{} = zext i1 %{} to i32\n", self.rc + 1, self.rc).unwrap();
-                    }
-                    NodeKind::L => {
-                        write!(f, "  %{} = icmp slt i32 %{}, %{}\n", self.rc, lr, rr).unwrap();
-                        write!(f, "  %{} = zext i1 %{} to i32\n", self.rc + 1, self.rc).unwrap();
-                    }
-                    NodeKind::LE => {
-                        write!(f, "  %{} = icmp sle i32 %{}, %{}\n", self.rc, lr, rr).unwrap();
-                        write!(f, "  %{} = zext i1 %{} to i32\n", self.rc + 1, self.rc).unwrap();
-                    }
-                    NodeKind::G => {
-                        write!(f, "  %{} = icmp sgt i32 %{}, %{}\n", self.rc, lr, rr).unwrap();
-                        write!(f, "  %{} = zext i1 %{} to i32\n", self.rc + 1, self.rc).unwrap();
-                    }
-                    NodeKind::GE => {
-                        write!(f, "  %{} = icmp sge i32 %{}, %{}\n", self.rc, lr, rr).unwrap();
-                        write!(f, "  %{} = zext i1 %{} to i32\n", self.rc + 1, self.rc).unwrap();
-                    }
-                    _ => unreachable!(),
+            | NodeKind::GE => match ns.c.value {
+                NodeKind::Add => {
+                    write!(f, "  %{} = add nsw i32 %{}, %{}\n", self.rc, lr, rr).unwrap();
+                    self.vr.push(self.rc);
+                    self.rc += 1;
                 }
-                write!(f, "  %{} = alloca i32, align 4\n", self.rc + 2).unwrap();
-                write!(
-                    f,
-                    "  store i32 %{}, i32* %{}, align 4\n",
-                    self.rc + 1,
-                    self.rc + 2
-                )
-                .unwrap();
-                write!(
-                    f,
-                    "  %{} = load i32, i32* %{}, align 4\n",
-                    self.rc + 3,
-                    self.rc + 2
-                )
-                .unwrap();
-                self.vr.push(self.rc + 3);
-                self.rc += 4;
-            }
+                NodeKind::Sub => {
+                    write!(f, "  %{} = sub nsw i32 %{}, %{}\n", self.rc, lr, rr).unwrap();
+                    self.vr.push(self.rc);
+                    self.rc += 1;
+                }
+                NodeKind::Mul => {
+                    write!(f, "  %{} = mul nsw i32 %{}, %{}\n", self.rc, lr, rr).unwrap();
+                    self.vr.push(self.rc);
+                    self.rc += 1;
+                }
+                NodeKind::Div => {
+                    write!(f, "  %{} = sdiv i32 %{}, %{}\n", self.rc, lr, rr).unwrap();
+                    self.vr.push(self.rc);
+                    self.rc += 1;
+                }
+                NodeKind::Sur => {
+                    write!(f, "  %{} = srem i32 %{}, %{}\n", self.rc, lr, rr).unwrap();
+                    self.vr.push(self.rc);
+                    self.rc += 1;
+                }
+                NodeKind::E
+                | NodeKind::NE
+                | NodeKind::L
+                | NodeKind::LE
+                | NodeKind::G
+                | NodeKind::GE => {
+                    match ns.c.value {
+                        NodeKind::E => {
+                            write!(f, "  %{} = icmp eq i32 %{}, %{}\n", self.rc, lr, rr).unwrap();
+                            write!(f, "  %{} = zext i1 %{} to i32\n", self.rc + 1, self.rc)
+                                .unwrap();
+                        }
+                        NodeKind::NE => {
+                            write!(f, "  %{} = icmp ne i32 %{}, %{}\n", self.rc, lr, rr).unwrap();
+                            write!(f, "  %{} = zext i1 %{} to i32\n", self.rc + 1, self.rc)
+                                .unwrap();
+                        }
+                        NodeKind::L => {
+                            write!(f, "  %{} = icmp slt i32 %{}, %{}\n", self.rc, lr, rr).unwrap();
+                            write!(f, "  %{} = zext i1 %{} to i32\n", self.rc + 1, self.rc)
+                                .unwrap();
+                        }
+                        NodeKind::LE => {
+                            write!(f, "  %{} = icmp sle i32 %{}, %{}\n", self.rc, lr, rr).unwrap();
+                            write!(f, "  %{} = zext i1 %{} to i32\n", self.rc + 1, self.rc)
+                                .unwrap();
+                        }
+                        NodeKind::G => {
+                            write!(f, "  %{} = icmp sgt i32 %{}, %{}\n", self.rc, lr, rr).unwrap();
+                            write!(f, "  %{} = zext i1 %{} to i32\n", self.rc + 1, self.rc)
+                                .unwrap();
+                        }
+                        NodeKind::GE => {
+                            write!(f, "  %{} = icmp sge i32 %{}, %{}\n", self.rc, lr, rr).unwrap();
+                            write!(f, "  %{} = zext i1 %{} to i32\n", self.rc + 1, self.rc)
+                                .unwrap();
+                        }
+                        _ => unreachable!(),
+                    }
+                    write!(f, "  %{} = alloca i32, align 4\n", self.rc + 2).unwrap();
+                    write!(
+                        f,
+                        "  store i32 %{}, i32* %{}, align 4\n",
+                        self.rc + 1,
+                        self.rc + 2
+                    )
+                    .unwrap();
+                    write!(
+                        f,
+                        "  %{} = load i32, i32* %{}, align 4\n",
+                        self.rc + 3,
+                        self.rc + 2
+                    )
+                    .unwrap();
+                    self.vr.push(self.rc + 3);
+                    self.rc += 4;
+                }
+                _ => unreachable!(),
+            },
             _ => unimplemented!(),
         }
     }
@@ -353,27 +381,30 @@ impl Femitter {
     pub fn calc_label(&mut self, ns: NodeSt) {
         // println!("ns.c.value: {:?}", ns.c.value);
         match ns.c.value {
-            NodeKind::Num(_) => {
-                self.lah += 2;
-                return ();
-            }
-            NodeKind::UnderScore => {
-                return ();
-            }
-            NodeKind::NewVar(_) => {
-                self.lah += 1;
-                self.calc_label(ns.to_owned().rhs.unwrap().as_ref().to_owned());
-                return ();
-            }
-            NodeKind::ReAssignVar(_) => {
-                return ();
-            }
-            NodeKind::GVar(_) => {
-                self.lah += 1;
-                return ();
-            }
-            NodeKind::LVar(_) => {
-                self.lah += 1;
+            NodeKind::Num(_)
+            | NodeKind::UnderScore
+            | NodeKind::NewVar(_)
+            | NodeKind::ReAssignVar(_)
+            | NodeKind::GVar(_)
+            | NodeKind::LVar(_) => {
+                match ns.c.value {
+                    NodeKind::Num(_) => {
+                        self.lah += 2;
+                    }
+                    NodeKind::UnderScore => {}
+                    NodeKind::NewVar(_) => {
+                        self.lah += 1;
+                        self.calc_label(ns.to_owned().rhs.unwrap().as_ref().to_owned());
+                    }
+                    NodeKind::ReAssignVar(_) => {}
+                    NodeKind::GVar(_) => {
+                        self.lah += 1;
+                    }
+                    NodeKind::LVar(_) => {
+                        self.lah += 1;
+                    }
+                    _ => unreachable!(),
+                }
                 return ();
             }
             _ => (),
@@ -383,30 +414,43 @@ impl Femitter {
         self.calc_label(ns.to_owned().rhs.unwrap().as_ref().to_owned());
 
         match ns.c.value {
-            NodeKind::Add => {
-                self.lah += 1;
-            }
-            NodeKind::Sub => {
-                self.lah += 1;
-            }
-            NodeKind::Mul => {
-                self.lah += 1;
-            }
-            NodeKind::Div => {
-                self.lah += 1;
-            }
-            NodeKind::Sur => {
-                self.lah += 1;
-            }
-            NodeKind::E
+            NodeKind::Add
+            | NodeKind::Sub
+            | NodeKind::Mul
+            | NodeKind::Div
+            | NodeKind::Sur
+            | NodeKind::E
             | NodeKind::NE
             | NodeKind::L
             | NodeKind::LE
             | NodeKind::G
-            | NodeKind::GE => {
-                self.lah += 4;
-            }
-            _ => unimplemented!(),
+            | NodeKind::GE => match ns.c.value {
+                NodeKind::Add => {
+                    self.lah += 1;
+                }
+                NodeKind::Sub => {
+                    self.lah += 1;
+                }
+                NodeKind::Mul => {
+                    self.lah += 1;
+                }
+                NodeKind::Div => {
+                    self.lah += 1;
+                }
+                NodeKind::Sur => {
+                    self.lah += 1;
+                }
+                NodeKind::E
+                | NodeKind::NE
+                | NodeKind::L
+                | NodeKind::LE
+                | NodeKind::G
+                | NodeKind::GE => {
+                    self.lah += 4;
+                }
+                _ => unreachable!(),
+            },
+            _ => unreachable!(),
         }
     }
 }
