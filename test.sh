@@ -46,8 +46,8 @@ assert_llvm 36 'fn int { int a = 3; int b = 4; b*a*3 }'
 assert_llvm 54 'fn int { int a = 3; int b = a*2; b*a*3 }'
 assert_llvm 15 'fn int { int r = 1; int l = 5; l + map 2 4 + + r }' simplified
 assert_llvm 120 'fn int { map 1 5 * }'
-assert_llvm 0 'fn { if (2 == 3) { 5+3; } else { 10+21; } _ }' calc_if_label
-assert_llvm 0 'fn { if (2 < 3) { 5+3; } else { 10; } _ }' calc_if_label
+assert_llvm 0 'fn { if (2 == 3) { 5+3; } else { 10+21; } }' calc_if_label
+assert_llvm 0 'fn { if (2 < 3) { 5+3; } else { 10; } }' calc_if_label
 assert_llvm 2 'fn int { int a = 3; a; a = 2; a }'
 assert_llvm 6 'fn int { int a = 3; a = 2*a; a }'
 assert_llvm 6 'fn int { int a = 3; int a = 2*a; a }'
