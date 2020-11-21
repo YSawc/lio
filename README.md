@@ -45,11 +45,11 @@ sudo bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"`
   - [ ] parser
   - [ ] whole of program
 - [ ] assign with block statements
-  - [ ] single block statement
+  - [x] [single block statement](https://github.com/YSawc/lio/commit/d0b4bd2475de2e61b3b4ae9e656829b27d1d030f)
   - [ ] while statement
   - [x] [if-else statement](https://github.com/YSawc/lio/commit/d242bcebcd65fcbcbb4bbf1104d4021fd5c43326)
 - [ ] inheritance value
-  - [ ] single block statement
+  - [x] [single block statement](https://github.com/YSawc/lio/commit/1948e97d17145848501717822e74a97813a7f8cb)
   - [ ] while statement
   - [x] [if-else statement](https://github.com/YSawc/lio/commit/7782886caa70e076a3d48a1a71f772846a83628e)
 - [ ] lifetime
