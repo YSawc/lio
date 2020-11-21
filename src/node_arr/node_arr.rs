@@ -154,24 +154,25 @@ impl NodeArr {
             ParseError::NotOpenedStmt(it.p.to_owned().peek().unwrap().to_owned().to_owned()),
         )?;
 
-        let (a, uev) = Self::parse_internal_statement(it, ev)?;
+        let mut narr = Self::new();
+        narr.set_env(ev);
+
+        let uev = narr.parse_internal_statement(it)?;
 
         it.expect_token(
             TokenKind::RBrace,
             ParseError::NotOpenedStmt(it.p.to_owned().peek().unwrap().to_owned().to_owned()),
         )?;
 
-        Ok((a, uev))
+        Ok((narr, uev))
     }
 
     pub fn parse_internal_statement(
+        &mut self,
         it: &mut TokenIter,
-        ev: Vec<Vec<Var>>,
-    ) -> Result<(Self, Vec<String>), ParseError> {
-        let mut a = Self::new();
-        a.set_env(ev);
+    ) -> Result<Vec<String>, ParseError> {
         let mut aln: i32 = 0;
-        while it.p.peek() != None && a.end_of_node == false {
+        while it.p.peek() != None && self.end_of_node == false {
             match NodeSt::parser(it) {
                 Ok(n) => match n.c.value {
                     NodeKind::Return
@@ -187,11 +188,11 @@ impl NodeArr {
                                     return Err(ParseError::OperatorAfterRetrun(it.next()));
                                 }
 
-                                a.set_end_of_node();
-                                a.set_imm_env();
-                                let r = beta(&mut n.to_owned().lhs.unwrap().to_owned(), &mut a)?;
-                                a.set_ret_node(r.to_owned());
-                                a.node_st_vec.push(r.to_owned());
+                                self.set_end_of_node();
+                                self.set_imm_env();
+                                let r = beta(&mut n.to_owned().lhs.unwrap().to_owned(), self)?;
+                                self.set_ret_node(r.to_owned());
+                                self.node_st_vec.push(r.to_owned());
                             }
                             NodeKind::NewAssign => {
                                 let mut _s = String::new();
@@ -204,14 +205,17 @@ impl NodeArr {
                                         };
                                     }
                                 }
-                                a.set_imm_env();
+                                self.set_imm_env();
 
-                                let rhs = a.parse_close_imm(it)?;
+                                let rhs = self.parse_close_imm(it)?;
 
-                                match Program::find_v(_s.to_owned(), a.imm_env_v.to_owned()) {
+                                match Program::find_v(_s.to_owned(), self.imm_env_v.to_owned()) {
                                     Some(f) => {
-                                        match a.used_variable.contains(&f.to_owned().s.to_owned()) {
-                                            true => a
+                                        match self
+                                            .used_variable
+                                            .contains(&f.to_owned().s.to_owned())
+                                        {
+                                            true => self
                                                 .used_variable
                                                 .retain(|s| s != &f.to_owned().s.to_owned()),
                                             false => {
@@ -229,12 +233,12 @@ impl NodeArr {
                                     _ => Var::new_l(_s, n.to_owned(), aln),
                                 };
                                 if v.to_owned().m {
-                                    a.used_variable.push(v.to_owned().s);
+                                    self.used_variable.push(v.to_owned().s);
                                 }
-                                a.l.push(v.to_owned());
+                                self.l.push(v.to_owned());
 
                                 let avar = NodeSt::ass_var(v.to_owned().aln, rhs, n.c.loc);
-                                a.node_st_vec.push(avar);
+                                self.node_st_vec.push(avar);
                             }
                             NodeKind::Assign => {
                                 let mut _s = String::new();
@@ -248,25 +252,25 @@ impl NodeArr {
                                     }
                                 }
 
-                                a.set_imm_env();
-                                match Program::find_v(_s.to_owned(), a.imm_env_v.to_owned()) {
+                                self.set_imm_env();
+                                match Program::find_v(_s.to_owned(), self.imm_env_v.to_owned()) {
                                     Some(mut f) => {
                                         // println!("a.used_variable: {:?}", a.used_variable);
 
-                                        let rhs = a.parse_close_imm(it)?;
+                                        let rhs = self.parse_close_imm(it)?;
 
                                         f.n = rhs.to_owned();
                                         let ff = f.to_owned();
-                                        if a.l.contains(&ff) {
-                                            a.l.retain(|s| s.s != _s.to_owned());
-                                            a.l.push(ff);
+                                        if self.l.contains(&ff) {
+                                            self.l.retain(|s| s.s != _s.to_owned());
+                                            self.l.push(ff);
                                         }
                                         let rvar = NodeSt::r_var(
                                             f.to_owned().aln,
                                             rhs,
                                             n.c.loc.to_owned(),
                                         );
-                                        a.node_st_vec.push(rvar);
+                                        self.node_st_vec.push(rvar);
                                     }
                                     _ => {
                                         return Err(ParseError::UndefinedVariable(
@@ -281,35 +285,35 @@ impl NodeArr {
                                         n.to_owned().c.loc,
                                     ));
                                 }
-                                a.set_end_of_node();
+                                self.set_end_of_node();
 
                                 let n = NodeSt::under_score(n.c.loc);
-                                a.set_ret_node(n.to_owned());
-                                a.node_st_vec.push(n);
+                                self.set_ret_node(n.to_owned());
+                                self.node_st_vec.push(n);
                             }
                             NodeKind::If => {
-                                a.parse_if(it, n)?;
+                                self.parse_if(it, n)?;
                             }
                             NodeKind::LBrace => {
-                                a.parse_stmt(it, n)?;
+                                self.parse_stmt(it, n)?;
                             }
                             _ => unreachable!(),
                         }
                     }
                     _ => {
-                        a.set_imm_env();
-                        let n = beta(&mut n.to_owned(), &mut a)?;
-                        a.node_st_vec.push(n.to_owned());
+                        self.set_imm_env();
+                        let n = beta(&mut n.to_owned(), self)?;
+                        self.node_st_vec.push(n.to_owned());
 
                         match it.check_evaluate_type() {
                             true => {
-                                a.set_end_of_node();
-                                a.set_ret_node(n.to_owned());
+                                self.set_end_of_node();
+                                self.set_ret_node(n.to_owned());
                             }
                             false => match it.check_evaluate_void() {
                                 true => {
-                                    a.set_end_of_node();
-                                    a.set_ret_node(NodeSt::default());
+                                    self.set_end_of_node();
+                                    self.set_ret_node(NodeSt::default());
                                 }
                                 false => (),
                             },
@@ -320,36 +324,36 @@ impl NodeArr {
             };
 
             if it.peek_value() == TokenKind::RBrace {
-                if a.none_ret_node() {
-                    a.set_end_of_node();
+                if self.none_ret_node() {
+                    self.set_end_of_node();
                     let n = NodeSt::under_score(Loc::default());
-                    a.set_ret_node(n.to_owned());
-                    a.node_st_vec.push(n);
+                    self.set_ret_node(n.to_owned());
+                    self.node_st_vec.push(n);
                 }
             }
         }
 
-        println!("a.used_variable: {:?}", a.used_variable);
+        println!("self.used_variable: {:?}", self.used_variable);
 
-        for l in a.to_owned().l {
-            match a.used_variable.contains(&l.to_owned().s.to_owned()) {
+        for l in self.to_owned().l {
+            match self.used_variable.contains(&l.to_owned().s.to_owned()) {
                 true => (),
                 false => return Err(ParseError::UnusedVariable(l.n.c.loc)),
             }
         }
-        // println!("ret_node_st: {:?}", a.ret_node_st);
+        // println!("self.ret_node_st: {:?}", self.ret_node_st);
 
         let mut ugv: Vec<String> = vec![];
-        for evc in a.env_v.to_owned() {
+        for evc in self.env_v.to_owned() {
             for v in evc {
                 // println!("v: {:?}", v);
-                match a.used_variable.contains(&v.to_owned().s.to_owned()) {
+                match self.used_variable.contains(&v.to_owned().s.to_owned()) {
                     true => ugv.push(v.to_owned().s.to_owned()),
                     false => (),
                 }
             }
         }
-        Ok((a, ugv))
+        Ok(ugv)
     }
 }
 
