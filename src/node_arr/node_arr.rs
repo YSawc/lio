@@ -52,6 +52,14 @@ impl NodeArr {
         }
     }
 
+    pub fn is_default(self) -> bool {
+        return if self.node_st_vec == vec![] {
+            true
+        } else {
+            false
+        };
+    }
+
     pub fn set_node(&mut self, v: Vec<NodeSt>) {
         self.node_st_vec = v.to_owned();
         self.ret_node_st = v.last().unwrap().to_owned();
@@ -344,22 +352,24 @@ impl NodeArr {
         let (if_stmts, uev) = Self::parse_statement(it, self.imm_env_v.to_owned())?;
         self.update_used_variable(uev);
 
-        let (_else_if_stmts, uev) = match it.p.peek().unwrap().value {
+        let (else_if_stmts, uev) = match it.p.peek().unwrap().value {
             TokenKind::Else => {
                 it.next();
                 Self::parse_statement(it, self.imm_env_v.to_owned())?
             }
-            _ => unimplemented!(),
+            _ => (NodeArr::new(), vec![]),
         };
         self.update_used_variable(uev);
 
         let if_stmts_isi = NodeSt::isi(if_stmts.ret_node_st.to_owned());
-        let else_if_stmts_isi = NodeSt::isi(_else_if_stmts.ret_node_st.to_owned());
+        let else_if_stmts_isi = NodeSt::isi(else_if_stmts.ret_node_st.to_owned());
 
-        if if_stmts_isi != else_if_stmts_isi {
-            return Err(ParseError::NotMatchTypeAnotherOneOfStatement(
-                it.p.peek().unwrap().loc.to_owned(),
-            ));
+        if !else_if_stmts.to_owned().is_default() {
+            if if_stmts_isi != else_if_stmts_isi {
+                return Err(ParseError::NotMatchTypeAnotherOneOfStatement(
+                    it.p.peek().unwrap().loc.to_owned(),
+                ));
+            }
         }
 
         if it.peek_value() == TokenKind::RBrace {
@@ -382,7 +392,7 @@ impl NodeArr {
             false => {
                 let mut n = n.to_owned();
                 n.if_stmts = Some(Box::new(if_stmts.to_owned()));
-                n.else_if_stmts = Some(Box::new(_else_if_stmts.to_owned()));
+                n.else_if_stmts = Some(Box::new(else_if_stmts.to_owned()));
                 n.cond = Some(Box::new(c));
                 self.node_st_vec.push(n.to_owned());
 
@@ -402,13 +412,13 @@ impl NodeArr {
                         if num == 0 {
                             if self.end_of_node {
                                 self.ret_node_st = match else_if_stmts_isi {
-                                    true => _else_if_stmts.ret_node_st,
+                                    true => else_if_stmts.ret_node_st,
                                     false => NodeSt::under_score(Loc::default()),
                                 }
                             }
 
                             self.node_st_vec
-                                .append(&mut _else_if_stmts.node_st_vec.to_owned());
+                                .append(&mut else_if_stmts.node_st_vec.to_owned());
                             return Ok(());
                         }
 
@@ -428,7 +438,7 @@ impl NodeArr {
                         let mut n = beta(&mut n.to_owned(), self)?;
 
                         n.if_stmts = Some(Box::new(if_stmts.to_owned()));
-                        n.else_if_stmts = Some(Box::new(_else_if_stmts.to_owned()));
+                        n.else_if_stmts = Some(Box::new(else_if_stmts.to_owned()));
                         n.cond = Some(Box::new(c));
                         self.node_st_vec.push(n.to_owned());
 

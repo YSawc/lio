@@ -239,14 +239,16 @@ impl Femitter {
                         self.emitter(f, ielse_if_stmts.next().unwrap().to_owned())
                     }
 
-                    if retf {
-                        write!(
-                            f,
-                            "  store i32 %{}, i32* %{}, align 4\n",
-                            self.rc - 1,
-                            self.assign_i
-                        )
-                        .unwrap();
+                    if !else_if_stmts.is_default() {
+                        if retf {
+                            write!(
+                                f,
+                                "  store i32 %{}, i32* %{}, align 4\n",
+                                self.rc - 1,
+                                self.assign_i
+                            )
+                            .unwrap();
+                        }
                     }
 
                     self.rc += 1;
