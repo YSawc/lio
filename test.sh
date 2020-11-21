@@ -25,7 +25,7 @@ echo "Starts llvm tests!"
 
 assert_llvm 42 'fn int { return 42; }'
 assert_llvm 0 'fn { _ }'
-assert_llvm 0 'fn { int _a = 3*4; _ }'
+assert_llvm 0 'fn { int _a = 3*4; }'
 assert_llvm 7 'fn int { int a = 3+4; return a; }'
 assert_llvm 12 'fn int { int a = 3*4; a }'
 assert_llvm 8 'fn int { int _a = 3*4; 2+3*2 }' simplified
@@ -56,28 +56,28 @@ assert_llvm 1 'fn int { 1 }'
 assert_llvm 2 'fn int { 2 }'
 assert_llvm 3 'fn int { return 3; }'
 assert_llvm 0 'fn { _ }'
-assert_llvm 0 'fn { int vvv = 55; 0*vvv*0; _ }'
-assert_llvm 0 'fn { int vvv = 4; 1+2*vvv/4-1; _ }'
-assert_llvm 0 'fn { int vvv = 4; 1+2*vvv/4-1; _ }' simplified
+assert_llvm 0 'fn { int vvv = 55; 0*vvv*0; }'
+assert_llvm 0 'fn { int vvv = 4; 1+2*vvv/4-1; }'
+assert_llvm 0 'fn { int vvv = 4; 1+2*vvv/4-1; }' simplified
 assert_llvm 27 'int g = 9; fn int { g*3 }'
 assert_llvm 8 'int g = 8; fn int { int v = 4; 1+v*g/4-1 }'
 assert_llvm 8 'int g = 8; fn int { int v = 4; 1+v*g/4-1 }'
 assert_llvm 8 'int g = 8; fn int { int v = 4; return 1+v*g/4-1; }'
-assert_llvm 0 'int g = 2; fn { int v = 4; 1+v*g/4-1; _ }'
-assert_llvm 0 'int g = 2; fn { int v = 4; 1+v*g/4-1; _ }' simplified
+assert_llvm 0 'int g = 2; fn { int v = 4; 1+v*g/4-1; }'
+assert_llvm 0 'int g = 2; fn { int v = 4; 1+v*g/4-1; }' simplified
 assert_llvm 10 'int g = 2; int l = 3; int o = 4; fn int { int v = 4; l+v*o/g-1 }' simplified
-assert_llvm 0 'int g = 2; int l = 3; int o = 4; fn { int v = 4; l+v*o/g-1; _ }'
+assert_llvm 0 'int g = 2; int l = 3; int o = 4; fn { int v = 4; l+v*o/g-1; }'
 assert_llvm 3 'int g = 10; fn int { g; int g = 3; g }'
 assert_llvm 13 'int g = 10; fn int { int g = 3+g; g }'
 assert_llvm 0 'int _g = 10; fn { _ }'
-assert_llvm 0 'fn { int _u = 8; _ }'
+assert_llvm 0 'fn { int _u = 8; }'
 assert_llvm 16 'fn int { int _u = 8; int a = 2; a*_u }'
 assert_llvm 34 'fn int { int _u = 8; int a = 2; 4+2*a*_u-2 }'
 assert_llvm 4 'fn int { if (3) { 0 } else { 0 } 4 }'
 assert_llvm 4 'fn int { if (2 == 3) { 1; 2 } else { 3; 4 } }' calc_if_label
 assert_llvm 4 'fn int { if (2 == 3) { 1; 2 } else { 3; 4 } }'
-assert_llvm 0 'fn { if (2 == 3) { 1; _ } else { 3; _ } }' calc_if_label
-assert_llvm 0 'fn { if (2 == 3) { 1; _ } else { 3; _ } }'
+assert_llvm 0 'fn { if (2 == 3) { 1; } else { 3; } }' calc_if_label
+assert_llvm 0 'fn { if (2 == 3) { 1; } else { 3; } }'
 assert_llvm 0 'fn { int i = 9; if (i) { 1; 2; } else { 3*4; 5; } }' calc_if_label
 assert_llvm 0 'fn { int i = 9; if (i) { 1; 2; } else { 3*4; 5; } }'
 assert_llvm 2 'fn int { int i = 9; if (i) { i; 2 } else { 3*4; 5 } }' calc_if_label
@@ -101,8 +101,8 @@ assert_llvm 10 'fn int { if (1) { 2; 10 } else { 3*4; 5 } }' calc_if_label
 assert_llvm 0 'fn { if (0) { 2; 10; } else { 3*4; 5; } }' calc_if_label
 assert_llvm 0 'fn { if (1) { 2; 10; } else { 3*4; 5; } }' calc_if_label
 assert_llvm 24 'fn int { int i = 4; int j = if (3) { int j = 6*i; j } else { 9 } j }'
-assert_llvm 2 'fn int { int i = 1; if (3) { i = 2; 0; } i }'
-assert_llvm 1 'fn int { int i = 1; if (0) { i = 2; 0; } i }'
+assert_llvm 2 'fn int { int i = 1; if (3) { i = 2; } i }'
+assert_llvm 1 'fn int { int i = 1; if (0) { i = 2; } i }'
 
 echo "------------------------------"
 echo "All llvm test passed!\n"

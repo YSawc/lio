@@ -135,7 +135,7 @@ fn operator_out_of_function_test() {
 
 #[test]
 fn not_match_return_type_test() {
-    let mut t = Token::tokenize("fn { 12+3; }").unwrap();
+    let mut t = Token::tokenize("fn { 12+3; 0 }").unwrap();
     let mut it = TokenIter::new(&mut t);
     let n = match NodeArr::w_parser(&mut it, vec![]) {
         Ok(_) => false,

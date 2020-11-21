@@ -78,6 +78,10 @@ impl NodeArr {
         self.imm_env_v.push(self.l.to_owned());
     }
 
+    pub fn none_ret_node(&mut self) -> bool {
+        self.ret_node_st == NodeSt::default()
+    }
+
     pub fn set_ret_node(&mut self, v: NodeSt) {
         self.ret_node_st = v;
     }
@@ -310,6 +314,15 @@ impl NodeArr {
                 },
                 Err(e) => return Err(e),
             };
+
+            if it.peek_value() == TokenKind::RBrace {
+                if a.none_ret_node() {
+                    a.set_end_of_node();
+                    let n = NodeSt::under_score(Loc::default());
+                    a.set_ret_node(n.to_owned());
+                    a.node_st_vec.push(n);
+                }
+            }
         }
 
         println!("a.used_variable: {:?}", a.used_variable);
