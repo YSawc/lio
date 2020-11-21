@@ -108,7 +108,8 @@ impl Femitter {
             | NodeKind::ReAssignVar(_)
             | NodeKind::GVar(_)
             | NodeKind::LVar(_)
-            | NodeKind::If => match ns.c.value {
+            | NodeKind::If
+            | NodeKind::LBrace => match ns.c.value {
                 NodeKind::Num(n) => {
                     write!(f, "  %{} = alloca i32, align 4\n", self.rc).unwrap();
                     write!(f, "  store i32 {}, i32* %{}, align 4\n", n, self.rc).unwrap();
@@ -267,6 +268,15 @@ impl Femitter {
                         self.rc += 1;
                     }
 
+                    return ();
+                }
+                NodeKind::LBrace => {
+                    let stmts: NodeArr = *ns.to_owned().stmts.to_owned().unwrap();
+                    let mut istmts = stmts.node_st_vec.iter().peekable();
+
+                    while istmts.peek() != None {
+                        self.emitter(f, istmts.next().unwrap().to_owned())
+                    }
                     return ();
                 }
                 _ => unreachable!(),

@@ -52,6 +52,7 @@ pub struct NodeSt {
     pub cond: Option<Box<NodeSt>>,
     pub if_stmts: Option<Box<NodeArr>>,
     pub else_if_stmts: Option<Box<NodeArr>>,
+    pub stmts: Option<Box<NodeArr>>,
 }
 
 impl Node {
@@ -120,6 +121,9 @@ impl Node {
     }
     pub fn melse(loc: Loc) -> Self {
         Self::new(NodeKind::Else, loc)
+    }
+    pub fn st(loc: Loc) -> Self {
+        Self::new(NodeKind::LBrace, loc)
     }
     pub fn mfn(loc: Loc) -> Self {
         Self::new(NodeKind::Fn, loc)
@@ -207,9 +211,7 @@ impl NodeSt {
             | NodeKind::Ident(_)
             | NodeKind::GVar(_)
             | NodeKind::LVar(_) => true,
-            | NodeKind::If => {
-                self.if_stmts.unwrap().ret_node_st.isi()
-            },
+            NodeKind::If => self.if_stmts.unwrap().ret_node_st.isi(),
             _ => false,
         }
     }

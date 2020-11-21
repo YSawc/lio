@@ -59,102 +59,110 @@ impl NodeSt {
 
     pub fn stmt(it: &mut TokenIter) -> Result<NodeSt, ParseError> {
         match it.p.peek().unwrap().value {
-            TokenKind::Return | TokenKind::Int | TokenKind::If | TokenKind::UnderScore => {
-                match it.p.peek().unwrap() {
-                    Token {
-                        value: TokenKind::Return,
-                        loc,
-                    } => {
-                        it.next_with_shadow();
-                        let op = Node::ret(loc.to_owned());
-                        let mut lhs = Self::cmp(it)?;
-                        lhs = Self::new_unary(op, lhs);
-                        if it.p.peek() == None {
-                            return Err(ParseError::NotClosedStmt(
-                                it.shadow_p.next().unwrap().to_owned(),
-                            ));
-                        }
-                        it.expect_token(
-                            TokenKind::SemiColon,
-                            ParseError::NotClosedStmt(
-                                it.p.to_owned().peek().unwrap().to_owned().to_owned(),
-                            ),
-                        )?;
-                        return Ok(lhs);
+            TokenKind::Return
+            | TokenKind::Int
+            | TokenKind::If
+            | TokenKind::LBrace
+            | TokenKind::UnderScore => match it.p.peek().unwrap() {
+                Token {
+                    value: TokenKind::Return,
+                    loc,
+                } => {
+                    it.next_with_shadow();
+                    let op = Node::ret(loc.to_owned());
+                    let mut lhs = Self::cmp(it)?;
+                    lhs = Self::new_unary(op, lhs);
+                    if it.p.peek() == None {
+                        return Err(ParseError::NotClosedStmt(
+                            it.shadow_p.next().unwrap().to_owned(),
+                        ));
                     }
-                    Token {
-                        value: TokenKind::Int,
-                        loc,
-                    } => {
-                        it.p.next().unwrap();
-                        let i = Node::int(loc.to_owned());
-                        let (s, _) = it.expect_ident(ParseError::NotIdent(
+                    it.expect_token(
+                        TokenKind::SemiColon,
+                        ParseError::NotClosedStmt(
                             it.p.to_owned().peek().unwrap().to_owned().to_owned(),
-                        ))?;
-                        let l = Self::new_ident(
-                            s.to_owned(),
-                            it.p.peek().unwrap().to_owned().to_owned(),
-                        );
-                        let l = Self::new_unary(i, l);
-                        it.expect_token(
-                            TokenKind::Assign,
-                            ParseError::NotAssign(
-                                it.p.to_owned().peek().unwrap().to_owned().to_owned(),
-                            ),
-                        )?;
-                        let op = Node::new_assign(loc.to_owned());
-                        let lhs = Self::new_unary(op, l);
-                        return Ok(lhs);
-                    }
-                    Token {
-                        value: TokenKind::If,
-                        loc,
-                    } => {
-                        it.p.next().unwrap();
-                        let op = Node::mif(loc.to_owned());
-                        it.expect_token(
-                            TokenKind::LParen,
-                            ParseError::NotOpenedParen(
-                                it.p.to_owned().peek().unwrap().to_owned().to_owned(),
-                            ),
-                        )?;
-
-                        let cond = Self::cmp(it)?;
-                        it.expect_token(
-                            TokenKind::RParen,
-                            ParseError::NotClosedStmt(
-                                it.p.to_owned().peek().unwrap().to_owned().to_owned(),
-                            ),
-                        )?;
-                        let lhs = Self::new_if(op, cond.to_owned());
-                        return Ok(lhs);
-                    }
-                    Token {
-                        value: TokenKind::UnderScore,
-                        loc,
-                    } => {
-                        it.next_with_shadow();
-                        let u = Node::under_score(loc.to_owned());
-                        let op = Self::new_node(u);
-                        if it.p.peek() == None {
-                            it.shadow_p.next();
-                            return Err(ParseError::NotClosedStmt(
-                                it.shadow_p.next().unwrap().to_owned(),
-                            ));
-                        }
-
-                        it.unexpect_token(
-                            TokenKind::SemiColon,
-                            ParseError::UnexpectedUnderScoreOperator(
-                                it.p.to_owned().peek().unwrap().to_owned().to_owned().loc,
-                            ),
-                        )?;
-
-                        return Ok(op);
-                    }
-                    _ => unreachable!(),
+                        ),
+                    )?;
+                    return Ok(lhs);
                 }
-            }
+                Token {
+                    value: TokenKind::Int,
+                    loc,
+                } => {
+                    it.p.next().unwrap();
+                    let i = Node::int(loc.to_owned());
+                    let (s, _) = it.expect_ident(ParseError::NotIdent(
+                        it.p.to_owned().peek().unwrap().to_owned().to_owned(),
+                    ))?;
+                    let l =
+                        Self::new_ident(s.to_owned(), it.p.peek().unwrap().to_owned().to_owned());
+                    let l = Self::new_unary(i, l);
+                    it.expect_token(
+                        TokenKind::Assign,
+                        ParseError::NotAssign(
+                            it.p.to_owned().peek().unwrap().to_owned().to_owned(),
+                        ),
+                    )?;
+                    let op = Node::new_assign(loc.to_owned());
+                    let lhs = Self::new_unary(op, l);
+                    return Ok(lhs);
+                }
+                Token {
+                    value: TokenKind::If,
+                    loc,
+                } => {
+                    it.p.next().unwrap();
+                    let op = Node::mif(loc.to_owned());
+                    it.expect_token(
+                        TokenKind::LParen,
+                        ParseError::NotOpenedParen(
+                            it.p.to_owned().peek().unwrap().to_owned().to_owned(),
+                        ),
+                    )?;
+
+                    let cond = Self::cmp(it)?;
+                    it.expect_token(
+                        TokenKind::RParen,
+                        ParseError::NotClosedStmt(
+                            it.p.to_owned().peek().unwrap().to_owned().to_owned(),
+                        ),
+                    )?;
+                    let lhs = Self::new_if(op, cond.to_owned());
+                    return Ok(lhs);
+                }
+                Token {
+                    value: TokenKind::LBrace,
+                    loc,
+                } => {
+                    let st = Node::st(loc.to_owned());
+                    let lhs = Self::new_node(st);
+                    return Ok(lhs);
+                }
+                Token {
+                    value: TokenKind::UnderScore,
+                    loc,
+                } => {
+                    it.next_with_shadow();
+                    let u = Node::under_score(loc.to_owned());
+                    let op = Self::new_node(u);
+                    if it.p.peek() == None {
+                        it.shadow_p.next();
+                        return Err(ParseError::NotClosedStmt(
+                            it.shadow_p.next().unwrap().to_owned(),
+                        ));
+                    }
+
+                    it.unexpect_token(
+                        TokenKind::SemiColon,
+                        ParseError::UnexpectedUnderScoreOperator(
+                            it.p.to_owned().peek().unwrap().to_owned().to_owned().loc,
+                        ),
+                    )?;
+
+                    return Ok(op);
+                }
+                _ => unreachable!(),
+            },
             _ => return Self::cmp(it),
         }
     }

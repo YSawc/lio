@@ -178,7 +178,8 @@ impl NodeArr {
                     | NodeKind::NewAssign
                     | NodeKind::Assign
                     | NodeKind::UnderScore
-                    | NodeKind::If => {
+                    | NodeKind::If
+                    | NodeKind::LBrace => {
                         // println!("n.c.value: {:?}", n.c.value);
                         match n.c.value {
                             NodeKind::Return => {
@@ -289,6 +290,30 @@ impl NodeArr {
                             NodeKind::If => {
                                 a.parse_if(it, n)?;
                             }
+                            NodeKind::LBrace => {
+                                a.set_imm_env();
+                                let (stmts, uev) =
+                                    Self::parse_statement(it, a.imm_env_v.to_owned())?;
+                                a.update_used_variable(uev);
+                                if it.peek_value() == TokenKind::RBrace {
+                                    a.set_end_of_node()
+                                }
+
+                                let stmt_isi = NodeSt::isi(stmts.ret_node_st.to_owned());
+
+                                if a.end_of_node {
+                                    a.ret_node_st = match stmt_isi {
+                                        true => stmts.to_owned().ret_node_st,
+                                        false => NodeSt::under_score(Loc::default()),
+                                    }
+                                }
+
+                                let mut n = n.to_owned();
+                                println!("n {:?}", n);
+
+                                n.stmts = Some(Box::new(stmts));
+                                a.node_st_vec.push(n.to_owned());
+                            }
                             _ => unreachable!(),
                         }
                     }
@@ -351,10 +376,6 @@ impl NodeArr {
 
 impl NodeArr {
     pub fn parse_if(&mut self, it: &mut TokenIter, n: NodeSt) -> Result<(), ParseError> {
-        if it.p.peek() == None {
-            return Err(ParseError::Eof);
-        }
-
         self.set_imm_env();
 
         let (if_stmts, uev) = Self::parse_statement(it, self.imm_env_v.to_owned())?;

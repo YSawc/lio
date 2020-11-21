@@ -103,6 +103,10 @@ assert_llvm 0 'fn { if (1) { 2; 10; } else { 3*4; 5; } }' calc_if_label
 assert_llvm 24 'fn int { int i = 4; int j = if (3) { int j = 6*i; j } else { 9 } j }'
 assert_llvm 2 'fn int { int i = 1; if (3) { i = 2; } i }'
 assert_llvm 1 'fn int { int i = 1; if (0) { i = 2; } i }'
+assert_llvm 0 'fn { { _ } }'
+assert_llvm 90 'fn int { int i = 3; { int i = i*30; i } }'
+assert_llvm 3 'fn int { int i = 3; { i*30 } i }'
+# assert_llvm 90 'fn int { int i = 3; i = { i*30 } i }'
 
 echo "------------------------------"
 echo "All llvm test passed!\n"
