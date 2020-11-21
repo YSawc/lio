@@ -106,7 +106,7 @@ assert_llvm 1 'fn int { int i = 1; if (0) { i = 2; } i }'
 assert_llvm 0 'fn { { _ } }'
 assert_llvm 90 'fn int { int i = 3; { int i = i*30; i } }'
 assert_llvm 3 'fn int { int i = 3; { i*30 } i }'
-# assert_llvm 90 'fn int { int i = 3; i = { i*30 } i }'
+assert_llvm 90 'fn int { int i = 3; i = { i*30 } i }'
 
 echo "------------------------------"
 echo "All llvm test passed!\n"

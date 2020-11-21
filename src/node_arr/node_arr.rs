@@ -291,28 +291,7 @@ impl NodeArr {
                                 a.parse_if(it, n)?;
                             }
                             NodeKind::LBrace => {
-                                a.set_imm_env();
-                                let (stmts, uev) =
-                                    Self::parse_statement(it, a.imm_env_v.to_owned())?;
-                                a.update_used_variable(uev);
-                                if it.peek_value() == TokenKind::RBrace {
-                                    a.set_end_of_node()
-                                }
-
-                                let stmt_isi = NodeSt::isi(stmts.ret_node_st.to_owned());
-
-                                if a.end_of_node {
-                                    a.ret_node_st = match stmt_isi {
-                                        true => stmts.to_owned().ret_node_st,
-                                        false => NodeSt::under_score(Loc::default()),
-                                    }
-                                }
-
-                                let mut n = n.to_owned();
-                                println!("n {:?}", n);
-
-                                n.stmts = Some(Box::new(stmts));
-                                a.node_st_vec.push(n.to_owned());
+                                a.parse_stmt(it, n)?;
                             }
                             _ => unreachable!(),
                         }
@@ -484,6 +463,31 @@ impl NodeArr {
             }
         }
     }
+
+    pub fn parse_stmt(&mut self, it: &mut TokenIter, n: NodeSt) -> Result<(), ParseError> {
+        self.set_imm_env();
+        let (stmts, uev) = Self::parse_statement(it, self.imm_env_v.to_owned())?;
+        self.update_used_variable(uev);
+        if it.peek_value() == TokenKind::RBrace {
+            self.set_end_of_node()
+        }
+
+        let stmt_isi = NodeSt::isi(stmts.ret_node_st.to_owned());
+
+        if self.end_of_node {
+            self.ret_node_st = match stmt_isi {
+                true => stmts.to_owned().ret_node_st,
+                false => NodeSt::under_score(Loc::default()),
+            }
+        }
+
+        let mut n = n.to_owned();
+
+        n.stmts = Some(Box::new(stmts));
+        self.node_st_vec.push(n.to_owned());
+
+        return Ok(());
+    }
 }
 
 impl NodeArr {
@@ -503,6 +507,23 @@ impl NodeArr {
                             .last()
                             .unwrap()
                             .if_stmts
+                            .to_owned()
+                            .unwrap()
+                            .ret_node_st,
+                    ) {
+                        true => Ok(self.pop_node()),
+                        false => Err(ParseError::NotImmediate(
+                            it.shadow_p.peek().unwrap().loc.to_owned(),
+                        )),
+                    }
+                }
+                NodeKind::LBrace => {
+                    self.parse_stmt(it, n.to_owned())?;
+                    match NodeSt::isi(
+                        self.node_st_vec
+                            .last()
+                            .unwrap()
+                            .stmts
                             .to_owned()
                             .unwrap()
                             .ret_node_st,
