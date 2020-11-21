@@ -393,14 +393,14 @@ impl NodeArr {
 
         use std::env;
         let args: Vec<String> = env::args().collect();
-        let mut calc_if_label = false;
+        let mut calc_cond = false;
         if args.len() > 3 {
-            if args[3] == "calc_if_label" {
-                calc_if_label = true;
+            if args[3] == "calc_cond_label" {
+                calc_cond = true;
             }
         }
 
-        match calc_if_label {
+        match calc_cond {
             false => {
                 let mut n = n.to_owned();
                 n.if_stmts = Some(Box::new(if_stmts.to_owned()));
