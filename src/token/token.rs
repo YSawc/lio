@@ -28,6 +28,7 @@ pub enum TokenKind {
     Map,
     If,
     Else,
+    While,
     Fn,
     LBrace,
     RBrace,
@@ -103,6 +104,9 @@ impl Token {
     pub fn melse(loc: Loc) -> Self {
         Self::new(TokenKind::Else, loc)
     }
+    pub fn mwhile(loc: Loc) -> Self {
+        Self::new(TokenKind::While, loc)
+    }
     pub fn mfn(loc: Loc) -> Self {
         Self::new(TokenKind::Fn, loc)
     }
@@ -150,6 +154,7 @@ impl Token {
             map.insert("map".into(), TokenKind::Map);
             map.insert("if".into(), TokenKind::If);
             map.insert("else".into(), TokenKind::Else);
+            map.insert("while".into(), TokenKind::While);
             map.insert("fn".into(), TokenKind::Fn);
             map
         }

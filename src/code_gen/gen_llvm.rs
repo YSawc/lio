@@ -109,6 +109,7 @@ impl Femitter {
             | NodeKind::GVar(_)
             | NodeKind::LVar(_)
             | NodeKind::If
+            | NodeKind::While
             | NodeKind::LBrace => match ns.c.value {
                 NodeKind::Num(n) => {
                     write!(f, "  %{} = alloca i32, align 4\n", self.rc).unwrap();
@@ -257,6 +258,76 @@ impl Femitter {
                     write!(f, "  br label %{}\n", melse_stmt_lah).unwrap();
 
                     write!(f, "\n{}:\n", melse_stmt_lah).unwrap();
+
+                    if retf {
+                        write!(
+                            f,
+                            "  %{} = load i32, i32* %{}, align 4\n",
+                            self.rc, self.assign_i
+                        )
+                        .unwrap();
+                        self.rc += 1;
+                    }
+
+                    return ();
+                }
+                NodeKind::While => {
+                    let stmts: NodeArr = *ns.to_owned().stmts.to_owned().unwrap();
+                    let mut istmts = stmts.node_st_vec.iter().peekable();
+
+                    let retf = if stmts.ret_node_st != NodeSt::default() {
+                        write!(f, "  %{} = alloca i32, align 4\n", self.rc).unwrap();
+                        true
+                    } else {
+                        false
+                    };
+
+                    if retf {
+                        self.assign_i = self.rc;
+                        self.rc += 1;
+                    }
+
+                    let condl = self.rc;
+                    write!(f, "  br label %{}\n", condl).unwrap();
+                    self.rc += 1;
+
+                    write!(f, "\n{}:\n", condl).unwrap();
+                    self.emitter(f, ns.to_owned().cond.unwrap().as_ref().to_owned());
+                    write!(f, "  %{} = icmp ne i32 %{}, 0\n", self.rc, self.rc - 1).unwrap();
+                    while istmts.peek() != None {
+                        self.calc_label(istmts.next().unwrap().to_owned())
+                    }
+                    let stmt_lah = self.rc + self.lah + 2;
+                    write!(
+                        f,
+                        "  br i1 %{}, label %{}, label %{}\n",
+                        self.rc,
+                        self.rc + 1,
+                        stmt_lah,
+                    )
+                    .unwrap();
+
+                    write!(f, "\n{}:\n", self.rc + 1).unwrap();
+                    self.rc += 2;
+                    let mut istmts = stmts.node_st_vec.iter().peekable();
+                    while istmts.peek() != None {
+                        self.emitter(f, istmts.next().unwrap().to_owned())
+                    }
+
+                    if retf {
+                        write!(
+                            f,
+                            "  store i32 %{}, i32* %{}, align 4\n",
+                            self.rc - 1,
+                            self.assign_i
+                        )
+                        .unwrap();
+                    }
+
+                    self.rc += 1;
+
+                    write!(f, "  br label %{}\n", condl).unwrap();
+                    write!(f, "\n{}:\n", stmt_lah).unwrap();
 
                     if retf {
                         write!(

@@ -12,7 +12,7 @@ impl NodeSt {
         }
     }
 
-    pub fn new_if(c: Node, cond: NodeSt) -> Self {
+    pub fn new_c(c: Node, cond: NodeSt) -> Self {
         Self {
             c,
             cond: Some(Box::new(cond)),
@@ -62,6 +62,7 @@ impl NodeSt {
             TokenKind::Return
             | TokenKind::Int
             | TokenKind::If
+            | TokenKind::While
             | TokenKind::LBrace
             | TokenKind::UnderScore => match it.p.peek().unwrap() {
                 Token {
@@ -111,23 +112,20 @@ impl NodeSt {
                     value: TokenKind::If,
                     loc,
                 } => {
-                    it.p.next().unwrap();
+                    it.next();
                     let op = Node::mif(loc.to_owned());
-                    it.expect_token(
-                        TokenKind::LParen,
-                        ParseError::NotOpenedParen(
-                            it.p.to_owned().peek().unwrap().to_owned().to_owned(),
-                        ),
-                    )?;
-
-                    let cond = Self::cmp(it)?;
-                    it.expect_token(
-                        TokenKind::RParen,
-                        ParseError::NotClosedStmt(
-                            it.p.to_owned().peek().unwrap().to_owned().to_owned(),
-                        ),
-                    )?;
-                    let lhs = Self::new_if(op, cond.to_owned());
+                    let cond = it.consume_cond()?;
+                    let lhs = Self::new_c(op, cond);
+                    return Ok(lhs);
+                }
+                Token {
+                    value: TokenKind::While,
+                    loc,
+                } => {
+                    it.next();
+                    let op = Node::mwhile(loc.to_owned());
+                    let cond = it.consume_cond()?;
+                    let lhs = Self::new_c(op, cond);
                     return Ok(lhs);
                 }
                 Token {
@@ -349,6 +347,26 @@ impl<'a> TokenIter<'a> {
         } else {
             Err(err)
         }
+    }
+
+    pub fn consume_cond(&mut self) -> Result<NodeSt, ParseError> {
+      self.expect_token(
+          TokenKind::LParen,
+          ParseError::NotOpenedParen(
+              self.p.to_owned().peek().unwrap().to_owned().to_owned(),
+          ),
+      )?;
+
+      let cond = NodeSt::cmp(self)?;
+
+      self.expect_token(
+          TokenKind::RParen,
+          ParseError::NotClosedStmt(
+              self.p.to_owned().peek().unwrap().to_owned().to_owned(),
+          ),
+      )?;
+
+      Ok(cond)
     }
 
     pub fn unexpect_token(&mut self, ty: TokenKind, err: ParseError) -> Result<(), ParseError> {

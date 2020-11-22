@@ -25,6 +25,7 @@ pub enum NodeKind {
     NewAssignL,
     If,
     Else,
+    While,
     Fn,
     LBrace,
     RBrace,
@@ -121,6 +122,9 @@ impl Node {
     }
     pub fn melse(loc: Loc) -> Self {
         Self::new(NodeKind::Else, loc)
+    }
+    pub fn mwhile(loc: Loc) -> Self {
+        Self::new(NodeKind::While, loc)
     }
     pub fn st(loc: Loc) -> Self {
         Self::new(NodeKind::LBrace, loc)

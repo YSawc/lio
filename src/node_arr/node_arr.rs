@@ -180,6 +180,7 @@ impl NodeArr {
                     | NodeKind::Assign
                     | NodeKind::UnderScore
                     | NodeKind::If
+                    | NodeKind::While
                     | NodeKind::LBrace => {
                         // println!("n.c.value: {:?}", n.c.value);
                         match n.c.value {
@@ -294,6 +295,9 @@ impl NodeArr {
                             NodeKind::If => {
                                 self.parse_if(it, n)?;
                             }
+                            NodeKind::While => {
+                                self.parse_while(it, n)?;
+                            }
                             NodeKind::LBrace => {
                                 self.parse_stmt(it, n)?;
                             }
@@ -388,7 +392,6 @@ impl NodeArr {
             self.set_end_of_node()
         }
 
-        self.set_imm_env();
         let mut c = beta(&mut n.cond.to_owned().unwrap(), self)?;
 
         use std::env;
@@ -446,7 +449,6 @@ impl NodeArr {
                         Ok(())
                     }
                     _ => {
-                        self.set_imm_env();
                         let mut n = beta(&mut n.to_owned(), self)?;
 
                         n.if_stmts = Some(Box::new(if_stmts.to_owned()));
@@ -466,6 +468,32 @@ impl NodeArr {
                 }
             }
         }
+    }
+
+    pub fn parse_while(&mut self, it: &mut TokenIter, n: NodeSt) -> Result<(), ParseError> {
+        self.set_imm_env();
+        let (stmts, uev) = Self::parse_statement(it, self.imm_env_v.to_owned())?;
+        self.update_used_variable(uev);
+
+        if it.peek_value() == TokenKind::RBrace {
+            self.set_end_of_node()
+        }
+
+        let mut n = n.to_owned();
+        n.stmts = Some(Box::new(stmts.to_owned()));
+        let c = beta(&mut n.cond.to_owned().unwrap(), self)?;
+        n.cond = Some(Box::new(c));
+        self.node_st_vec.push(n.to_owned());
+
+        let stmts_isi = NodeSt::isi(stmts.ret_node_st.to_owned());
+        if self.end_of_node {
+            self.ret_node_st = match stmts_isi {
+                true => stmts.to_owned().ret_node_st,
+                false => NodeSt::under_score(Loc::default()),
+            }
+        }
+
+        return Ok(());
     }
 
     pub fn parse_stmt(&mut self, it: &mut TokenIter, n: NodeSt) -> Result<(), ParseError> {
@@ -511,6 +539,23 @@ impl NodeArr {
                             .last()
                             .unwrap()
                             .if_stmts
+                            .to_owned()
+                            .unwrap()
+                            .ret_node_st,
+                    ) {
+                        true => Ok(self.pop_node()),
+                        false => Err(ParseError::NotImmediate(
+                            it.shadow_p.peek().unwrap().loc.to_owned(),
+                        )),
+                    }
+                }
+                NodeKind::While => {
+                    self.parse_while(it, n.to_owned())?;
+                    match NodeSt::isi(
+                        self.node_st_vec
+                            .last()
+                            .unwrap()
+                            .stmts
                             .to_owned()
                             .unwrap()
                             .ret_node_st,
