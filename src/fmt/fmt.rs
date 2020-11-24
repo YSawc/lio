@@ -41,6 +41,7 @@ impl fmt::Display for TokenKind {
             TokenKind::Fn => write!(f, "fn"),
             TokenKind::LBrace => write!(f, "{{"),
             TokenKind::RBrace => write!(f, "}}"),
+            TokenKind::Pipe => write!(f, "|"),
             TokenKind::UnderScore => write!(f, "_"),
         }
     }
@@ -115,9 +116,16 @@ impl fmt::Display for ParseError {
                 "{}: Expected match return type of each statement but not match.",
                 loc
             ),
-            ParseError::NotImmediate(loc) => {
-                write!(f, "{}: Expected immediate statement but not match.", loc)
-            }
+            ParseError::NotClosedImmediate(loc) => write!(
+                f,
+                "{}: Expected closed immediate statement but not match.",
+                loc
+            ),
+            ParseError::NotOpenedImmediate(loc) => write!(
+                f,
+                "{}: Expected opened immediate statement but not match.",
+                loc
+            ),
             ParseError::Eof => write!(f, "Expected token, but not detected."),
         }
     }

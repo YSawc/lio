@@ -161,7 +161,7 @@ impl NodeArr {
 
         it.expect_token(
             TokenKind::RBrace,
-            ParseError::NotOpenedStmt(it.p.to_owned().peek().unwrap().to_owned().to_owned()),
+            ParseError::NotClosedStmt(it.p.to_owned().peek().unwrap().to_owned().to_owned()),
         )?;
 
         Ok((narr, uev))
@@ -181,7 +181,8 @@ impl NodeArr {
                     | NodeKind::UnderScore
                     | NodeKind::If
                     | NodeKind::While
-                    | NodeKind::LBrace => {
+                    | NodeKind::LBrace
+                    | NodeKind::Pipe => {
                         // println!("n.c.value: {:?}", n.c.value);
                         match n.c.value {
                             NodeKind::Return => {
@@ -300,6 +301,9 @@ impl NodeArr {
                             }
                             NodeKind::LBrace => {
                                 self.parse_stmt(it, n)?;
+                            }
+                            NodeKind::Pipe => {
+                                self.parse_pipe(it)?;
                             }
                             _ => unreachable!(),
                         }
@@ -520,16 +524,33 @@ impl NodeArr {
 
         return Ok(());
     }
+
+    pub fn parse_pipe(&mut self, it: &mut TokenIter) -> Result<(), ParseError> {
+        it.next();
+
+        it.copy_iter();
+        let n = self.parse_opened_imm(it)?;
+        self.node_st_vec.push(n.to_owned());
+
+        if it.peek_value() != TokenKind::RBrace {
+            return Err(ParseError::NotClosedStmt(it.next()));
+        }
+
+        self.set_end_of_node();
+        self.set_ret_node(n.to_owned());
+
+        Ok(())
+    }
 }
 
 impl NodeArr {
-    pub fn parse_imm(&mut self, it: &mut TokenIter) -> Result<NodeSt, ParseError> {
+    pub fn parse_close_imm(&mut self, it: &mut TokenIter) -> Result<NodeSt, ParseError> {
         match NodeSt::parser(it) {
             Ok(n) => match n.c.value {
                 NodeKind::Return
                 | NodeKind::NewAssign
                 | NodeKind::Assign
-                | NodeKind::UnderScore => Err(ParseError::NotImmediate(
+                | NodeKind::UnderScore => Err(ParseError::NotClosedImmediate(
                     it.shadow_p.peek().unwrap().loc.to_owned(),
                 )),
                 NodeKind::If => {
@@ -544,7 +565,7 @@ impl NodeArr {
                             .ret_node_st,
                     ) {
                         true => Ok(self.pop_node()),
-                        false => Err(ParseError::NotImmediate(
+                        false => Err(ParseError::NotClosedImmediate(
                             it.shadow_p.peek().unwrap().loc.to_owned(),
                         )),
                     }
@@ -561,7 +582,7 @@ impl NodeArr {
                             .ret_node_st,
                     ) {
                         true => Ok(self.pop_node()),
-                        false => Err(ParseError::NotImmediate(
+                        false => Err(ParseError::NotClosedImmediate(
                             it.shadow_p.peek().unwrap().loc.to_owned(),
                         )),
                     }
@@ -578,7 +599,7 @@ impl NodeArr {
                             .ret_node_st,
                     ) {
                         true => Ok(self.pop_node()),
-                        false => Err(ParseError::NotImmediate(
+                        false => Err(ParseError::NotClosedImmediate(
                             it.shadow_p.peek().unwrap().loc.to_owned(),
                         )),
                     }
@@ -602,8 +623,28 @@ impl NodeArr {
         }
     }
 
-    pub fn parse_close_imm(&mut self, it: &mut TokenIter) -> Result<NodeSt, ParseError> {
-        Ok(self.parse_imm(it)?)
+    pub fn parse_opened_imm(&mut self, it: &mut TokenIter) -> Result<NodeSt, ParseError> {
+        match NodeSt::parser(it) {
+            Ok(n) => match n.c.value {
+                NodeKind::Return
+                | NodeKind::NewAssign
+                | NodeKind::Assign
+                | NodeKind::UnderScore
+                | NodeKind::If
+                | NodeKind::While
+                | NodeKind::LBrace => Err(ParseError::NotOpenedImmediate(
+                    it.shadow_p.peek().unwrap().loc.to_owned(),
+                )),
+                _ => {
+                    self.set_imm_env();
+                    let mut n = n;
+                    n = beta(&mut n, self)?;
+                    n = n.simplified();
+                    Ok(n)
+                }
+            },
+            Err(e) => return Err(e),
+        }
     }
 }
 

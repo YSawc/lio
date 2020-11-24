@@ -64,6 +64,7 @@ impl NodeSt {
             | TokenKind::If
             | TokenKind::While
             | TokenKind::LBrace
+            | TokenKind::Pipe
             | TokenKind::UnderScore => match it.p.peek().unwrap() {
                 Token {
                     value: TokenKind::Return,
@@ -134,6 +135,14 @@ impl NodeSt {
                 } => {
                     let st = Node::st(loc.to_owned());
                     let lhs = Self::new_node(st);
+                    return Ok(lhs);
+                }
+                Token {
+                    value: TokenKind::Pipe,
+                    loc,
+                } => {
+                    let op = Node::pipe(loc.to_owned());
+                    let lhs = Self::new_node(op);
                     return Ok(lhs);
                 }
                 Token {
@@ -350,23 +359,19 @@ impl<'a> TokenIter<'a> {
     }
 
     pub fn consume_cond(&mut self) -> Result<NodeSt, ParseError> {
-      self.expect_token(
-          TokenKind::LParen,
-          ParseError::NotOpenedParen(
-              self.p.to_owned().peek().unwrap().to_owned().to_owned(),
-          ),
-      )?;
+        self.expect_token(
+            TokenKind::LParen,
+            ParseError::NotOpenedParen(self.p.to_owned().peek().unwrap().to_owned().to_owned()),
+        )?;
 
-      let cond = NodeSt::cmp(self)?;
+        let cond = NodeSt::cmp(self)?;
 
-      self.expect_token(
-          TokenKind::RParen,
-          ParseError::NotClosedStmt(
-              self.p.to_owned().peek().unwrap().to_owned().to_owned(),
-          ),
-      )?;
+        self.expect_token(
+            TokenKind::RParen,
+            ParseError::NotClosedStmt(self.p.to_owned().peek().unwrap().to_owned().to_owned()),
+        )?;
 
-      Ok(cond)
+        Ok(cond)
     }
 
     pub fn unexpect_token(&mut self, ty: TokenKind, err: ParseError) -> Result<(), ParseError> {

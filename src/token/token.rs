@@ -32,6 +32,7 @@ pub enum TokenKind {
     Fn,
     LBrace,
     RBrace,
+    Pipe,
     UnderScore,
 }
 
@@ -174,6 +175,7 @@ impl Token {
             map.insert('='.into(), TokenKind::Assign);
             map.insert('{'.into(), TokenKind::LBrace);
             map.insert('}'.into(), TokenKind::RBrace);
+            map.insert('|'.into(), TokenKind::Pipe);
             map
         }
 

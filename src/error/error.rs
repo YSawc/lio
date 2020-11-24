@@ -82,7 +82,8 @@ impl Error {
                     | ParseError::NotMatchReturnType(loc)
                     | ParseError::UnexpectedUnderScoreOperator(loc)
                     | ParseError::NotMatchTypeAnotherOneOfStatement(loc)
-                    | ParseError::NotImmediate(loc) => loc.clone(),
+                    | ParseError::NotClosedImmediate(loc)
+                    | ParseError::NotOpenedImmediate(loc) => loc.clone(),
                     ParseError::Eof => Loc::new(input.len() as u8, input.len() as u8 + 1),
                 };
                 (e, loc)

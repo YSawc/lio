@@ -23,10 +23,7 @@ pub enum ParseError {
     NotMatchReturnType(Loc),
     UnexpectedUnderScoreOperator(Loc),
     NotMatchTypeAnotherOneOfStatement(Loc),
-    NotImmediate(Loc),
-    // UnexpectedToken(Token),
-    // NotExpression(Token),
-    // UnclosedOpenParen(Token),
-    // RedundantExpression(Token),
+    NotClosedImmediate(Loc),
+    NotOpenedImmediate(Loc),
     Eof,
 }

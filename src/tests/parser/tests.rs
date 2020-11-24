@@ -346,13 +346,13 @@ fn checker_for_not_definition_variable_in_multiple_evaluation_values_test() {
 }
 
 #[test]
-fn check_immediate_in_new_assign_test() {
+fn check_closed_immediate_in_new_assign_test() {
     let mut t = Token::tokenize("fn { int aa = return 9; _ }").unwrap();
     let mut it = TokenIter::new(&mut t);
     let n = match NodeArr::w_parser(&mut it, vec![]) {
         Ok(_) => false,
         Err(e) => match e {
-            ParseError::NotImmediate(_) => true,
+            ParseError::NotClosedImmediate(_) => true,
             _ => false,
         },
     };
@@ -360,15 +360,43 @@ fn check_immediate_in_new_assign_test() {
 }
 
 #[test]
-fn check_immediate_in_assign_test() {
+fn check_closed_immediate_in_assign_test() {
     let mut t = Token::tokenize("fn { int aa = 9; aa; aa = return 3; _ }").unwrap();
     let mut it = TokenIter::new(&mut t);
     let n = match NodeArr::w_parser(&mut it, vec![]) {
         Ok(_) => false,
         Err(e) => match e {
-            ParseError::NotImmediate(_) => true,
+            ParseError::NotClosedImmediate(_) => true,
             _ => false,
         },
+    };
+    assert!(n)
+}
+
+#[test]
+fn check_opened_immediate_in_assign_fail_test() {
+    let mut t =
+        Token::tokenize("fn int { int i = 0; i = while (i < 30) { i = i + 1; | { i } } i }")
+            .unwrap();
+    let mut it = TokenIter::new(&mut t);
+    let n = match NodeArr::w_parser(&mut it, vec![]) {
+        Ok(_) => false,
+        Err(e) => match e {
+            ParseError::NotOpenedImmediate(_) => true,
+            _ => false,
+        },
+    };
+    assert!(n)
+}
+
+#[test]
+fn check_opened_immediate_in_assign_pass_test() {
+    let mut t =
+        Token::tokenize("fn int { int i = 0; i = while (i < 30) { i = i + 1; | i } i }").unwrap();
+    let mut it = TokenIter::new(&mut t);
+    let n = match NodeArr::w_parser(&mut it, vec![]) {
+        Ok(_) => true,
+        Err(_) => false,
     };
     assert!(n)
 }

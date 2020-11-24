@@ -29,6 +29,7 @@ pub enum NodeKind {
     Fn,
     LBrace,
     RBrace,
+    Pipe,
     UnderScore,
     NewVar(i32),
     ReAssignVar(i32),
@@ -128,6 +129,9 @@ impl Node {
     }
     pub fn st(loc: Loc) -> Self {
         Self::new(NodeKind::LBrace, loc)
+    }
+    pub fn pipe(loc: Loc) -> Self {
+        Self::new(NodeKind::Pipe, loc)
     }
     pub fn mfn(loc: Loc) -> Self {
         Self::new(NodeKind::Fn, loc)
