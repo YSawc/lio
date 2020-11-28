@@ -33,6 +33,7 @@ pub enum TokenKind {
     LBrace,
     RBrace,
     Pipe,
+    Comma,
     UnderScore,
 }
 
@@ -117,6 +118,9 @@ impl Token {
     pub fn rbrace(loc: Loc) -> Self {
         Self::new(TokenKind::RBrace, loc)
     }
+    pub fn comma(loc: Loc) -> Self {
+        Self::new(TokenKind::Comma, loc)
+    }
 }
 
 struct Lexer<'a> {
@@ -176,6 +180,7 @@ impl Token {
             map.insert('{'.into(), TokenKind::LBrace);
             map.insert('}'.into(), TokenKind::RBrace);
             map.insert('|'.into(), TokenKind::Pipe);
+            map.insert(','.into(), TokenKind::Comma);
             map
         }
 

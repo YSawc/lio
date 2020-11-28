@@ -197,21 +197,20 @@ impl NodeArr {
                                 self.node_st_vec.push(r.to_owned());
                             }
                             NodeKind::NewAssign => {
-                                let mut _s = String::new();
-                                match n.to_owned().lhs.unwrap().c.value {
-                                    NodeKind::Ident(si) => _s = si,
-                                    _ => {
-                                        match n.to_owned().lhs.unwrap().lhs.unwrap().c.value {
-                                            NodeKind::Ident(si) => _s = si,
-                                            _ => unreachable!(),
-                                        };
-                                    }
-                                }
+                                let sv = n
+                                    .to_owned()
+                                    .lhs
+                                    .unwrap()
+                                    .lhs
+                                    .unwrap()
+                                    .ret_set
+                                    .unwrap()
+                                    .contents;
                                 self.set_imm_env();
 
                                 let rhs = self.parse_close_imm(it)?;
 
-                                match Program::find_v(_s.to_owned(), self.imm_env_v.to_owned()) {
+                                match Program::find_v(sv[0].to_owned(), self.imm_env_v.to_owned()) {
                                     Some(f) => {
                                         match self
                                             .used_variable
@@ -230,9 +229,9 @@ impl NodeArr {
                                     }
                                 }
 
-                                let v = match _s.as_bytes()[0] {
-                                    b'_' => Var::mnew(_s, n.to_owned(), aln),
-                                    _ => Var::new_l(_s, n.to_owned(), aln),
+                                let v = match sv[0].as_bytes()[0] {
+                                    b'_' => Var::mnew(sv[0].to_owned(), n.to_owned(), aln),
+                                    _ => Var::new_l(sv[0].to_owned(), n.to_owned(), aln),
                                 };
                                 if v.to_owned().m {
                                     self.used_variable.push(v.to_owned().s);
@@ -282,11 +281,13 @@ impl NodeArr {
                                 }
                             }
                             NodeKind::UnderScore => {
-                                if it.peek_value() != TokenKind::RBrace {
-                                    return Err(ParseError::UnexpectedUnderScoreOperator(
-                                        n.to_owned().c.loc,
-                                    ));
-                                }
+                                it.copy_iter();
+                                it.expect_token(
+                                    TokenKind::RBrace,
+                                    ParseError::UnexpectedUnderScoreOperator(n.to_owned().c.loc),
+                                )?;
+                                it.back_to_shadow();
+
                                 self.set_end_of_node();
 
                                 let n = NodeSt::under_score(n.c.loc);

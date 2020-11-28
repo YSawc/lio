@@ -43,6 +43,14 @@ impl NodeSt {
             ..Default::default()
         }
     }
+
+    pub fn new_ret_set(r: ReturnSet) -> Self {
+        Self {
+            ret_set: Some(Box::new(r)),
+            ..Default::default()
+        }
+    }
+
     pub fn new_node(c: Node) -> Self {
         Self {
             c,
@@ -91,13 +99,10 @@ impl NodeSt {
                     value: TokenKind::Int,
                     loc,
                 } => {
-                    it.p.next().unwrap();
+                    it.next();
                     let i = Node::int(loc.to_owned());
-                    let (s, _) = it.expect_ident(ParseError::NotIdent(
-                        it.p.to_owned().peek().unwrap().to_owned().to_owned(),
-                    ))?;
-                    let l =
-                        Self::new_ident(s.to_owned(), it.p.peek().unwrap().to_owned().to_owned());
+                    let r = it.consume_ret_set()?;
+                    let l = Self::new_ret_set(r);
                     let l = Self::new_unary(i, l);
                     it.expect_token(
                         TokenKind::Assign,
@@ -340,12 +345,15 @@ impl NodeSt {
 }
 
 impl<'a> TokenIter<'a> {
-    pub fn expect_ident(&mut self, err: ParseError) -> Result<(String, Loc), ParseError> {
+    pub fn expect_ident(&mut self, err: ParseError) -> Result<String, ParseError> {
         match self.p.peek().unwrap() {
             Token {
                 value: TokenKind::Ident(s),
                 ..
-            } => Ok((s.to_string(), self.p.next().unwrap().loc.to_owned())),
+            } => {
+                self.next();
+                Ok(s.to_string())
+            }
             _ => Err(err),
         }
     }
@@ -401,5 +409,43 @@ impl<'a> TokenIter<'a> {
             TokenKind::RBrace => true,
             _ => false,
         }
+    }
+
+    pub fn consume_ret_set(&mut self) -> Result<ReturnSet, ParseError> {
+        match self.p.peek().unwrap() {
+            Token {
+                value: TokenKind::Ident(s),
+                ..
+            } => {
+                self.next();
+                let r = ReturnSet::new_single(s.to_owned());
+                Ok(r)
+            }
+            Token {
+                value: TokenKind::LParen,
+                ..
+            } => Ok(ReturnSet::new_touple(self.consume_touple()?)),
+            _ => Err(ParseError::NotIdent(
+                self.p.to_owned().peek().unwrap().to_owned().to_owned(),
+            )),
+        }
+    }
+
+    pub fn consume_touple(&mut self) -> Result<Vec<String>, ParseError> {
+        self.expect_token(
+            TokenKind::LParen,
+            ParseError::NotOpenedParen(self.p.to_owned().peek().unwrap().to_owned().to_owned()),
+        )?;
+
+        let p = self.peek_shadow();
+        let mut sv: Vec<String> = vec![];
+        while self.peek_value() != TokenKind::RParen {
+            let s = self.expect_ident(ParseError::NotIdent(p.to_owned()))?;
+            sv.push(s);
+        }
+
+        self.next();
+
+        Ok(sv)
     }
 }

@@ -29,7 +29,6 @@ sudo bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"`
   - [x] [local](https://github.com/YSawc/lio/commit/3df3c89b00e1ceab2925bc02fead9df5c5fc7c78)
   - [x] [simplified initializing](https://github.com/YSawc/lio/commit/3c4b0c609fa4e742342443ebc280ca9ea8e016a5)
 - [ ] simplified
-  - [ ] alpha
   - [x] [beta](https://github.com/YSawc/lio/commit/dd6dd3de39019f4c7bec2677140fb22e9f06fcc9)
   - [x] [simplified](https://github.com/YSawc/lio/commit/e2199f937ca5e13c19579430e677ea922cd4cbf5)
   - [x] [simplified mixed variable](https://github.com/YSawc/lio/commit/f843da7c562e6ea6aa8a2a486b31d2e7d991ad46)

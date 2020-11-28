@@ -49,6 +49,7 @@ pub type Node = Annot<NodeKind>;
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Default)]
 pub struct NodeSt {
     pub c: Node,
+    pub ret_set: Option<Box<ReturnSet>>,
     pub lhs: Option<Box<NodeSt>>,
     pub rhs: Option<Box<NodeSt>>,
     pub cond: Option<Box<NodeSt>>,
@@ -221,6 +222,37 @@ impl NodeSt {
             | NodeKind::LVar(_) => true,
             NodeKind::If => self.if_stmts.unwrap().ret_node_st.isi(),
             _ => false,
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub enum ReturnSetKind {
+    Single,
+    Touple,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct ReturnSet {
+    pub ty: ReturnSetKind,
+    pub contents: Vec<String>,
+}
+
+impl ReturnSet {
+    pub fn new_single(s: String) -> Self {
+        let mut contents: Vec<String> = vec![];
+        contents.push(s);
+
+        Self {
+            ty: ReturnSetKind::Single,
+            contents,
+        }
+    }
+
+    pub fn new_touple(contents: Vec<String>) -> Self {
+        Self {
+            ty: ReturnSetKind::Single,
+            contents,
         }
     }
 }

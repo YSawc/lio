@@ -64,18 +64,18 @@ impl Program {
                         a.set_end_of_node();
                     }
                     NodeKind::NewAssign => {
-                        let mut _s = String::new();
-                        match n.to_owned().lhs.unwrap().c.value {
-                            NodeKind::Ident(si) => _s = si,
-                            _ => {
-                                match n.to_owned().lhs.unwrap().lhs.unwrap().c.value {
-                                    NodeKind::Ident(si) => _s = si,
-                                    _ => unreachable!(),
-                                };
-                            }
-                        }
+                        let sv = n
+                            .to_owned()
+                            .lhs
+                            .unwrap()
+                            .lhs
+                            .unwrap()
+                            .ret_set
+                            .unwrap()
+                            .contents;
+
                         a.set_imm_env();
-                        match NodeArr::find_l(_s.to_owned(), a.l.to_owned()) {
+                        match NodeArr::find_l(sv[0].to_owned(), a.l.to_owned()) {
                             Some(mut f) => {
                                 match a.used_variable.contains(&f.to_owned().s.to_owned()) {
                                     true => (),
@@ -89,7 +89,7 @@ impl Program {
 
                                 f.n = rhs;
                                 let ff = f.to_owned();
-                                a.l.retain(|s| s.s != _s.to_owned());
+                                a.l.retain(|s| s.s != sv[0].to_owned());
                                 a.l.push(ff);
                             }
                             _ => {
@@ -104,9 +104,9 @@ impl Program {
                                     }
                                 }
                                 aln += 1;
-                                let v = match _s.as_bytes()[0] {
-                                    b'_' => Var::gmnew(_s, rhs, aln),
-                                    _ => Var::new_g(_s, rhs, aln),
+                                let v = match sv[0].to_owned().as_bytes()[0] {
+                                    b'_' => Var::gmnew(sv[0].to_owned(), rhs, aln),
+                                    _ => Var::new_g(sv[0].to_owned(), rhs, aln),
                                 };
                                 if v.m {
                                     a.used_variable.push(v.to_owned().s);

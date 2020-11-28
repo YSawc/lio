@@ -42,6 +42,7 @@ impl fmt::Display for TokenKind {
             TokenKind::LBrace => write!(f, "{{"),
             TokenKind::RBrace => write!(f, "}}"),
             TokenKind::Pipe => write!(f, "|"),
+            TokenKind::Comma => write!(f, ","),
             TokenKind::UnderScore => write!(f, "_"),
         }
     }
