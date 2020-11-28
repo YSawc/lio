@@ -33,21 +33,6 @@ impl Program {
         fs::remove_file(DIR).unwrap();
         let mut f = fs::File::create(DIR).unwrap();
 
-        write!(f, "%FILE = type opaque\n").unwrap();
-        write!(f, "\n").unwrap();
-        write!(
-            f,
-            "@str = private unnamed_addr constant [4 x i8] c\"%d\\0A\\00\", align 1\n"
-        )
-        .unwrap();
-        write!(f, "declare i32 @fprintf(%FILE*, i8*, ...)\n").unwrap();
-        write!(f, "declare i32 @printf(i8*, ...)\n").unwrap();
-        write!(f, "declare i32 @atoi(...)\n").unwrap();
-        write!(f, "define i32 @print(i32) nounwind {{\n").unwrap();
-        write!(f, "  call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @str, i64 0, i64 0), i32 %0)\n").unwrap();
-        write!(f, "  ret i32 %0\n").unwrap();
-        write!(f, "}}\n\n").unwrap();
-
         let mut gi = self.g.iter().peekable();
         while gi.peek() != None {
             let g = gi.next().unwrap();
