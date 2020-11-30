@@ -197,20 +197,16 @@ impl NodeArr {
                                 self.node_st_vec.push(r.to_owned());
                             }
                             NodeKind::NewAssign => {
-                                let sv = n
-                                    .to_owned()
-                                    .lhs
-                                    .unwrap()
-                                    .lhs
-                                    .unwrap()
-                                    .ret_set
-                                    .unwrap()
-                                    .contents;
+                                let ret_set =
+                                    n.to_owned().lhs.unwrap().lhs.unwrap().ret_set.unwrap();
                                 self.set_imm_env();
 
                                 let rhs = self.parse_close_imm(it)?;
 
-                                match Program::find_v(sv[0].to_owned(), self.imm_env_v.to_owned()) {
+                                match Program::find_v(
+                                    ret_set.contents[0].to_owned(),
+                                    self.imm_env_v.to_owned(),
+                                ) {
                                     Some(f) => {
                                         match self
                                             .used_variable
@@ -229,9 +225,15 @@ impl NodeArr {
                                     }
                                 }
 
-                                let v = match sv[0].as_bytes()[0] {
-                                    b'_' => Var::mnew(sv[0].to_owned(), n.to_owned(), aln),
-                                    _ => Var::new_l(sv[0].to_owned(), n.to_owned(), aln),
+                                let v = match ret_set.contents[0].as_bytes()[0] {
+                                    b'_' => {
+                                        Var::mnew(ret_set.contents[0].to_owned(), n.to_owned(), aln)
+                                    }
+                                    _ => Var::new_l(
+                                        ret_set.contents[0].to_owned(),
+                                        n.to_owned(),
+                                        aln,
+                                    ),
                                 };
                                 if v.to_owned().m {
                                     self.used_variable.push(v.to_owned().s);

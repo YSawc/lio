@@ -332,14 +332,11 @@ impl NodeSt {
                     }
                     _ => {
                         it.p = t;
-                        return Ok(Self::new_ident(
-                            s.to_string(),
-                            it.p.next().unwrap().to_owned(),
-                        ));
+                        return Ok(Self::new_ident(s.to_string(), it.next()));
                     }
                 }
             }
-            _ => return Ok(Self::new_num(it.p.next().unwrap().to_owned())?),
+            _ => return Ok(Self::new_num(it.next())?),
         }
     }
 }
@@ -360,7 +357,7 @@ impl<'a> TokenIter<'a> {
 
     pub fn expect_token(&mut self, ty: TokenKind, err: ParseError) -> Result<Loc, ParseError> {
         if self.p.peek().unwrap().value == ty {
-            Ok(self.p.next().unwrap().loc.to_owned())
+            Ok(self.next().loc.to_owned())
         } else {
             Err(err)
         }
@@ -437,14 +434,26 @@ impl<'a> TokenIter<'a> {
             ParseError::NotOpenedParen(self.p.to_owned().peek().unwrap().to_owned().to_owned()),
         )?;
 
+        self.copy_iter();
         let p = self.peek_shadow();
         let mut sv: Vec<String> = vec![];
-        while self.peek_value() != TokenKind::RParen {
-            let s = self.expect_ident(ParseError::NotIdent(p.to_owned()))?;
-            sv.push(s);
+
+        sv.push(self.expect_ident(ParseError::NotIdent(p.to_owned()))?);
+
+        if self.peek_value() != TokenKind::RParen {
+            while self.peek_value() == TokenKind::Comma {
+                self.next();
+                sv.push(self.expect_ident(ParseError::NotIdent(p.to_owned()))?);
+                if self.peek_value() == TokenKind::RParen {
+                    break;
+                }
+            }
         }
 
-        self.next();
+        self.expect_token(
+            TokenKind::RParen,
+            ParseError::NotClosedParen(self.p.to_owned().peek().unwrap().to_owned().to_owned()),
+        )?;
 
         Ok(sv)
     }
