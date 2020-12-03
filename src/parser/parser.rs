@@ -363,6 +363,14 @@ impl<'a> TokenIter<'a> {
         }
     }
 
+    pub fn expect_peek_token(&mut self, ty: TokenKind, err: ParseError) -> Result<Loc, ParseError> {
+        if self.p.peek().unwrap().value == ty {
+            Ok(self.peek_shadow().loc.to_owned())
+        } else {
+            Err(err)
+        }
+    }
+
     pub fn consume_cond(&mut self) -> Result<NodeSt, ParseError> {
         self.expect_token(
             TokenKind::LParen,

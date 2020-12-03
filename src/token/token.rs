@@ -30,6 +30,8 @@ pub enum TokenKind {
     Else,
     While,
     Fn,
+    To,
+    Nill,
     LBrace,
     RBrace,
     Pipe,
@@ -112,6 +114,12 @@ impl Token {
     pub fn mfn(loc: Loc) -> Self {
         Self::new(TokenKind::Fn, loc)
     }
+    pub fn to(loc: Loc) -> Self {
+        Self::new(TokenKind::To, loc)
+    }
+    pub fn nill(loc: Loc) -> Self {
+        Self::new(TokenKind::Nill, loc)
+    }
     pub fn lbrace(loc: Loc) -> Self {
         Self::new(TokenKind::LBrace, loc)
     }
@@ -161,6 +169,8 @@ impl Token {
             map.insert("else".into(), TokenKind::Else);
             map.insert("while".into(), TokenKind::While);
             map.insert("fn".into(), TokenKind::Fn);
+            map.insert("->".into(), TokenKind::To);
+            map.insert("()".into(), TokenKind::Nill);
             map
         }
 

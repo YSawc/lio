@@ -39,6 +39,8 @@ impl fmt::Display for TokenKind {
             TokenKind::Else => write!(f, "else"),
             TokenKind::While => write!(f, "while"),
             TokenKind::Fn => write!(f, "fn"),
+            TokenKind::To => write!(f, "->"),
+            TokenKind::Nill => write!(f, "()"),
             TokenKind::LBrace => write!(f, "{{"),
             TokenKind::RBrace => write!(f, "}}"),
             TokenKind::Pipe => write!(f, "|"),

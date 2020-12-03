@@ -11,12 +11,12 @@ use super::super::super::token::token::*;
 
 #[test]
 fn parser_test() {
-    let mut t = Token::tokenize("fn int { 12+3 }").unwrap();
+    let mut t = Token::tokenize("fn -> int { 12+3 }").unwrap();
     let mut it = TokenIter::new(&mut t);
     let n = NodeArr::w_parser(&mut it, vec![]).unwrap().0.ret_node_st;
     let e = {
         NodeSt {
-            c: Node::plus(Loc::new(14, 15)),
+            c: Node::plus(Loc::new(18, 19)),
             lhs: Some(n.to_owned().lhs.unwrap()),
             rhs: Some(n.to_owned().rhs.unwrap()),
             ..Default::default()
@@ -27,12 +27,12 @@ fn parser_test() {
 
 #[test]
 fn evaluation_final_value_test() {
-    let mut t = Token::tokenize("fn int { 12+3 }").unwrap();
+    let mut t = Token::tokenize("fn -> int { 12+3 }").unwrap();
     let mut it = TokenIter::new(&mut t);
     let n = NodeArr::w_parser(&mut it, vec![]).unwrap().0.ret_node_st;
     let e = {
         NodeSt {
-            c: Node::plus(Loc::new(14, 15)),
+            c: Node::plus(Loc::new(18, 19)),
             lhs: Some(n.to_owned().lhs.unwrap()),
             rhs: Some(n.to_owned().rhs.unwrap()),
             ..Default::default()
@@ -54,7 +54,7 @@ fn parser_assign_test() {
 
 #[test]
 fn return_with_unclosed_test() {
-    let mut t = Token::tokenize("fn int { return 3 }").unwrap();
+    let mut t = Token::tokenize("fn -> int { return 3 }").unwrap();
     let mut it = TokenIter::new(&mut t);
     let n = match NodeArr::w_parser(&mut it, vec![]) {
         Ok(_) => false,
@@ -68,7 +68,7 @@ fn return_with_unclosed_test() {
 
 #[test]
 fn operater_after_return_test() {
-    let mut t = Token::tokenize("fn int { return 3; 4 }").unwrap();
+    let mut t = Token::tokenize("fn -> int { return 3; 4 }").unwrap();
     let mut it = TokenIter::new(&mut t);
     let n = match NodeArr::w_parser(&mut it, vec![]) {
         Ok(_) => false,
@@ -160,7 +160,7 @@ fn match_void_type_test() {
 
 #[test]
 fn not_match_void_type_test() {
-    let mut t = Token::tokenize("fn int { _ }").unwrap();
+    let mut t = Token::tokenize("fn -> int { _ }").unwrap();
     let mut it = TokenIter::new(&mut t);
     let n = match NodeArr::w_parser(&mut it, vec![]) {
         Ok(_) => false,
@@ -174,7 +174,7 @@ fn not_match_void_type_test() {
 
 #[test]
 fn unexpected_underscore_operator_test() {
-    let mut t = Token::tokenize("fn int { _; 1 }").unwrap();
+    let mut t = Token::tokenize("fn -> int { _; 1 }").unwrap();
     let mut it = TokenIter::new(&mut t);
     let n = match NodeArr::w_parser(&mut it, vec![]) {
         Ok(_) => false,
@@ -188,7 +188,7 @@ fn unexpected_underscore_operator_test() {
 
 #[test]
 fn not_opened_stmt_test() {
-    let mut t = Token::tokenize("fn int { if (2 == 3)  5; } else { 10; } }").unwrap();
+    let mut t = Token::tokenize("fn -> int { if (2 == 3)  5; } else { 10; } }").unwrap();
     let mut it = TokenIter::new(&mut t);
     let n = match NodeArr::w_parser(&mut it, vec![]) {
         Ok(_) => false,
@@ -202,7 +202,7 @@ fn not_opened_stmt_test() {
 
 #[test]
 fn parse_not_number_in_if_statement_test() {
-    let mut t = Token::tokenize("fn int { if (2 == 3) { 5; else { 10; } }").unwrap();
+    let mut t = Token::tokenize("fn -> int { if (2 == 3) { 5; else { 10; } }").unwrap();
     let mut it = TokenIter::new(&mut t);
     let n = match NodeArr::w_parser(&mut it, vec![]) {
         Ok(_) => false,
@@ -216,7 +216,7 @@ fn parse_not_number_in_if_statement_test() {
 
 #[test]
 fn not_opened_else_stmt_test() {
-    let mut t = Token::tokenize("fn int { if (2 == 3) { 5; } else 10; } }").unwrap();
+    let mut t = Token::tokenize("fn -> int { if (2 == 3) { 5; } else 10; } }").unwrap();
     let mut it = TokenIter::new(&mut t);
     let n = match NodeArr::w_parser(&mut it, vec![]) {
         Ok(_) => false,
@@ -230,7 +230,7 @@ fn not_opened_else_stmt_test() {
 
 // #[test]
 // fn not_closed_else_stmt_test() {
-//     let mut t = Token::tokenize("fn int { if (2 == 3) { 5; } else { 10;  0}").unwrap();
+//     let mut t = Token::tokenize("fn -> int { if (2 == 3) { 5; } else { 10;  0}").unwrap();
 //     let mut it = TokenIter::new(&mut t);
 //     let n = match NodeArr::w_parser(&mut it, vec![]) {
 //         Ok(_) => false,
@@ -244,7 +244,7 @@ fn not_opened_else_stmt_test() {
 
 // #[test]
 // fn eof_around_closed_else_stmt_test() {
-//     let mut t = Token::tokenize("fn int { if (2 == 3) { 5; } else { 10; }").unwrap();
+//     let mut t = Token::tokenize("fn -> int { if (2 == 3) { 5; } else { 10; }").unwrap();
 //     let mut it = TokenIter::new(&mut t);
 //     let n = match NodeArr::w_parser(&mut it, vec![]) {
 //         Ok(_) => false,
@@ -319,7 +319,7 @@ fn type_not_match_another_one_of_statement_1_test() {
 
 #[test]
 fn checker_for_not_definition_variable_in_single_evaluation_value_test() {
-    let mut t = Token::tokenize("fn int { int aa = 9; b }").unwrap();
+    let mut t = Token::tokenize("fn -> int { int aa = 9; b }").unwrap();
     let mut it = TokenIter::new(&mut t);
     let n = match NodeArr::w_parser(&mut it, vec![]) {
         Ok(_) => false,
@@ -333,7 +333,7 @@ fn checker_for_not_definition_variable_in_single_evaluation_value_test() {
 
 #[test]
 fn checker_for_not_definition_variable_in_multiple_evaluation_values_test() {
-    let mut t = Token::tokenize("fn int{ int aa = 9; b*3 }").unwrap();
+    let mut t = Token::tokenize("fn -> int { int aa = 9; b*3 }").unwrap();
     let mut it = TokenIter::new(&mut t);
     let n = match NodeArr::w_parser(&mut it, vec![]) {
         Ok(_) => false,
@@ -376,7 +376,7 @@ fn check_closed_immediate_in_assign_test() {
 #[test]
 fn check_opened_immediate_in_assign_fail_test1() {
     let mut t =
-        Token::tokenize("fn int { int i = 0; i = while (i < 30) { i = i + 1; | { i } } i }")
+        Token::tokenize("fn -> int { int i = 0; i = while (i < 30) { i = i + 1; | { i } } i }")
             .unwrap();
     let mut it = TokenIter::new(&mut t);
     let n = match NodeArr::w_parser(&mut it, vec![]) {
@@ -392,7 +392,7 @@ fn check_opened_immediate_in_assign_fail_test1() {
 #[test]
 fn check_opened_immediate_in_assign_fail_test2() {
     let mut t =
-        Token::tokenize("fn int { int i = 0; i = while (i < 30) { i = i + 1; | i = i; i } i }")
+        Token::tokenize("fn -> int { int i = 0; i = while (i < 30) { i = i + 1; | i = i; i } i }")
             .unwrap();
     let mut it = TokenIter::new(&mut t);
 
@@ -408,8 +408,8 @@ fn check_opened_immediate_in_assign_fail_test2() {
 
 #[test]
 fn check_opened_immediate_in_assign_pass_test() {
-    let mut t =
-        Token::tokenize("fn int { int i = 0; i = while (i < 30) { i = i + 1; | i } i }").unwrap();
+    let mut t = Token::tokenize("fn -> int { int i = 0; i = while (i < 30) { i = i + 1; | i } i }")
+        .unwrap();
     let mut it = TokenIter::new(&mut t);
     let n = match NodeArr::w_parser(&mut it, vec![]) {
         Ok(_) => true,

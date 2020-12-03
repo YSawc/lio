@@ -103,13 +103,30 @@ impl NodeArr {
 
         it.next_with_shadow();
 
-        let isi = {
-            match it.peek_value() {
-                TokenKind::Int => {
-                    it.next_with_shadow();
-                    true
+        let isi: bool;
+        match it.peek_value() {
+            TokenKind::To => {
+                it.next_with_shadow();
+
+                match it.peek_value() {
+                    TokenKind::Int | TokenKind::Nill => match it.peek_value() {
+                        TokenKind::Int => isi = true,
+                        TokenKind::Nill => isi = false,
+                        _ => unreachable!(),
+                    },
+                    _ => unimplemented!(),
                 }
-                _ => false,
+                it.next_with_shadow();
+            }
+            _ => {
+                it.expect_peek_token(
+                    TokenKind::LBrace,
+                    ParseError::NotOpenedStmt(
+                        it.p.to_owned().peek().unwrap().to_owned().to_owned(),
+                    ),
+                )?;
+
+                isi = false
             }
         };
 

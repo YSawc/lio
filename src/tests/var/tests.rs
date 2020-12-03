@@ -9,7 +9,7 @@ use super::super::super::token::token::*;
 
 #[test]
 fn unused_variable_check_for_used_variable_test() {
-    let mut t = Token::tokenize("fn int { int a = 3; a; int a = 0; int b = 5; a*b }").unwrap();
+    let mut t = Token::tokenize("fn -> int { int a = 3; a; int a = 0; int b = 5; a*b }").unwrap();
     let mut it = TokenIter::new(&mut t);
     let l = match NodeArr::w_parser(&mut it, vec![]) {
         Ok(_) => true,
@@ -49,7 +49,7 @@ fn unused_variable_check_just_before_overwrite_variable_test() {
 #[test]
 fn unused_variable_check_for_update_variable_test() {
     let mut t =
-        Token::tokenize("fn int { int a = 3; int b = a; int c = 5; a = 1; 0+c+b }").unwrap();
+        Token::tokenize("fn -> int { int a = 3; int b = a; int c = 5; a = 1; 0+c+b }").unwrap();
     let mut it = TokenIter::new(&mut t);
     let l = match NodeArr::w_parser(&mut it, vec![]) {
         Ok(_) => true,
@@ -84,7 +84,7 @@ fn unused_variable_check_for_under_score_local_variable_test() {
 
 #[test]
 fn unused_variable_check_for_global_variable_test() {
-    let mut t = Token::tokenize("int g = 10; fn int { int g = 3; g }").unwrap();
+    let mut t = Token::tokenize("int g = 10; fn -> int { int g = 3; g }").unwrap();
     let l = match Program::w_parser(&mut t) {
         Ok(_) => false,
         Err(e) => match e {
