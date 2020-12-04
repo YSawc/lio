@@ -676,4 +676,11 @@ impl NodeArr {
             }
         }
     }
+
+    pub fn has_ret(&mut self) -> bool {
+        match self.ret_node_st.c.value {
+            NodeKind::Default => true,
+            _ => false,
+        }
+    }
 }
