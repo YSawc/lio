@@ -16,7 +16,7 @@ pub enum RetTy {
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct NodeArr {
     pub node_st_vec: Vec<NodeSt>,
-    pub ty: RetTy,
+    pub ty: Vec<RetTy>,
     pub ret_node_st: NodeSt,
     pub l: Vec<Var>,
     pub env_v: Vec<Vec<Var>>,
@@ -24,6 +24,14 @@ pub struct NodeArr {
     pub end_of_node: bool,
     pub used_variable: Vec<String>,
     pub ret_n: NodeSt,
+}
+
+impl NodeArr {
+    fn default_ty() -> Vec<RetTy> {
+        let mut tyv: Vec<RetTy> = vec![];
+        tyv.push(RetTy::Default);
+        tyv
+    }
 }
 
 impl NodeArr {
@@ -41,7 +49,7 @@ impl NodeArr {
     pub fn new() -> Self {
         Self {
             node_st_vec: vec![],
-            ty: RetTy::Default,
+            ty: NodeArr::default_ty(),
             ret_node_st: NodeSt::default(),
             l: vec![],
             env_v: vec![],
@@ -136,9 +144,9 @@ impl NodeArr {
         let (mut l, uev) = Self::parse_statement(&mut it, ev)?;
 
         if isi {
-            l.ty = RetTy::Int32;
+            l.ty.push(RetTy::Int32);
         } else {
-            l.ty = RetTy::Void;
+            l.ty.push(RetTy::Void);
         }
 
         if isi {

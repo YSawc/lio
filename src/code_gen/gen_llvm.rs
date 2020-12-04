@@ -54,7 +54,7 @@ impl Program {
             fm.fgen(&mut f, nai.next().unwrap().to_owned())
         }
 
-        if naf.ty == RetTy::Int32 {
+        if naf.ty.to_owned().pop().unwrap() == RetTy::Int32 {
             write!(f, "  %{} = add nsw i32 %{}, 0\n", fm.rc, fm.rc - 1).unwrap();
             write!(f, "  ret i32 %{}\n", fm.rc).unwrap();
         } else {
