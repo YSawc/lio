@@ -52,7 +52,7 @@ impl NodeArr {
         }
     }
 
-    pub fn is_default(self) -> bool {
+    pub fn is_default(&self) -> bool {
         return if self.node_st_vec == vec![] {
             true
         } else {
@@ -78,7 +78,7 @@ impl NodeArr {
         self.imm_env_v.push(self.l.to_owned());
     }
 
-    pub fn none_ret_node(&mut self) -> bool {
+    pub fn none_ret_node(&self) -> bool {
         self.ret_node_st == NodeSt::default()
     }
 
@@ -261,7 +261,7 @@ impl NodeArr {
                                 self.node_st_vec.push(avar);
                             }
                             NodeKind::Assign => {
-                                let mut _s = String::new();
+                                let _s: String;
                                 match n.to_owned().lhs.unwrap().c.value {
                                     NodeKind::Ident(si) => _s = si,
                                     _ => {
@@ -404,7 +404,7 @@ impl NodeArr {
         let if_stmts_isi = NodeSt::isi(if_stmts.ret_node_st.to_owned());
         let else_if_stmts_isi = NodeSt::isi(else_if_stmts.ret_node_st.to_owned());
 
-        if !else_if_stmts.to_owned().is_default() {
+        if !else_if_stmts.is_default() {
             if if_stmts_isi != else_if_stmts_isi {
                 return Err(ParseError::NotMatchTypeAnotherOneOfStatement(
                     it.p.peek().unwrap().loc.to_owned(),
@@ -677,7 +677,7 @@ impl NodeArr {
         }
     }
 
-    pub fn has_ret(&mut self) -> bool {
+    pub fn has_ret(&self) -> bool {
         match self.ret_node_st.c.value {
             NodeKind::Default => true,
             _ => false,

@@ -163,7 +163,7 @@ impl Femitter {
                     let else_if_stmts: NodeArr = *ns.to_owned().else_if_stmts.to_owned().unwrap();
                     let mut ielse_if_stmts = else_if_stmts.node_st_vec.iter().peekable();
 
-                    let retf = if !if_stmts.to_owned().has_ret() {
+                    let retf = if !if_stmts.has_ret() {
                         write!(f, "  %{} = alloca i32, align 4\n", self.rc).unwrap();
                         true
                     } else {
@@ -260,7 +260,7 @@ impl Femitter {
                     let stmts: NodeArr = *ns.to_owned().stmts.to_owned().unwrap();
                     let mut istmts = stmts.node_st_vec.iter().peekable();
 
-                    let retf = if !stmts.to_owned().has_ret() {
+                    let retf = if !stmts.has_ret() {
                         write!(f, "  %{} = alloca i32, align 4\n", self.rc).unwrap();
                         true
                     } else {
