@@ -183,9 +183,13 @@ impl NodeSt {
         let mut lhs = Self::expr(it)?;
 
         loop {
-            match it.p.peek().map(|vt| vt.value.to_owned()) {
-                Some(TokenKind::E) | Some(TokenKind::NE) | Some(TokenKind::L)
-                | Some(TokenKind::LE) | Some(TokenKind::G) | Some(TokenKind::GE) => {
+            match it.p.peek().map(|vt| vt.value.to_owned()).unwrap() {
+                TokenKind::E
+                | TokenKind::NE
+                | TokenKind::L
+                | TokenKind::LE
+                | TokenKind::G
+                | TokenKind::GE => {
                     let op = match it.p.next().unwrap() {
                         Token {
                             value: TokenKind::E,
@@ -227,8 +231,8 @@ impl NodeSt {
         let mut lhs = Self::mul(it)?;
 
         loop {
-            match it.p.peek().map(|vt| vt.value.to_owned()) {
-                Some(TokenKind::Plus) | Some(TokenKind::Minus) => {
+            match it.p.peek().map(|vt| vt.value.to_owned()).unwrap() {
+                TokenKind::Plus | TokenKind::Minus => {
                     let op = match it.p.next().unwrap() {
                         Token {
                             value: TokenKind::Plus,
@@ -253,8 +257,8 @@ impl NodeSt {
         let mut lhs = Self::unary(it)?;
 
         loop {
-            match it.p.peek().map(|vt| vt.value.to_owned()) {
-                Some(TokenKind::Asterisk) | Some(TokenKind::Slash) | Some(TokenKind::Percent) => {
+            match it.p.peek().map(|vt| vt.value.to_owned()).unwrap() {
+                TokenKind::Asterisk | TokenKind::Slash | TokenKind::Percent => {
                     let op = match it.p.next().unwrap() {
                         Token {
                             value: TokenKind::Asterisk,
