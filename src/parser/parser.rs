@@ -65,7 +65,7 @@ impl NodeSt {
         Ok(lhs)
     }
 
-    pub fn stmt(it: &mut TokenIter) -> Result<NodeSt, ParseError> {
+    pub fn stmt(it: &mut TokenIter) -> Result<Self, ParseError> {
         match it.p.peek().unwrap().value {
             TokenKind::Return
             | TokenKind::Int
@@ -179,7 +179,7 @@ impl NodeSt {
         }
     }
 
-    pub fn cmp(it: &mut TokenIter) -> Result<NodeSt, ParseError> {
+    pub fn cmp(it: &mut TokenIter) -> Result<Self, ParseError> {
         let mut lhs = Self::expr(it)?;
 
         loop {
@@ -223,7 +223,7 @@ impl NodeSt {
         }
     }
 
-    pub fn expr(it: &mut TokenIter) -> Result<NodeSt, ParseError> {
+    pub fn expr(it: &mut TokenIter) -> Result<Self, ParseError> {
         let mut lhs = Self::mul(it)?;
 
         loop {
@@ -249,7 +249,7 @@ impl NodeSt {
         }
     }
 
-    pub fn mul(it: &mut TokenIter) -> Result<NodeSt, ParseError> {
+    pub fn mul(it: &mut TokenIter) -> Result<Self, ParseError> {
         let mut lhs = Self::unary(it)?;
 
         loop {
@@ -280,7 +280,7 @@ impl NodeSt {
         }
     }
 
-    pub fn unary(it: &mut TokenIter) -> Result<NodeSt, ParseError> {
+    pub fn unary(it: &mut TokenIter) -> Result<Self, ParseError> {
         match it.p.peek().map(|vt| vt.value.to_owned()) {
             Some(TokenKind::LParen) => {
                 let rhs = match it.p.next().unwrap() {
@@ -308,7 +308,7 @@ impl NodeSt {
         }
     }
 
-    pub fn primary(it: &mut TokenIter) -> Result<NodeSt, ParseError> {
+    pub fn primary(it: &mut TokenIter) -> Result<Self, ParseError> {
         if it.p.peek() == None {
             return Err(ParseError::Eof);
         }
