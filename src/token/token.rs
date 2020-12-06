@@ -337,4 +337,23 @@ impl<'a> TokenIter<'a> {
     pub fn back_to_shadow(&mut self) {
         self.p = self.shadow_p.to_owned();
     }
+
+    pub fn peek_expression_or(&mut self) -> bool {
+        match self.peek_value() {
+            TokenKind::Ident(_)
+            | TokenKind::Num(_)
+            | TokenKind::Plus
+            | TokenKind::Minus
+            | TokenKind::Asterisk
+            | TokenKind::Slash => true,
+            _ => false,
+        }
+    }
+
+    pub fn peek_type_or(&mut self) -> bool {
+        match self.peek_value() {
+            TokenKind::Int | TokenKind::Nill => true,
+            _ => false,
+        }
+    }
 }

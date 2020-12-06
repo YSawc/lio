@@ -287,7 +287,10 @@ impl NodeSt {
                     Token {
                         value: TokenKind::LParen,
                         ..
-                    } => Self::cmp(it)?,
+                    } => match it.sort_parse_type() {
+                        ParseKind::Expression => Self::cmp(it)?,
+                        ParseKind::Type => unimplemented!(),
+                    },
                     _ => unreachable!(),
                 };
                 if it.p.peek() == None {
@@ -464,5 +467,25 @@ impl<'a> TokenIter<'a> {
         )?;
 
         Ok(sv)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub enum ParseKind {
+    Expression,
+    Type,
+}
+
+impl<'a> TokenIter<'a> {
+    pub fn sort_parse_type(&mut self) -> ParseKind {
+        if self.peek_expression_or() {
+            return ParseKind::Expression;
+        }
+
+        if self.peek_type_or() {
+            return ParseKind::Type;
+        }
+
+        unimplemented!()
     }
 }
