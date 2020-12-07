@@ -1,7 +1,6 @@
 use super::super::location::location::*;
 use super::super::node::node::*;
 use super::super::parser::error::*;
-use super::super::parser::parser::*;
 use super::super::program::program::*;
 use super::super::simplified::beta::*;
 use super::super::token::token::*;
@@ -117,15 +116,11 @@ impl NodeArr {
             TokenKind::To => {
                 it.next_with_shadow();
 
-                match it.sort_parse_type() {
-                    ParseKind::Type => match it.peek_value() {
-                        TokenKind::Int => isi = true,
-                        TokenKind::Nill => isi = false,
-                        _ => unreachable!(),
-                    },
-                    _ => unimplemented!(),
-                }
-                it.next_with_shadow();
+                match it.consume_type()?.c.value {
+                    NodeKind::Int => isi = true,
+                    NodeKind::Nill => isi = false,
+                    _ => unreachable!(),
+                };
             }
             _ => {
                 it.expect_peek_token(

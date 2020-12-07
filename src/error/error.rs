@@ -74,7 +74,8 @@ impl Error {
                     | ParseError::NotAssign(loc, ..)
                     | ParseError::NotLBrace(loc, ..)
                     | ParseError::NotRBrace(loc, ..)
-                    | ParseError::OperatorOutOfFnction(loc, ..) => loc.loc.clone(),
+                    | ParseError::OperatorOutOfFnction(loc, ..)
+                    | ParseError::NotType(loc, ..) => loc.loc.clone(),
                     ParseError::NotDefinitionVar(loc)
                     | ParseError::NotACompileTimeConstant(loc)
                     | ParseError::UndefinedVariable(loc)

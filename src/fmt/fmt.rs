@@ -100,6 +100,9 @@ impl fmt::Display for ParseError {
                 "{}: Expected operator inner function but god {}",
                 tok.loc, tok.value
             ),
+            ParseError::NotType(tok) => {
+                write!(f, "{}: Expected type but got {}", tok.loc, tok.value)
+            }
             ParseError::NotDefinitionVar(loc) => {
                 write!(f, "{}: Expected definition var but not detected.", loc)
             }

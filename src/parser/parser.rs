@@ -492,4 +492,47 @@ impl<'a> TokenIter<'a> {
 
         unimplemented!()
     }
+
+    pub fn expect_type(&mut self) -> Result<NodeSt, ParseError> {
+        match self.peek_value() {
+            TokenKind::Int | TokenKind::Nill => {
+                let tok = self.peek_shadow();
+                match self.next().value {
+                    TokenKind::Int => {
+                        let op = Node::int(tok.loc);
+                        let lhs = NodeSt::new_node(op);
+                        return Ok(lhs);
+                    }
+                    TokenKind::Nill => {
+                        let op = Node::nill(tok.loc);
+                        let lhs = NodeSt::new_node(op);
+                        return Ok(lhs);
+                    }
+                    _ => unreachable!(),
+                }
+            }
+            _ => Err(ParseError::NotType(self.peek_shadow())),
+        }
+    }
+
+    pub fn consume_type(&mut self) -> Result<NodeSt, ParseError> {
+        let need_close_paren = match self.peek_value() {
+            TokenKind::LParen => {
+                self.next_with_shadow();
+                true
+            }
+            _ => false,
+        };
+
+        let nd = self.expect_type()?;
+
+        if need_close_paren {
+            self.expect_token(
+                TokenKind::RParen,
+                ParseError::NotClosedStmt(self.p.to_owned().peek().unwrap().to_owned().to_owned()),
+            )?;
+        }
+
+        return Ok(nd);
+    }
 }

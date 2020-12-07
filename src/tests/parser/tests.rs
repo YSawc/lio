@@ -417,3 +417,18 @@ fn check_opened_immediate_in_assign_pass_test() {
     };
     assert!(n)
 }
+
+#[test]
+fn expect_type_test() {
+    let mut t = Token::tokenize("fn -> (0) { 0 }").unwrap();
+    let mut it = TokenIter::new(&mut t);
+
+    let n = match NodeArr::w_parser(&mut it, vec![]) {
+        Ok(_) => false,
+        Err(e) => match e {
+            ParseError::NotType(_) => true,
+            _ => false,
+        },
+    };
+    assert!(n)
+}
