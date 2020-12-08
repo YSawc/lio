@@ -73,7 +73,8 @@ impl NodeSt {
             | TokenKind::While
             | TokenKind::LBrace
             | TokenKind::Pipe
-            | TokenKind::UnderScore => match it.p.peek().unwrap() {
+            | TokenKind::UnderScore
+            | TokenKind::LParen => match it.p.peek().unwrap() {
                 Token {
                     value: TokenKind::Return,
                     loc,
@@ -171,6 +172,14 @@ impl NodeSt {
                         ),
                     )?;
 
+                    return Ok(op);
+                }
+                Token {
+                    value: TokenKind::LParen,
+                    loc,
+                } => {
+                    let nd = Node::l_touple(loc.to_owned());
+                    let op = Self::new_node(nd);
                     return Ok(op);
                 }
                 _ => unreachable!(),
@@ -534,5 +543,13 @@ impl<'a> TokenIter<'a> {
         }
 
         return Ok(nd);
+    }
+
+    pub fn consume_token(&mut self, tk: TokenKind) -> bool {
+        if self.peek_value() == tk {
+            self.next();
+            return true;
+        }
+        false
     }
 }

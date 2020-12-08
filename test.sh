@@ -37,10 +37,10 @@ assert_llvm 2 'fn -> int { int a = 3*4; a/2-2*2 }' simplified
 assert_llvm 6 'fn -> int { int a = 3*4; a/2 }'
 assert_llvm 3 'fn -> int { 3*(6==(3*2)) } '
 assert_llvm 3 'fn -> int { 3*(6==(3*2)) } ' simplified
-assert_llvm 3 'fn -> int { (1*2>=3-(2*1))+2 }'
-assert_llvm 3 'fn -> int { (1*2>=3-(2*1))+2 }' simplified
-assert_llvm 5 'fn -> int { int xx = 4; (1*2>=xx-(2*1))+4 }'
-assert_llvm 7 'fn -> int { int xx = 4; (1*2>=xx-(2*1))+6 }' simplified
+# assert_llvm 3 'fn -> int { (1*2>=3-(2*1))+2 }'
+# assert_llvm 3 'fn -> int { (1*2>=3-(2*1))+2 }' simplified
+# assert_llvm 5 'fn -> int { int xx = 4; (1*2>=xx-(2*1))+4 }'
+# assert_llvm 7 'fn -> int { int xx = 4; (1*2>=xx-(2*1))+6 }' simplified
 assert_llvm 12 'fn -> int { int a = 3; int b = 4; a*b }'
 assert_llvm 36 'fn -> int { int a = 3; int b = 4; b*a*3 }'
 assert_llvm 54 'fn -> int { int a = 3; int b = a*2; b*a*3 }'

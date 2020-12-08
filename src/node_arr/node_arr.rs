@@ -17,21 +17,13 @@ pub enum RetTy {
 pub struct NodeArr {
     pub node_st_vec: Vec<NodeSt>,
     pub ty: Vec<RetTy>,
-    pub ret_node_st: NodeSt,
+    pub ret_nodes: Vec<NodeSt>,
     pub l: Vec<Var>,
     pub env_v: Vec<Vec<Var>>,
     pub imm_env_v: Vec<Vec<Var>>,
     pub end_of_node: bool,
     pub used_variable: Vec<String>,
     pub ret_n: NodeSt,
-}
-
-impl NodeArr {
-    fn default_ty() -> Vec<RetTy> {
-        let mut tyv: Vec<RetTy> = vec![];
-        tyv.push(RetTy::Default);
-        tyv
-    }
 }
 
 impl NodeArr {
@@ -49,8 +41,8 @@ impl NodeArr {
     pub fn new() -> Self {
         Self {
             node_st_vec: vec![],
-            ty: NodeArr::default_ty(),
-            ret_node_st: NodeSt::default(),
+            ty: vec![],
+            ret_nodes: vec![],
             l: vec![],
             env_v: vec![],
             imm_env_v: vec![],
@@ -70,7 +62,7 @@ impl NodeArr {
 
     pub fn set_node(&mut self, v: Vec<NodeSt>) {
         self.node_st_vec = v.to_owned();
-        self.ret_node_st = v.last().unwrap().to_owned();
+        self.ret_nodes.push(v.last().unwrap().to_owned());
     }
 
     pub fn set_end_of_node(&mut self) {
@@ -87,11 +79,11 @@ impl NodeArr {
     }
 
     pub fn none_ret_node(&self) -> bool {
-        self.ret_node_st == NodeSt::default()
+        self.ret_nodes == vec![]
     }
 
     pub fn set_ret_node(&mut self, v: NodeSt) {
-        self.ret_node_st = v;
+        self.ret_nodes.push(v);
     }
 
     pub fn pop_node(&mut self) -> NodeSt {
@@ -145,25 +137,29 @@ impl NodeArr {
             l.ty.push(RetTy::Void);
         }
 
-        if isi {
-            match NodeSt::isi(l.to_owned().ret_node_st) {
-                true => return Ok((l, uev)),
-                false => {
-                    return Err(ParseError::NotMatchReturnType(
-                        l.to_owned().ret_node_st.c.loc,
-                    ))
+        for i in 0..l.to_owned().ret_nodes.len() {
+            if l.ty[i] == RetTy::Int32 {
+                match NodeSt::isi(&mut l.ret_nodes[i]) {
+                    true => (),
+                    false => {
+                        return Err(ParseError::NotMatchReturnType(
+                            l.to_owned().ret_nodes[i].c.loc.to_owned(),
+                        ))
+                    }
                 }
-            }
-        } else {
-            match l.ret_node_st.c.value {
-                NodeKind::UnderScore => return Ok((l, uev)),
-                _ => {
-                    return Err(ParseError::NotMatchReturnType(
-                        l.to_owned().ret_node_st.c.loc,
-                    ))
+            } else {
+                match l.ret_nodes[i].c.value {
+                    NodeKind::UnderScore | NodeKind::Default => return Ok((l, uev)),
+                    _ => {
+                        return Err(ParseError::NotMatchReturnType(
+                            l.to_owned().ret_nodes[i].c.loc.to_owned(),
+                        ))
+                    }
                 }
             }
         }
+
+        Ok((l, uev))
     }
 
     pub fn parse_statement(
@@ -203,7 +199,8 @@ impl NodeArr {
                     | NodeKind::If
                     | NodeKind::While
                     | NodeKind::LBrace
-                    | NodeKind::Pipe => {
+                    | NodeKind::Pipe
+                    | NodeKind::LTouple => {
                         // println!("n.c.value: {:?}", n.c.value);
                         match n.c.value {
                             NodeKind::Return => {
@@ -329,6 +326,9 @@ impl NodeArr {
                             NodeKind::Pipe => {
                                 self.parse_pipe(it)?;
                             }
+                            NodeKind::LTouple => {
+                                self.parse_touple(it)?;
+                            }
                             _ => unreachable!(),
                         }
                     }
@@ -405,8 +405,12 @@ impl NodeArr {
         };
         self.update_used_variable(uev);
 
-        let if_stmts_isi = NodeSt::isi(if_stmts.ret_node_st.to_owned());
-        let else_if_stmts_isi = NodeSt::isi(else_if_stmts.ret_node_st.to_owned());
+        let if_stmts_isi =
+            NodeSt::isi(&mut if_stmts.ret_nodes.to_owned().first().unwrap().to_owned());
+        let else_if_stmts_isi = match else_if_stmts.has_ret() {
+            true => NodeSt::isi(&mut else_if_stmts.ret_nodes.first().unwrap().to_owned()),
+            false => false,
+        };
 
         if !else_if_stmts.is_default() {
             if if_stmts_isi != else_if_stmts_isi {
@@ -440,10 +444,10 @@ impl NodeArr {
                 self.node_st_vec.push(n.to_owned());
 
                 if self.end_of_node {
-                    self.ret_node_st = match if_stmts_isi {
+                    self.ret_nodes.push(match if_stmts_isi {
                         true => n,
                         false => NodeSt::under_score(Loc::default()),
-                    }
+                    });
                 }
 
                 Ok(())
@@ -454,10 +458,10 @@ impl NodeArr {
                     NodeKind::Num(num) => {
                         if num == 0 {
                             if self.end_of_node {
-                                self.ret_node_st = match else_if_stmts_isi {
-                                    true => else_if_stmts.ret_node_st,
+                                self.ret_nodes.push(match else_if_stmts_isi {
+                                    true => else_if_stmts.ret_nodes[0].to_owned(),
                                     false => NodeSt::under_score(Loc::default()),
-                                }
+                                })
                             }
 
                             self.node_st_vec
@@ -466,10 +470,10 @@ impl NodeArr {
                         }
 
                         if self.end_of_node {
-                            self.ret_node_st = match if_stmts_isi {
-                                true => if_stmts.ret_node_st,
+                            self.ret_nodes.push(match if_stmts_isi {
+                                true => if_stmts.ret_nodes[0].to_owned(),
                                 false => NodeSt::under_score(Loc::default()),
-                            }
+                            })
                         }
 
                         self.node_st_vec
@@ -485,10 +489,10 @@ impl NodeArr {
                         self.node_st_vec.push(n.to_owned());
 
                         if self.end_of_node {
-                            self.ret_node_st = match if_stmts_isi {
+                            self.ret_nodes.push(match if_stmts_isi {
                                 true => n,
                                 false => NodeSt::under_score(Loc::default()),
-                            }
+                            })
                         }
 
                         Ok(())
@@ -513,12 +517,16 @@ impl NodeArr {
         n.cond = Some(Box::new(c));
         self.node_st_vec.push(n.to_owned());
 
-        let stmts_isi = NodeSt::isi(stmts.ret_node_st.to_owned());
+        let stmt_isi = match stmts.has_ret() {
+            true => NodeSt::isi(&mut stmts.ret_nodes.first().unwrap().to_owned()),
+            false => false,
+        };
+
         if self.end_of_node {
-            self.ret_node_st = match stmts_isi {
-                true => stmts.to_owned().ret_node_st,
+            self.ret_nodes.push(match stmt_isi {
+                true => stmts.to_owned().ret_nodes.first().unwrap().to_owned(),
                 false => NodeSt::under_score(Loc::default()),
-            }
+            })
         }
 
         return Ok(());
@@ -532,13 +540,16 @@ impl NodeArr {
             self.set_end_of_node()
         }
 
-        let stmt_isi = NodeSt::isi(stmts.ret_node_st.to_owned());
+        let stmt_isi = match stmts.has_ret() {
+            true => NodeSt::isi(&mut stmts.ret_nodes.first().unwrap().to_owned()),
+            false => false,
+        };
 
         if self.end_of_node {
-            self.ret_node_st = match stmt_isi {
-                true => stmts.to_owned().ret_node_st,
+            self.ret_nodes.push(match stmt_isi {
+                true => stmts.to_owned().ret_nodes.first().unwrap().to_owned(),
                 false => NodeSt::under_score(Loc::default()),
-            }
+            })
         }
 
         let mut n = n.to_owned();
@@ -565,6 +576,20 @@ impl NodeArr {
 
         Ok(())
     }
+
+    pub fn parse_touple(&mut self, it: &mut TokenIter) -> Result<(), ParseError> {
+        it.next();
+
+        it.copy_iter();
+        let n = self.parse_close_imm(it)?;
+
+        if it.peek_value() == TokenKind::RBrace {}
+
+        self.set_end_of_node();
+        self.set_ret_node(n.to_owned());
+
+        Ok(())
+    }
 }
 
 impl NodeArr {
@@ -580,13 +605,17 @@ impl NodeArr {
                 NodeKind::If => {
                     self.parse_if(it, n.to_owned())?;
                     match NodeSt::isi(
-                        self.node_st_vec
+                        &mut self
+                            .node_st_vec
                             .last()
                             .unwrap()
                             .if_stmts
                             .to_owned()
                             .unwrap()
-                            .ret_node_st,
+                            .ret_nodes
+                            .first()
+                            .unwrap()
+                            .to_owned(),
                     ) {
                         true => Ok(self.pop_node()),
                         false => Err(ParseError::NotClosedImmediate(
@@ -597,13 +626,17 @@ impl NodeArr {
                 NodeKind::While => {
                     self.parse_while(it, n.to_owned())?;
                     match NodeSt::isi(
-                        self.node_st_vec
+                        &mut self
+                            .node_st_vec
                             .last()
                             .unwrap()
                             .stmts
                             .to_owned()
                             .unwrap()
-                            .ret_node_st,
+                            .ret_nodes
+                            .first()
+                            .unwrap()
+                            .to_owned(),
                     ) {
                         true => Ok(self.pop_node()),
                         false => Err(ParseError::NotClosedImmediate(
@@ -614,13 +647,17 @@ impl NodeArr {
                 NodeKind::LBrace => {
                     self.parse_stmt(it, n.to_owned())?;
                     match NodeSt::isi(
-                        self.node_st_vec
+                        &mut self
+                            .node_st_vec
                             .last()
                             .unwrap()
                             .stmts
                             .to_owned()
                             .unwrap()
-                            .ret_node_st,
+                            .ret_nodes
+                            .first()
+                            .unwrap()
+                            .to_owned(),
                     ) {
                         true => Ok(self.pop_node()),
                         false => Err(ParseError::NotClosedImmediate(
@@ -682,9 +719,9 @@ impl NodeArr {
     }
 
     pub fn has_ret(&self) -> bool {
-        match self.ret_node_st.c.value {
-            NodeKind::Default => true,
-            _ => false,
+        match self.ret_nodes.len() {
+            0 => false,
+            _ => true,
         }
     }
 }

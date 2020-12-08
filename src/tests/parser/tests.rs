@@ -13,7 +13,13 @@ use super::super::super::token::token::*;
 fn parser_test() {
     let mut t = Token::tokenize("fn -> int { 12+3 }").unwrap();
     let mut it = TokenIter::new(&mut t);
-    let n = NodeArr::w_parser(&mut it, vec![]).unwrap().0.ret_node_st;
+    let n = NodeArr::w_parser(&mut it, vec![])
+        .unwrap()
+        .0
+        .ret_nodes
+        .first()
+        .unwrap()
+        .to_owned();
     let e = {
         NodeSt {
             c: Node::plus(Loc::new(18, 19)),
@@ -29,7 +35,13 @@ fn parser_test() {
 fn evaluation_final_value_test() {
     let mut t = Token::tokenize("fn -> int { 12+3 }").unwrap();
     let mut it = TokenIter::new(&mut t);
-    let n = NodeArr::w_parser(&mut it, vec![]).unwrap().0.ret_node_st;
+    let n = NodeArr::w_parser(&mut it, vec![])
+        .unwrap()
+        .0
+        .ret_nodes
+        .first()
+        .unwrap()
+        .to_owned();
     let e = {
         NodeSt {
             c: Node::plus(Loc::new(18, 19)),

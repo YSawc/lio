@@ -32,6 +32,7 @@ pub enum NodeKind {
     RBrace,
     Pipe,
     UnderScore,
+    LTouple,
     NewVar(i32),
     ReAssignVar(i32),
     GVar(String),
@@ -144,6 +145,9 @@ impl Node {
     pub fn under_score(loc: Loc) -> Self {
         Self::new(NodeKind::UnderScore, loc)
     }
+    pub fn l_touple(loc: Loc) -> Self {
+        Self::new(NodeKind::LTouple, loc)
+    }
     pub fn new_var(i: i32, loc: Loc) -> Self {
         Self::new(NodeKind::NewVar(i), loc)
     }
@@ -207,7 +211,7 @@ impl NodeSt {
         }
     }
 
-    pub fn isi(self) -> bool {
+    pub fn isi(&mut self) -> bool {
         // println!("self.c: {:?}", self.c);
         match self.c.value {
             NodeKind::Num(_)
@@ -224,7 +228,15 @@ impl NodeSt {
             | NodeKind::Ident(_)
             | NodeKind::GVar(_)
             | NodeKind::LVar(_) => true,
-            NodeKind::If => self.if_stmts.unwrap().ret_node_st.isi(),
+            NodeKind::If => self
+                .if_stmts
+                .as_ref()
+                .unwrap()
+                .ret_nodes
+                .first()
+                .unwrap()
+                .to_owned()
+                .isi(),
             _ => false,
         }
     }

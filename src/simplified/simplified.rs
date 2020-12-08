@@ -10,7 +10,7 @@ impl NodeArr {
             nv.push(nai.next().unwrap().to_owned().simplified());
         }
         self.node_st_vec = nv.to_owned();
-        self.ret_node_st = nv.last().unwrap().to_owned();
+        self.ret_nodes[0] = nv.last().unwrap().to_owned();
         self
     }
 }
