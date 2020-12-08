@@ -73,8 +73,7 @@ impl NodeSt {
             | TokenKind::While
             | TokenKind::LBrace
             | TokenKind::Pipe
-            | TokenKind::UnderScore
-            | TokenKind::LParen => match it.p.peek().unwrap() {
+            | TokenKind::UnderScore => match it.p.peek().unwrap() {
                 Token {
                     value: TokenKind::Return,
                     loc,
@@ -172,14 +171,6 @@ impl NodeSt {
                         ),
                     )?;
 
-                    return Ok(op);
-                }
-                Token {
-                    value: TokenKind::LParen,
-                    loc,
-                } => {
-                    let nd = Node::l_touple(loc.to_owned());
-                    let op = Self::new_node(nd);
                     return Ok(op);
                 }
                 _ => unreachable!(),
@@ -296,13 +287,20 @@ impl NodeSt {
     pub fn unary(it: &mut TokenIter) -> Result<Self, ParseError> {
         match it.p.peek().map(|vt| vt.value.to_owned()) {
             Some(TokenKind::LParen) => {
-                let rhs = match it.p.next().unwrap() {
+                let rhs = match it.peek_token() {
                     Token {
                         value: TokenKind::LParen,
-                        ..
-                    } => match it.sort_parse_type() {
-                        ParseKind::Expression => Self::cmp(it)?,
-                        ParseKind::Type => unimplemented!(),
+                        loc,
+                    } => match it.look_ahead_of_rparen()? {
+                        true => match it.sort_parse_type() {
+                            ParseKind::Expression => Self::cmp(it)?,
+                            ParseKind::Type => unimplemented!(),
+                        },
+                        false => {
+                            let nd = Node::l_touple(loc.to_owned());
+                            let op = Self::new_node(nd);
+                            return Ok(op);
+                        }
                     },
                     _ => unreachable!(),
                 };
@@ -551,5 +549,32 @@ impl<'a> TokenIter<'a> {
             return true;
         }
         false
+    }
+
+    pub fn look_ahead_of_rparen(&mut self) -> Result<bool, ParseError> {
+        self.copy_iter();
+        let mut pi = 0;
+        let mut bi = 0;
+
+        while !(self.peek_value() == TokenKind::RParen && pi == 1 && bi == 0) {
+            if self.peek_value() == TokenKind::LParen {
+                pi += 1;
+            } else if self.peek_value() == TokenKind::RParen {
+                pi -= 1;
+            } else if self.peek_value() == TokenKind::LBrace {
+                bi += 1;
+            } else if self.peek_value() == TokenKind::RBrace {
+                if pi != 0 {
+                    return Err(ParseError::NotClosedParen(self.peek_token()));
+                }
+                bi -= 1;
+            }
+            self.next();
+        }
+
+        self.back_to_shadow();
+        self.next();
+
+        Ok(self.peek_expression_or())
     }
 }

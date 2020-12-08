@@ -326,6 +326,10 @@ impl<'a> TokenIter<'a> {
         self.shadow_p = self.p.to_owned();
     }
 
+    pub fn peek_token(&mut self) -> Token {
+        self.p.peek().unwrap().to_owned().to_owned()
+    }
+
     pub fn peek_value(&mut self) -> TokenKind {
         self.p.peek().unwrap().value.to_owned()
     }
