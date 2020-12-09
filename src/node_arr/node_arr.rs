@@ -405,10 +405,10 @@ impl NodeArr {
         };
         self.update_used_variable(uev);
 
-        let if_stmts_isi =
-            NodeSt::isi(&mut if_stmts.ret_nodes.to_owned().first().unwrap().to_owned());
+        let if_stmts_isi = isi_all(if_stmts.to_owned().ret_nodes);
+
         let else_if_stmts_isi = match else_if_stmts.has_ret() {
-            true => NodeSt::isi(&mut else_if_stmts.ret_nodes.first().unwrap().to_owned()),
+            true => isi_all(else_if_stmts.to_owned().ret_nodes),
             false => false,
         };
 
@@ -458,10 +458,12 @@ impl NodeArr {
                     NodeKind::Num(num) => {
                         if num == 0 {
                             if self.end_of_node {
-                                self.ret_nodes.push(match else_if_stmts_isi {
-                                    true => else_if_stmts.ret_nodes[0].to_owned(),
-                                    false => NodeSt::under_score(Loc::default()),
-                                })
+                                match else_if_stmts_isi {
+                                    true => self.ret_nodes = else_if_stmts.ret_nodes,
+                                    false => {
+                                        self.ret_nodes.push(NodeSt::under_score(Loc::default()))
+                                    }
+                                }
                             }
 
                             self.node_st_vec
@@ -470,10 +472,10 @@ impl NodeArr {
                         }
 
                         if self.end_of_node {
-                            self.ret_nodes.push(match if_stmts_isi {
-                                true => if_stmts.ret_nodes[0].to_owned(),
-                                false => NodeSt::under_score(Loc::default()),
-                            })
+                            match if_stmts_isi {
+                                true => self.ret_nodes = if_stmts.ret_nodes,
+                                false => self.ret_nodes.push(NodeSt::under_score(Loc::default())),
+                            }
                         }
 
                         self.node_st_vec
@@ -489,10 +491,10 @@ impl NodeArr {
                         self.node_st_vec.push(n.to_owned());
 
                         if self.end_of_node {
-                            self.ret_nodes.push(match if_stmts_isi {
-                                true => n,
-                                false => NodeSt::under_score(Loc::default()),
-                            })
+                            match if_stmts_isi {
+                                true => self.ret_nodes.push(n),
+                                false => self.ret_nodes.push(NodeSt::under_score(Loc::default())),
+                            }
                         }
 
                         Ok(())
@@ -518,15 +520,15 @@ impl NodeArr {
         self.node_st_vec.push(n.to_owned());
 
         let stmt_isi = match stmts.has_ret() {
-            true => NodeSt::isi(&mut stmts.ret_nodes.first().unwrap().to_owned()),
+            true => isi_all(stmts.to_owned().ret_nodes),
             false => false,
         };
 
         if self.end_of_node {
-            self.ret_nodes.push(match stmt_isi {
-                true => stmts.to_owned().ret_nodes.first().unwrap().to_owned(),
-                false => NodeSt::under_score(Loc::default()),
-            })
+            match stmt_isi {
+                true => self.ret_nodes = stmts.to_owned().ret_nodes,
+                false => self.ret_nodes.push(NodeSt::under_score(Loc::default())),
+            }
         }
 
         return Ok(());
@@ -541,15 +543,15 @@ impl NodeArr {
         }
 
         let stmt_isi = match stmts.has_ret() {
-            true => NodeSt::isi(&mut stmts.ret_nodes.first().unwrap().to_owned()),
+            true => isi_all(stmts.to_owned().ret_nodes),
             false => false,
         };
 
         if self.end_of_node {
-            self.ret_nodes.push(match stmt_isi {
-                true => stmts.to_owned().ret_nodes.first().unwrap().to_owned(),
-                false => NodeSt::under_score(Loc::default()),
-            })
+            match stmt_isi {
+                true => self.ret_nodes = stmts.to_owned().ret_nodes,
+                false => self.ret_nodes.push(NodeSt::under_score(Loc::default())),
+            }
         }
 
         let mut n = n.to_owned();
@@ -604,18 +606,14 @@ impl NodeArr {
                 )),
                 NodeKind::If => {
                     self.parse_if(it, n.to_owned())?;
-                    match NodeSt::isi(
-                        &mut self
-                            .node_st_vec
+                    match isi_all(
+                        self.node_st_vec
                             .last()
                             .unwrap()
                             .if_stmts
                             .to_owned()
                             .unwrap()
-                            .ret_nodes
-                            .first()
-                            .unwrap()
-                            .to_owned(),
+                            .ret_nodes,
                     ) {
                         true => Ok(self.pop_node()),
                         false => Err(ParseError::NotClosedImmediate(
@@ -625,18 +623,14 @@ impl NodeArr {
                 }
                 NodeKind::While => {
                     self.parse_while(it, n.to_owned())?;
-                    match NodeSt::isi(
-                        &mut self
-                            .node_st_vec
+                    match isi_all(
+                        self.node_st_vec
                             .last()
                             .unwrap()
                             .stmts
                             .to_owned()
                             .unwrap()
-                            .ret_nodes
-                            .first()
-                            .unwrap()
-                            .to_owned(),
+                            .ret_nodes,
                     ) {
                         true => Ok(self.pop_node()),
                         false => Err(ParseError::NotClosedImmediate(
@@ -646,18 +640,14 @@ impl NodeArr {
                 }
                 NodeKind::LBrace => {
                     self.parse_stmt(it, n.to_owned())?;
-                    match NodeSt::isi(
-                        &mut self
-                            .node_st_vec
+                    match isi_all(
+                        self.node_st_vec
                             .last()
                             .unwrap()
                             .stmts
                             .to_owned()
                             .unwrap()
-                            .ret_nodes
-                            .first()
-                            .unwrap()
-                            .to_owned(),
+                            .ret_nodes,
                     ) {
                         true => Ok(self.pop_node()),
                         false => Err(ParseError::NotClosedImmediate(

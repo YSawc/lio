@@ -242,6 +242,15 @@ impl NodeSt {
     }
 }
 
+pub fn isi_all(nds: Vec<NodeSt>) -> bool {
+    for mut i in nds {
+        if !NodeSt::isi(&mut i) {
+            return false;
+        }
+    }
+    true
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum ReturnSetKind {
     Single,
