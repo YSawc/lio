@@ -124,13 +124,13 @@ impl Node {
     pub fn new_assign_l(loc: Loc) -> Self {
         Self::new(NodeKind::NewAssignL, loc)
     }
-    pub fn mif(loc: Loc) -> Self {
+    pub fn if_(loc: Loc) -> Self {
         Self::new(NodeKind::If, loc)
     }
-    pub fn melse(loc: Loc) -> Self {
+    pub fn else_(loc: Loc) -> Self {
         Self::new(NodeKind::Else, loc)
     }
-    pub fn mwhile(loc: Loc) -> Self {
+    pub fn while_(loc: Loc) -> Self {
         Self::new(NodeKind::While, loc)
     }
     pub fn st(loc: Loc) -> Self {
@@ -139,7 +139,7 @@ impl Node {
     pub fn pipe(loc: Loc) -> Self {
         Self::new(NodeKind::Pipe, loc)
     }
-    pub fn mfn(loc: Loc) -> Self {
+    pub fn fn_(loc: Loc) -> Self {
         Self::new(NodeKind::Fn, loc)
     }
     pub fn under_score(loc: Loc) -> Self {

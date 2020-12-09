@@ -119,7 +119,7 @@ impl NodeSt {
                     loc,
                 } => {
                     it.next();
-                    let op = Node::mif(loc.to_owned());
+                    let op = Node::if_(loc.to_owned());
                     let cond = it.consume_cond()?;
                     let lhs = Self::new_c(op, cond);
                     return Ok(lhs);
@@ -129,7 +129,7 @@ impl NodeSt {
                     loc,
                 } => {
                     it.next();
-                    let op = Node::mwhile(loc.to_owned());
+                    let op = Node::while_(loc.to_owned());
                     let cond = it.consume_cond()?;
                     let lhs = Self::new_c(op, cond);
                     return Ok(lhs);

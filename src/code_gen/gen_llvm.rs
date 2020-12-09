@@ -204,7 +204,7 @@ impl Femitter {
                         self.calc_label(ielse_if_stmts.next().unwrap().to_owned())
                     }
 
-                    let melse_stmt_lah = self.rc + self.lah + 1;
+                    let else_stmt_lah = self.rc + self.lah + 1;
                     if retf {
                         write!(
                             f,
@@ -218,7 +218,7 @@ impl Femitter {
                     self.rc += 1;
                     self.lah = 0;
 
-                    write!(f, "  br label %{}", melse_stmt_lah).unwrap();
+                    write!(f, "  br label %{}", else_stmt_lah).unwrap();
                     write!(f, "\n{}:\n", stmt_lah).unwrap();
 
                     let mut ielse_if_stmts = else_if_stmts.node_st_vec.iter().peekable();
@@ -240,9 +240,9 @@ impl Femitter {
 
                     self.rc += 1;
 
-                    write!(f, "  br label %{}\n", melse_stmt_lah).unwrap();
+                    write!(f, "  br label %{}\n", else_stmt_lah).unwrap();
 
-                    write!(f, "\n{}:\n", melse_stmt_lah).unwrap();
+                    write!(f, "\n{}:\n", else_stmt_lah).unwrap();
 
                     if retf {
                         write!(

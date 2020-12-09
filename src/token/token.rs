@@ -105,13 +105,13 @@ impl Token {
     pub fn mif(loc: Loc) -> Self {
         Self::new(TokenKind::If, loc)
     }
-    pub fn melse(loc: Loc) -> Self {
+    pub fn else_(loc: Loc) -> Self {
         Self::new(TokenKind::Else, loc)
     }
-    pub fn mwhile(loc: Loc) -> Self {
+    pub fn while_(loc: Loc) -> Self {
         Self::new(TokenKind::While, loc)
     }
-    pub fn mfn(loc: Loc) -> Self {
+    pub fn fn_(loc: Loc) -> Self {
         Self::new(TokenKind::Fn, loc)
     }
     pub fn to(loc: Loc) -> Self {
