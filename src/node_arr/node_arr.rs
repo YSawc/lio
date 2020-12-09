@@ -80,8 +80,10 @@ impl NodeArr {
         self.ret_nodes == vec![]
     }
 
-    pub fn set_ret_node(&mut self, v: NodeSt) {
-        self.ret_nodes.push(v);
+    pub fn set_ret_node(&mut self, nds: Vec<NodeSt>) {
+        for n in nds {
+            self.ret_nodes.push(n);
+        }
     }
 
     pub fn pop_node(&mut self) -> NodeSt {
@@ -209,8 +211,10 @@ impl NodeArr {
                                 self.set_end_of_node();
                                 self.set_imm_env();
                                 let r = beta(&mut n.to_owned().lhs.unwrap().to_owned(), self)?;
-                                self.set_ret_node(r.to_owned());
-                                self.node_st_vec.push(r.to_owned());
+                                let mut nds: Vec<NodeSt> = vec![];
+                                nds.push(r);
+                                self.set_ret_node(nds.to_owned());
+                                self.node_st_vec.append(&mut nds.to_owned());
                             }
                             NodeKind::NewAssign => {
                                 let ret_set =
@@ -309,8 +313,9 @@ impl NodeArr {
                                 self.set_end_of_node();
 
                                 let n = NodeSt::under_score(n.c.loc);
-                                self.set_ret_node(n.to_owned());
-                                self.node_st_vec.push(n);
+                                let mut nds: Vec<NodeSt> = vec![];
+                                nds.push(n);
+                                self.set_ret_node(nds);
                             }
                             NodeKind::If => {
                                 self.parse_if(it, n)?;
@@ -334,16 +339,19 @@ impl NodeArr {
                         self.set_imm_env();
                         let n = beta(&mut n.to_owned(), self)?;
                         self.node_st_vec.push(n.to_owned());
+                        let mut nds: Vec<NodeSt> = vec![];
 
                         match it.check_evaluate_type() {
                             true => {
+                                nds.push(n);
                                 self.set_end_of_node();
-                                self.set_ret_node(n.to_owned());
+                                self.set_ret_node(nds);
                             }
                             false => match it.check_evaluate_void() {
                                 true => {
+                                    nds.push(NodeSt::default());
                                     self.set_end_of_node();
-                                    self.set_ret_node(NodeSt::default());
+                                    self.set_ret_node(nds);
                                 }
                                 false => (),
                             },
@@ -357,8 +365,10 @@ impl NodeArr {
                 if self.none_ret_node() {
                     self.set_end_of_node();
                     let n = NodeSt::under_score(Loc::default());
-                    self.set_ret_node(n.to_owned());
-                    self.node_st_vec.push(n);
+                    let mut nds: Vec<NodeSt> = vec![];
+                    nds.push(n);
+                    self.set_ret_node(nds.to_owned());
+                    self.node_st_vec.append(&mut nds.to_owned());
                 }
             }
         }
@@ -564,15 +574,18 @@ impl NodeArr {
         it.next();
 
         it.copy_iter();
-        let n = self.parse_opened_imm(it)?;
-        self.node_st_vec.push(n.to_owned());
+
+        let mut nds: Vec<NodeSt> = vec![];
+        nds.push(self.parse_opened_imm(it)?);
+
+        self.node_st_vec.append(&mut nds.to_owned());
 
         if it.peek_value() != TokenKind::RBrace {
             return Err(ParseError::NotClosedStmt(it.next()));
         }
 
         self.set_end_of_node();
-        self.set_ret_node(n.to_owned());
+        self.set_ret_node(nds);
 
         Ok(())
     }
@@ -581,12 +594,22 @@ impl NodeArr {
         it.next();
 
         it.copy_iter();
-        let n = self.parse_close_imm(it)?;
+        let mut nds: Vec<NodeSt> = vec![];
 
-        if it.peek_value() == TokenKind::RBrace {}
+        nds.push(self.parse_close_imm(it)?);
+
+        while it.peek_value() == TokenKind::Comma {
+            nds.push(self.parse_close_imm(it)?);
+        }
+
+        match it.peek_value() {
+            TokenKind::RBrace => self.set_end_of_node(),
+            TokenKind::Comma => self.node_st_vec.append(&mut nds.to_owned()),
+            _ => unimplemented!(),
+        }
 
         self.set_end_of_node();
-        self.set_ret_node(n.to_owned());
+        self.set_ret_node(nds);
 
         Ok(())
     }

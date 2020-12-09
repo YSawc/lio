@@ -114,7 +114,7 @@ assert_llvm 30 'fn -> int { int i = 0; i = while (i < 30) { i = i + 1; | i } i }
 assert_llvm 0 'fn { int (_i) = 0; }'
 assert_llvm 0 'fn -> () { _ }'
 assert_llvm 0 'fn -> (()) { _ }'
-assert_llvm 0 'fn -> (int) { 0 }'
+assert_llvm 1 'fn -> (int) { (1) }'
 
 echo "------------------------------"
 echo "All llvm test passed!\n"
