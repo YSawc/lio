@@ -458,9 +458,7 @@ impl<'a> TokenIter<'a> {
 
         self.copy_iter();
         let p = self.peek_shadow();
-        let mut sv: Vec<String> = vec![];
-
-        sv.push(self.expect_ident(ParseError::NotIdent(p.to_owned()))?);
+        let mut sv = vec![self.expect_ident(ParseError::NotIdent(p.to_owned()))?];
 
         if self.peek_value() != TokenKind::RParen {
             while self.peek_value() == TokenKind::Comma {

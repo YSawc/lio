@@ -126,8 +126,7 @@ impl NodeArr {
             }
         };
 
-        let mut ev: Vec<Vec<Var>> = vec![];
-        ev.push(g.to_owned());
+        let ev = vec![g.to_owned()];
 
         let (mut l, uev) = Self::parse_statement(&mut it, ev)?;
 
@@ -211,8 +210,7 @@ impl NodeArr {
                                 self.set_end_of_node();
                                 self.set_imm_env();
                                 let r = beta(&mut n.to_owned().lhs.unwrap().to_owned(), self)?;
-                                let mut nds: Vec<NodeSt> = vec![];
-                                nds.push(r);
+                                let nds = vec![r];
                                 self.set_ret_node(nds.to_owned());
                                 self.node_st_vec.append(&mut nds.to_owned());
                             }
@@ -322,8 +320,7 @@ impl NodeArr {
                                 self.set_end_of_node();
 
                                 let n = NodeSt::under_score(n.c.loc);
-                                let mut nds: Vec<NodeSt> = vec![];
-                                nds.push(n);
+                                let nds = vec![n];
                                 self.set_ret_node(nds);
                             }
                             NodeKind::If => {
@@ -348,17 +345,16 @@ impl NodeArr {
                         self.set_imm_env();
                         let n = beta(&mut n.to_owned(), self)?;
                         self.node_st_vec.push(n.to_owned());
-                        let mut nds: Vec<NodeSt> = vec![];
 
                         match it.check_evaluate_type() {
                             true => {
-                                nds.push(n);
+                                let nds = vec![n];
                                 self.set_end_of_node();
                                 self.set_ret_node(nds);
                             }
                             false => match it.check_evaluate_void() {
                                 true => {
-                                    nds.push(NodeSt::default());
+                                    let nds = vec![NodeSt::default()];
                                     self.set_end_of_node();
                                     self.set_ret_node(nds);
                                 }
@@ -374,8 +370,7 @@ impl NodeArr {
                 if self.none_ret_node() {
                     self.set_end_of_node();
                     let n = NodeSt::under_score(Loc::default());
-                    let mut nds: Vec<NodeSt> = vec![];
-                    nds.push(n);
+                    let nds = vec![n];
                     self.set_ret_node(nds.to_owned());
                     self.node_st_vec.append(&mut nds.to_owned());
                 }
@@ -584,8 +579,7 @@ impl NodeArr {
 
         it.copy_iter();
 
-        let mut nds: Vec<NodeSt> = vec![];
-        nds.push(self.parse_opened_imm(it)?);
+        let nds = vec![self.parse_opened_imm(it)?];
 
         self.node_st_vec.append(&mut nds.to_owned());
 
@@ -599,13 +593,11 @@ impl NodeArr {
         Ok(())
     }
 
-    pub fn parse_touple(&mut self, it: &mut TokenIter) -> Result<(), ParseError> {
+    pub fn parse_touple(&mut self, it: &mut TokenIter) -> Result<Vec<NodeSt>, ParseError> {
         it.next();
 
         it.copy_iter();
-        let mut nds: Vec<NodeSt> = vec![];
-
-        nds.push(self.parse_close_imm(it)?);
+        let mut nds = vec![self.parse_close_imm(it)?];
 
         while it.peek_value() == TokenKind::Comma {
             nds.push(self.parse_close_imm(it)?);
@@ -618,10 +610,10 @@ impl NodeArr {
         }
 
         if self.end_of_node {
-            self.set_ret_node(nds);
+            self.set_ret_node(nds.to_owned());
         }
 
-        Ok(())
+        Ok(nds)
     }
 }
 

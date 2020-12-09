@@ -265,8 +265,7 @@ pub struct ReturnSet {
 
 impl ReturnSet {
     pub fn new_single(s: String) -> Self {
-        let mut contents: Vec<String> = vec![];
-        contents.push(s);
+        let contents = vec![s];
 
         Self {
             ty: ReturnSetKind::Single,
