@@ -132,6 +132,9 @@ impl fmt::Display for ParseError {
                 "{}: Expected opened immediate statement but not match.",
                 loc
             ),
+            ParseError::AssignedSameWord(loc) => {
+                write!(f, "{}: Expected another name but assigned same name. Here is the location info duplicated word assigned", loc)
+            }
             ParseError::Eof => write!(f, "Expected token, but not detected."),
         }
     }

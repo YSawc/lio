@@ -26,5 +26,6 @@ pub enum ParseError {
     NotMatchTypeAnotherOneOfStatement(Loc),
     NotClosedImmediate(Loc),
     NotOpenedImmediate(Loc),
+    AssignedSameWord(Loc),
     Eof,
 }

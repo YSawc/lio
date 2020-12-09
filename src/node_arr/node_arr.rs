@@ -217,14 +217,29 @@ impl NodeArr {
                                 self.node_st_vec.append(&mut nds.to_owned());
                             }
                             NodeKind::NewAssign => {
-                                let ret_set =
-                                    n.to_owned().lhs.unwrap().lhs.unwrap().ret_set.unwrap();
+                                let contents = n
+                                    .to_owned()
+                                    .lhs
+                                    .unwrap()
+                                    .lhs
+                                    .unwrap()
+                                    .ret_set
+                                    .unwrap()
+                                    .contents;
                                 self.set_imm_env();
+
+                                let mut vs: Vec<String> = vec![];
+                                for c in contents.to_owned() {
+                                    match vs.contains(&c) {
+                                        true => return Err(ParseError::AssignedSameWord(n.c.loc)),
+                                        false => vs.push(c),
+                                    }
+                                }
 
                                 let rhs = self.parse_close_imm(it)?;
 
                                 match Program::find_v(
-                                    ret_set.contents[0].to_owned(),
+                                    contents[0].to_owned(),
                                     self.imm_env_v.to_owned(),
                                 ) {
                                     Some(f) => {
@@ -245,15 +260,9 @@ impl NodeArr {
                                     }
                                 }
 
-                                let v = match ret_set.contents[0].as_bytes()[0] {
-                                    b'_' => {
-                                        Var::mnew(ret_set.contents[0].to_owned(), n.to_owned(), aln)
-                                    }
-                                    _ => Var::new_l(
-                                        ret_set.contents[0].to_owned(),
-                                        n.to_owned(),
-                                        aln,
-                                    ),
+                                let v = match contents[0].as_bytes()[0] {
+                                    b'_' => Var::mnew(contents[0].to_owned(), n.to_owned(), aln),
+                                    _ => Var::new_l(contents[0].to_owned(), n.to_owned(), aln),
                                 };
                                 if v.to_owned().m {
                                     self.used_variable.push(v.to_owned().s);
@@ -604,12 +613,13 @@ impl NodeArr {
 
         match it.peek_value() {
             TokenKind::RBrace => self.set_end_of_node(),
-            TokenKind::Comma => self.node_st_vec.append(&mut nds.to_owned()),
+            TokenKind::SemiColon => self.node_st_vec.append(&mut nds.to_owned()),
             _ => unimplemented!(),
         }
 
-        self.set_end_of_node();
-        self.set_ret_node(nds);
+        if self.end_of_node {
+            self.set_ret_node(nds);
+        }
 
         Ok(())
     }

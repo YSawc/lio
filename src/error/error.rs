@@ -84,7 +84,8 @@ impl Error {
                     | ParseError::UnexpectedUnderScoreOperator(loc)
                     | ParseError::NotMatchTypeAnotherOneOfStatement(loc)
                     | ParseError::NotClosedImmediate(loc)
-                    | ParseError::NotOpenedImmediate(loc) => loc.clone(),
+                    | ParseError::NotOpenedImmediate(loc)
+                    | ParseError::AssignedSameWord(loc) => loc.clone(),
                     ParseError::Eof => Loc::new(input.len() as u8, input.len() as u8 + 1),
                 };
                 (e, loc)

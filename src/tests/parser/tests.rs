@@ -444,3 +444,18 @@ fn expect_type_test() {
     };
     assert!(n)
 }
+
+#[test]
+fn assigned_same_word_test() {
+    let mut t = Token::tokenize("fn { int (_i, _i) = 0; }").unwrap();
+    let mut it = TokenIter::new(&mut t);
+
+    let n = match NodeArr::w_parser(&mut it, vec![]) {
+        Ok(_) => false,
+        Err(e) => match e {
+            ParseError::AssignedSameWord(_) => true,
+            _ => false,
+        },
+    };
+    assert!(n)
+}
