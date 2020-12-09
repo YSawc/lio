@@ -23,7 +23,6 @@ pub struct NodeArr {
     pub imm_env_v: Vec<Vec<Var>>,
     pub end_of_node: bool,
     pub used_variable: Vec<String>,
-    pub ret_n: NodeSt,
 }
 
 impl NodeArr {
@@ -48,7 +47,6 @@ impl NodeArr {
             imm_env_v: vec![],
             end_of_node: false,
             used_variable: vec![],
-            ret_n: NodeSt::default(),
         }
     }
 
@@ -430,7 +428,7 @@ impl NodeArr {
         let args: Vec<String> = env::args().collect();
         let mut calc_cond = false;
         if args.len() > 3 {
-            if args[3] == "calc_cond_label" {
+            if args[3] == "calc_cond" {
                 calc_cond = true;
             }
         }
