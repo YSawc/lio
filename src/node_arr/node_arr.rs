@@ -234,41 +234,59 @@ impl NodeArr {
                                     }
                                 }
 
-                                let rhs = self.parse_close_imm(it)?;
+                                let rhs = if contents.len() <= 1 {
+                                    vec![self.parse_close_imm(it)?]
+                                } else {
+                                    self.parse_touple(it)?;
+                                    let mut t = vec![self.pop_node()];
+                                    for _ in 1..contents.len() {
+                                        t.push(self.pop_node());
+                                    }
+                                    t.reverse();
+                                    t
+                                };
 
-                                match Program::find_v(
-                                    contents[0].to_owned(),
-                                    self.imm_env_v.to_owned(),
-                                ) {
-                                    Some(f) => {
-                                        match self
-                                            .used_variable
-                                            .contains(&f.to_owned().s.to_owned())
-                                        {
-                                            true => self
+                                let mut alns: Vec<i32> = vec![];
+                                for c in contents.to_owned() {
+                                    match Program::find_v(c.to_owned(), self.imm_env_v.to_owned()) {
+                                        Some(f) => {
+                                            match self
                                                 .used_variable
-                                                .retain(|s| s != &f.to_owned().s.to_owned()),
-                                            false => {
-                                                return Err(ParseError::UnusedVariable(f.n.c.loc))
+                                                .contains(&f.to_owned().s.to_owned())
+                                            {
+                                                true => self
+                                                    .used_variable
+                                                    .retain(|s| s != &f.to_owned().s.to_owned()),
+                                                false => {
+                                                    return Err(ParseError::UnusedVariable(
+                                                        f.n.c.loc,
+                                                    ))
+                                                }
                                             }
                                         }
+                                        None => {
+                                            aln += 1;
+                                        }
                                     }
-                                    None => {
-                                        aln += 1;
+
+                                    let v = match c.as_bytes()[0] {
+                                        b'_' => Var::mnew(c, n.to_owned(), aln),
+                                        _ => Var::new_l(c, n.to_owned(), aln),
+                                    };
+                                    if v.to_owned().m {
+                                        self.used_variable.push(v.to_owned().s);
                                     }
+                                    self.l.push(v.to_owned());
+                                    alns.push(v.to_owned().aln);
                                 }
 
-                                let v = match contents[0].as_bytes()[0] {
-                                    b'_' => Var::mnew(contents[0].to_owned(), n.to_owned(), aln),
-                                    _ => Var::new_l(contents[0].to_owned(), n.to_owned(), aln),
-                                };
-                                if v.to_owned().m {
-                                    self.used_variable.push(v.to_owned().s);
+                                for i in 0..contents.len() {
+                                    self.node_st_vec.push(NodeSt::ass_var(
+                                        alns[i],
+                                        rhs[i].to_owned(),
+                                        n.to_owned().c.loc,
+                                    ));
                                 }
-                                self.l.push(v.to_owned());
-
-                                let avar = NodeSt::ass_var(v.to_owned().aln, rhs, n.c.loc);
-                                self.node_st_vec.push(avar);
                             }
                             NodeKind::Assign => {
                                 let _s: String;
@@ -593,19 +611,24 @@ impl NodeArr {
         Ok(())
     }
 
-    pub fn parse_touple(&mut self, it: &mut TokenIter) -> Result<Vec<NodeSt>, ParseError> {
+    pub fn parse_touple(&mut self, it: &mut TokenIter) -> Result<(), ParseError> {
         it.next();
 
         it.copy_iter();
-        let mut nds = vec![self.parse_close_imm(it)?];
+        let mut nds = vec![self.parse_opened_imm(it)?];
 
         while it.peek_value() == TokenKind::Comma {
-            nds.push(self.parse_close_imm(it)?);
+            it.next();
+            nds.push(self.parse_opened_imm(it)?);
         }
+        it.next();
 
         match it.peek_value() {
             TokenKind::RBrace => self.set_end_of_node(),
-            TokenKind::SemiColon => self.node_st_vec.append(&mut nds.to_owned()),
+            TokenKind::SemiColon => {
+                it.next();
+                self.node_st_vec.append(&mut nds.to_owned())
+            }
             _ => unimplemented!(),
         }
 
@@ -613,7 +636,7 @@ impl NodeArr {
             self.set_ret_node(nds.to_owned());
         }
 
-        Ok(nds)
+        Ok(())
     }
 }
 

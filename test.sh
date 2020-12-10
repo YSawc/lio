@@ -115,6 +115,7 @@ assert_llvm 0 'fn { int (_i) = 0; }'
 assert_llvm 0 'fn -> () { _ }'
 assert_llvm 0 'fn -> (()) { _ }'
 assert_llvm 1 'fn -> (int) { (1) }'
+assert_llvm 10 'fn -> int { int (i, j, k) = (2, 3, 4); i*j+k }'
 
 echo "------------------------------"
 echo "All llvm test passed!\n"
