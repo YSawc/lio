@@ -41,7 +41,7 @@ sudo bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"`
 - [x] multiple if label [1](https://github.com/YSawc/lio/commit/3b0f2ec7e102c8cea78baa0c24f715f59339632c), [2](https://github.com/YSawc/lio/commit/52bd10a754e341e00d6080c917420807db17ddd8), [3](https://github.com/YSawc/lio/commit/3b0f2ec7e102c8cea78baa0c24f715f59339632c)
 - [ ] pipe
   - [x] [express opened immmediate used as return value](https://github.com/YSawc/lio/commit/2ecefecf6447c71f5dd78fcb442df74989033d66)
-- [ ] touple
+- [x] [touple](https://github.com/YSawc/lio/commit/37792e7ab53ae987a22b216feb0d32b885e74403)
 - [ ] multiple error notification
   - [x] [tokenize](https://github.com/YSawc/lio/commit/d09ae5afe26fd3daf1dcddd3dd333224cffe247c)
   - [ ] parser
