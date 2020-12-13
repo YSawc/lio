@@ -1,8 +1,6 @@
 #[cfg(test)]
 use super::super::super::location::location::*;
 #[cfg(test)]
-use super::super::super::token::error::*;
-#[cfg(test)]
 use super::super::super::token::token::*;
 
 #[test]
@@ -19,31 +17,9 @@ fn tokenize_test() {
 }
 
 #[test]
-fn invalid_token_test() {
-    let l = match Token::tokenize("1+1\n") {
-        Err(e) => match e[0].value {
-            TokenErrorKind::InvalidToken('\n') => true,
-            _ => false,
-        },
-        _ => false,
-    };
-    assert!(l);
-}
-
-#[test]
 fn pass_comparison_tokenize_test() {
     let i = "<<===>>=";
     let _t = Token::tokenize(i).unwrap().to_owned();
 
     assert!(true);
-}
-
-#[test]
-fn multiple_invalid_tokens_test() {
-    let l = Token::tokenize("\n1+1\n");
-    let e = vec![
-        (TokenError::invalid_token('\n', Loc::new(0, 1))),
-        (TokenError::invalid_token('\n', Loc::new(4, 5))),
-    ];
-    assert_eq!(e, l.unwrap_err());
 }

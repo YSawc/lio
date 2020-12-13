@@ -198,7 +198,12 @@ impl Token {
         let ss = single_symbol_map();
 
         while i < l {
-            if input.as_bytes()[i].is_ascii_digit() {
+            if input.as_bytes()[i] == b' '
+                || input.as_bytes()[i] == b'\t'
+                || input.as_bytes()[i] == b'\n'
+            {
+                b += 1;
+            } else if input.as_bytes()[i].is_ascii_digit() {
                 let t = i;
                 while i < input.len() && input.as_bytes()[i].is_ascii_digit() {
                     i += 1;
@@ -208,8 +213,6 @@ impl Token {
                 lexer
                     .p_data
                     .push(Self::number(n, Loc::new(t as u8 + b, (i + 1) as u8 + b)));
-            } else if input.as_bytes()[i] == b' ' {
-                b += 1;
             } else {
                 let mut _m = false;
                 for k in ms.to_owned() {
